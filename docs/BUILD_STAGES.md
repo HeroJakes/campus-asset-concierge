@@ -27,7 +27,7 @@ Stage numbers are stable. Use them in feature discussions and status updates.
 | [1.2](#stage-12--load-and-collect-equipment) | Load and collect equipment | B | Planned | 1.0, then 1.1 for integration |
 | [1.3](#stage-13--return-equipment) | Return equipment | C | Planned | 1.0, then 1.2 for integration |
 | [1.4](#stage-14--recover-an-at-risk-booking) | Recover an at-risk booking | D | Planned | 1.0, then 1.1 and 1.2 for integration |
-| [1.5](#stage-15--gemini-enterprise-access-check) | Gemini Enterprise access check | A + D | Waiting for event access | 1.1 inventory lookup and organizer access |
+| [1.5](#stage-15--gemini-enterprise-access-check) | Gemini Enterprise access check | A + D | Blocked by licence delay | 1.1 inventory lookup, event app access, and Agent Runtime permissions |
 | [1.6](#stage-16--rehearsal-and-submission) | Rehearsal and submission | All four, D coordinates | Planned | 1.1–1.4 and an outcome for 1.5 |
 
 ### Parallel work
@@ -59,6 +59,16 @@ After 1.0, all four leads can start with agreed demo data and connect their feat
 ## Phase 1 — Hackathon prototype (P0)
 
 One asset per reservation, one location, fictional data, and a virtual locker. Keep the prototype local while event access is pending. The locker view and agent use the same backend state.
+
+### What can start now
+
+- **Stages 1.0–1.4** can proceed locally. Build and test reservations, locker pickup, returns, and overdue recovery with fictional data and the Firestore emulator. Test the agent tools directly. Live local ADK chat needs separate Gemini model access.
+- **Stage 1.5** is blocked for now. The organizers reported a licence distribution delay with no confirmed date. Cloud credit details are still pending. Deploying the agent to Agent Runtime and testing it inside Gemini Enterprise depend on access to the event app and the required Cloud permissions.
+- **Stage 1.6** can start with local rehearsal and submission prep. The final demo format depends on the outcome of 1.5 and whether the organizers accept the local fallback.
+
+### Demo interfaces
+
+Gemini Enterprise provides the chat screen when our agent is registered. The team builds a small local web page for the virtual locker and staff actions. It shows the compartment state, lets staff confirm loading, and gives the borrower a place to enter the one-time code and confirm pickup. The page reads and updates the same backend state as the agent. Local ADK can provide the fallback chat screen if separate Gemini model access is available.
 
 ### Stage 1.0 — Shared rules and demo data
 
@@ -92,7 +102,7 @@ One asset per reservation, one location, fictional data, and a virtual locker. K
 
 ### Stage 1.5 — Gemini Enterprise access check
 
-**Depends on** · 1.1 inventory lookup and organizer access
+**Depends on** · 1.1 inventory lookup, event app access, and Agent Runtime permissions.
 
 **Done when** · A read-only tool works inside Gemini Enterprise before the rest of the chat flow is connected. If access is blocked, document the blocker and check whether local ADK is accepted for submission.
 

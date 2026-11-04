@@ -4,6 +4,10 @@ When shared equipment comes back late, the next borrower can lose their booking.
 
 **Current status** — The project scaffold is ready. The planned demo covers booking, virtual locker pickup, and overdue recovery using fictional data.
 
+The organizers reported a delay in Gemini Enterprise licences with no confirmed date. Cloud credit details are still pending. The lending features and locker page can be built locally while the in-app integration waits for access.
+
+Gemini Enterprise is the planned chat interface. Our prototype will have a separate virtual locker page for staff loading, one-time code entry, and pickup confirmation.
+
 See the [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the full roadmap.
 
 ## Local setup

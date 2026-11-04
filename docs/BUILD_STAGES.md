@@ -22,7 +22,7 @@ Stage numbers are stable. Use them in feature discussions and status updates.
 | Stage | Goal | Owner | Status | Depends on |
 | --- | --- | --- | --- | --- |
 | [0.1](#stage-01--project-scaffold) | Project scaffold | Team | Done | — |
-| [1.0](#stage-10--shared-rules-and-demo-data) | Shared rules and demo data | All four | Ready for review | 0.1 |
+| [1.0](#stage-10--shared-project-foundation) | Shared project foundation | All four | Done | 0.1 |
 | [1.1](#stage-11--find-and-reserve-equipment) | Find and reserve equipment | A | Planned | 1.0 |
 | [1.2](#stage-12--load-and-collect-equipment) | Load and collect equipment | B | Planned | 1.0, then 1.1 for integration |
 | [1.3](#stage-13--return-equipment) | Return equipment | C | Planned | 1.0, then 1.2 for integration |
@@ -44,7 +44,7 @@ Before starting each numbered feature, run a short Grill Me round on its rules, 
 | D | 1.4 Overdue recovery | Connect booking and loan records. Coordinate rehearsal in 1.6. |
 | A + D | 1.5 Gemini Enterprise | Run the first inventory check together when event access arrives. |
 
-After 1.0, all four leads can start with agreed demo data and connect their features as the earlier flows land. Start with the existing Python, ADK, FastAPI, and Firestore emulator scaffold. Confirm the choices in the relevant feature round. If hosting is approved later, the current option is Cloud Run for the backend, hosted Firestore, and Agent Runtime for the registered agent.
+After 1.0, all four leads can start with agreed local test data and connect their features as the earlier flows land. Start with the existing Python, ADK, FastAPI, and Firestore emulator scaffold. Confirm the choices in the relevant feature round. If hosting is approved later, the current option is Cloud Run for the backend, hosted Firestore, and Agent Runtime for the registered agent.
 
 ---
 
@@ -70,13 +70,13 @@ One asset per reservation, one location, fictional data, and a virtual locker. K
 
 Gemini Enterprise provides the chat screen when our agent is registered. The team builds a small local web page for the virtual locker and staff actions. It shows the compartment state, lets staff confirm loading, and gives the borrower a place to enter the one-time code and confirm pickup. The page reads and updates the same backend state as the agent. Local ADK can provide the fallback chat screen if separate Gemini model access is available.
 
-### Stage 1.0 — Shared rules and demo data
+### Stage 1.0 — Shared project foundation
 
 See the [Stage 1.0 implementation doc](STAGE_1_0_IMPLEMENTATION.md) for the agreed rules and fixture setup.
 
 **Depends on** · 0.1
 
-**Done when** · The team agrees on reservation and loan states, borrower and staff permissions, and resettable demo data with and without a spare unit.
+**Done when** · The team agrees on reservation and loan states, borrower and staff permissions, and resettable local test data with and without a spare unit.
 
 ### Stage 1.1 — Find and reserve equipment
 
@@ -100,7 +100,7 @@ See the [Stage 1.0 implementation doc](STAGE_1_0_IMPLEMENTATION.md) for the agre
 
 **Depends on** · 1.0, then 1.1 and 1.2 for integration
 
-**Done when** · Advancing the demo clock marks the loan overdue, queues one simulated reminder, and finds the next booking at risk. The system records a verified substitute proposal or a staff-owned escalation. The original loan stays overdue.
+**Done when** · Advancing the local test clock marks the loan overdue, queues one simulated reminder, and finds the next booking at risk. The system records a verified substitute proposal or a staff-owned escalation. The original loan stays overdue.
 
 ### Stage 1.5 — Gemini Enterprise access check
 

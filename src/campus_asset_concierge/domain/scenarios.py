@@ -5,12 +5,12 @@ BORROWER_A = "borrower-a"
 BORROWER_B = "borrower-b"
 
 
-class DemoScenario(StrEnum):
+class TestScenario(StrEnum):
     SPARE_AVAILABLE = "spare_available"
     SPARE_UNAVAILABLE = "spare_unavailable"
 
 
-def starting_state(scenario: DemoScenario) -> dict:
+def starting_state(scenario: TestScenario) -> dict:
     # 10:00 in Kuala Lumpur. Firestore stores timestamps in UTC.
     start = datetime(2026, 11, 7, 2, tzinfo=UTC)
     due = start + timedelta(hours=1)
@@ -25,7 +25,7 @@ def starting_state(scenario: DemoScenario) -> dict:
             "due_at": next_due,
         }
     }
-    if scenario == DemoScenario.SPARE_UNAVAILABLE:
+    if scenario == TestScenario.SPARE_UNAVAILABLE:
         reservations["spare-projector"] = {
             **reservations["next-projector"],
             "borrower_id": BORROWER_A,

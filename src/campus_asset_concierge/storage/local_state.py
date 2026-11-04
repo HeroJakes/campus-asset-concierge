@@ -3,11 +3,11 @@ import os
 from google.auth.credentials import AnonymousCredentials
 from google.cloud import firestore
 
-from campus_asset_concierge.domain.demo import DemoScenario, starting_state
+from campus_asset_concierge.domain.scenarios import TestScenario, starting_state
 
 
-class DemoStore:
-    """Store the local demo as one document so a reset replaces all fixture data."""
+class LocalStateStore:
+    """Store the local test state as one document so a reset replaces all fixture data."""
 
     def __init__(self, document_id: str = "current") -> None:
         emulator = os.environ.get("FIRESTORE_EMULATOR_HOST", "")
@@ -20,7 +20,7 @@ class DemoStore:
         )
         self.document = client.collection("demo").document(document_id)
 
-    def reset(self, scenario: DemoScenario) -> None:
+    def reset(self, scenario: TestScenario) -> None:
         self.document.set(starting_state(scenario))
 
     def load(self) -> dict | None:

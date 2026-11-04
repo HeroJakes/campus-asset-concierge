@@ -2,6 +2,18 @@
 
 These decisions give all four feature leads the same starting point. See the [build stages](BUILD_STAGES.md) for feature ownership and the [glossary](../GLOSSARY.md) for shared terms.
 
+## Readiness and follow-up
+
+Stage 1.0 can start locally. Use demo accounts, fictional data, and the Firestore emulator. The local prerequisites are Python through `uv`, the Firebase CLI, and Java for the emulator. Follow the [README setup steps](../README.md) and verify the emulator starts before testing fixture resets.
+
+| Pending item | How we proceed now | What to revisit when available |
+| --- | --- | --- |
+| Gemini Enterprise licence and event sign-in | Use local demo usernames and passwords. Keep borrower, staff, and demo operator checks in the backend. | In Stage 1.5, verify the identity Gemini Enterprise passes to the agent. Map approved event accounts to the existing roles and retest booking ownership and staff-only actions. Update this doc and any affected stage docs with the verified setup. |
+| Agent Runtime access and Cloud credits | Run the foundation locally against the emulator. | In Stage 1.5, confirm permissions and quota for agent registration. If hosting is approved, verify the hosted backend and data setup, then update the setup and demo instructions. |
+| Gemini model access for live local chat | Test role checks and fixture resets directly. | Run a local chat smoke test once model access is available. Verify that tool calls use the signed-in actor and follow the same permission rules. |
+
+Before closing Stage 1.0, add any other deferred dependency here with the local approach and the check to run once it is available.
+
 ## Reservation, pickup, and return
 
 - Track the reservation, locker compartment, loan, and asset condition separately.
@@ -34,6 +46,6 @@ In both scenarios, Borrower A's loan stays overdue and Borrower B's reservation 
 
 ## Foundation setup
 
-1. Share the rules and fixture names with the four feature leads.
-2. Prepare the fictional accounts and both local data fixtures, with a repeatable reset to the starting clock.
-3. Verify the two scenarios reset consistently and the borrower, staff, and demo operator permissions stay separate. The feature leads build and test the lending and recovery flows in their own stages.
+See the [README](../README.md#run-the-stage-10-demo) for local setup and API checks. The four feature leads can use the `spare_available` and `spare_unavailable` scenarios. Both start at 10:00 MYT. The active loan is due at 11:00 MYT, and the next pickup is at 12:00 MYT.
+
+The foundation checks demo credentials and protects clock and reset actions with the demo operator role. Borrowers can read their own seeded reservations. The feature leads add and test the lending and recovery actions in their own stages.

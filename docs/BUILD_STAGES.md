@@ -22,7 +22,7 @@ Stage numbers are stable. Use them in feature discussions and status updates.
 | Stage | Goal | Owner | Status | Depends on |
 | --- | --- | --- | --- | --- |
 | [0.1](#stage-01--project-scaffold) | Project scaffold | Team | Done | — |
-| [1.0](#stage-10--shared-rules-and-demo-data) | Shared rules and demo data | All four | Planned | 0.1 |
+| [1.0](#stage-10--shared-rules-and-demo-data) | Shared rules and demo data | All four | Ready for review | 0.1 |
 | [1.1](#stage-11--find-and-reserve-equipment) | Find and reserve equipment | A | Planned | 1.0 |
 | [1.2](#stage-12--load-and-collect-equipment) | Load and collect equipment | B | Planned | 1.0, then 1.1 for integration |
 | [1.3](#stage-13--return-equipment) | Return equipment | C | Planned | 1.0, then 1.2 for integration |

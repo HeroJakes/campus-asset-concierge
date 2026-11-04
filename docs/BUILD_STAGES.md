@@ -2,14 +2,14 @@
 
 Campus Asset Concierge helps staff protect future equipment bookings when a borrower returns an item late. The hackathon demo follows one asset from reservation to pickup, then shows what happens when its loan goes overdue.
 
-The scaffold is ready. P0 is the hackathon build. P1–P3 describe the rest of the roadmap.
+The shared foundation and local reservation flow are on main. P0 is the hackathon build. P1–P3 describe the rest of the roadmap.
 
 Stage numbers are stable. Use them in feature discussions and status updates.
 
 ## Table of contents
 
+- [Parallel work](#parallel-work)
 - [Status](#status)
-  - [Parallel work](#parallel-work)
 - [Phase 0 — Foundation](#phase-0--foundation)
 - [Phase 1 — Hackathon prototype (P0)](#phase-1--hackathon-prototype-p0)
   - [P0 stop line](#p0-stop-line)
@@ -17,20 +17,7 @@ Stage numbers are stable. Use them in feature discussions and status updates.
 - [Phase 3 — Full university product (P2)](#phase-3--full-university-product-p2)
 - [Phase 4 — Multi-organization platform (P3)](#phase-4--multi-organization-platform-p3)
 
-## Status
-
-| Stage | Goal | Owner | Status | Depends on |
-| --- | --- | --- | --- | --- |
-| [0.1](#stage-01--project-scaffold) | Project scaffold | Team | Done | — |
-| [1.0](#stage-10--shared-project-foundation) | Shared project foundation | All four | Done | 0.1 |
-| [1.1](#stage-11--find-and-reserve-equipment) | Find and reserve equipment | A | Ready for review | 1.0 |
-| [1.2](#stage-12--load-and-collect-equipment) | Load and collect equipment | B | Planned | 1.0, then 1.1 for integration |
-| [1.3](#stage-13--return-equipment) | Return equipment | C | Planned | 1.0, then 1.2 for integration |
-| [1.4](#stage-14--recover-an-at-risk-booking) | Recover an at-risk booking | D | Planned | 1.0, then 1.1 and 1.2 for integration |
-| [1.5](#stage-15--gemini-enterprise-access-check) | Gemini Enterprise access check | A + D | Blocked by licence delay | 1.1 inventory lookup, event app access, and Agent Runtime permissions |
-| [1.6](#stage-16--rehearsal-and-submission) | Rehearsal and submission | All four, D coordinates | Planned | 1.1–1.4 and an outcome for 1.5 |
-
-### Parallel work
+## Parallel work
 
 Each teammate leads one feature end to end, including the rules, chat tools or screens it needs, tests, and demo evidence. Teammates can pair across features. A–D are placeholders for the four names.
 
@@ -47,6 +34,32 @@ Before starting each numbered feature, run a short Grill Me round on its rules, 
 For P0, A shares the booking flow and inventory lookup with B and D. B shares pickup and active loan records with C and D. C shares verified return and condition status with A and D. See the P1 and P2 sections for their first deliverables and handoffs.
 
 After 1.0, all four leads can start with agreed local test data and connect their features as the earlier flows land. Start with the existing Python, ADK, FastAPI, and Firestore emulator scaffold. Confirm the choices in the relevant feature round. If hosting is approved later, the current option is Cloud Run for the backend, hosted Firestore, and Agent Runtime for the registered agent.
+
+## Status
+
+| Stage | Goal | Status | Depends on |
+| --- | --- | --- | --- |
+| [0.1](#stage-01--project-scaffold) | Project scaffold | Done | — |
+| [1.0](#stage-10--shared-project-foundation) | Shared project foundation | Done | 0.1 |
+| [1.1](#stage-11--find-and-reserve-equipment) | Find and reserve equipment | Done locally · PR #2 merged | 1.0 |
+| [1.2](#stage-12--load-and-collect-equipment) | Load and collect equipment | Planned | 1.0, then 1.1 for integration |
+| [1.3](#stage-13--return-equipment) | Return equipment | Planned | 1.0, then 1.2 for integration |
+| [1.4](#stage-14--recover-an-at-risk-booking) | Recover an at-risk booking | Planned | 1.0, then 1.1 and 1.2 for integration |
+| [1.5](#stage-15--gemini-enterprise-access-check) | Gemini Enterprise access check | Blocked by licence delay | 1.1 inventory lookup, event app access, and Agent Runtime permissions |
+| [1.6](#stage-16--rehearsal-and-submission) | Rehearsal and submission | Planned | 1.1–1.4 and an outcome for 1.5 |
+| [2.1](#stage-21--approve-and-apply-a-reassignment) | Apply a reassignment | Deferred · P1 | P0 sign-off and approval to start P1 |
+| [2.2](#stage-22--expand-booking-choices) | Expand booking choices | Deferred · P1 | P0 sign-off and approval to start P1 |
+| [2.3](#stage-23--run-automation-on-a-schedule) | Schedule overdue checks | Deferred · P1 | P0 sign-off and approval to start P1 |
+| [2.4](#stage-24--improve-staff-visibility) | Improve staff visibility | Deferred · P1 | P0 sign-off. Add outcomes as 2.1 and 2.3 land. |
+| [3.1](#stage-31--expand-campus-operations) | Expand campus operations | Deferred · P2 | P1 review and pilot agreement |
+| [3.2](#stage-32--manage-equipment-through-its-lifecycle) | Manage equipment lifecycle | Deferred · P2 | P1 review and pilot agreement |
+| [3.3](#stage-33--handle-more-disruptions) | Handle more disruptions | Deferred · P2 | P1 review and pilot agreement. Connect 3.2 and 3.4 events as they land. |
+| [3.4](#stage-34--connect-real-systems) | Connect real systems | Deferred · P2 | P2 pilot approval. Use 3.1 access rules for integration. |
+| [4.1](#stage-41--separate-organizations-and-policies) | Separate organizations and policies | Deferred · P3 | — |
+| [4.2](#stage-42--prepare-for-enterprise-operations) | Prepare for enterprise operations | Deferred · P3 | — |
+| [4.3](#stage-43--validate-the-commercial-offering) | Validate the commercial offering | Deferred · P3 | — |
+
+Stage 1.1 passed local API and direct ADK tool checks. Live Gemini chat and Gemini Enterprise integration are still pending.
 
 ---
 
@@ -134,59 +147,45 @@ See the [Stage 1.1 implementation doc](STAGE_1_1_IMPLEMENTATION.md) for the agre
 
 Start only after P0 is accepted and the team approves more work.
 
-| Stage | Feature lead | First deliverable | Handoff |
-| --- | --- | --- | --- |
-| 2.1 · Reassignment | D | Staff can approve and safely apply one substitution proposal. | Give C the audit events for reporting. |
-| 2.2 · Booking choices | A | Add richer equipment matching and agree on how bundles are booked. | Agree with D on shared matching rules. |
-| 2.3 · Scheduled automation | B | Run the overdue check on a schedule with safe retries. | Reuse D's overdue and reminder rules. Give C job outcomes for monitoring. |
-| 2.4 · Staff visibility | C | Give staff a view of overdue items, at-risk bookings, and outcomes. | Start with P0 records. Add reassignment and job outcomes as 2.1 and 2.3 land. |
-
-The four leads can start in parallel after the P0 sign-off. Each lead owns the feature's rules, tools or screens, tests, and demo evidence. Use the first deliverable to keep each track focused.
+The four leads can start their features in parallel after sign-off.
 
 ### Stage 2.1 — Approve and apply a reassignment
 
-Let authorized staff approve a proposal. Recheck stock and policy before moving the booking in one transaction, then verify the result.
+Start with one substitution proposal. Let authorized staff approve it and share the audit event with staff reporting. Recheck stock and policy before moving the booking in one transaction, then verify the result.
 
 ### Stage 2.2 — Expand booking choices
 
-Add bundles, richer substitute matching, split or alternate pickup locations, waitlists, and optional QR pickup.
+Start with richer substitute matching and agree on shared matching rules with 2.1. Then add bundles, split or alternate pickup locations, waitlists, and optional QR pickup.
 
 ### Stage 2.3 — Run automation on a schedule
 
-Add durable scheduling and retries, notification delivery to consenting accounts, and clearer locker status.
+Start by scheduling the existing overdue check with safe retries. Share job outcomes with 2.4, then add permitted notification delivery and clearer locker status.
 
 ### Stage 2.4 — Improve staff visibility
 
-Add utilization and overdue reporting, more failure scenarios, and stronger concurrency and monitoring checks.
+Start with a staff view of overdue items, at-risk bookings, and outcomes. Add utilization reporting, more failure scenarios, and stronger concurrency and monitoring checks.
 
 ## Phase 3 — Full university product (P2)
 
 After P1, review the results and agree on the first university pilot before starting P2. Keep real system access and hardware work subject to institutional approval.
 
-| Stage | Feature lead | First deliverable | Handoff |
-| --- | --- | --- | --- |
-| 3.1 · Campus operations | A | Support a second department with its own equipment pool and borrowing rules. | Agree on location, identity, and permission rules with all leads. |
-| 3.2 · Equipment lifecycle | C | Track kit components and move damaged returns into maintenance. | Share condition and maintenance events with D. |
-| 3.3 · Disruption recovery | D | Show how a damaged return affects the next booking and offer a recovery path. | Start with simulated events. Connect C's lifecycle events and B's device events as they land. |
-| 3.4 · Real system integrations | B | Pick an approved pilot integration and prove one workflow with it. | Use A's identity and access rules and agree with C and D on trusted device and inventory events. |
-
 A and C can start the shared rules and lifecycle work in parallel. D can test recovery with simulated events while B prepares the approved integration. Each lead stays responsible for their full feature through pilot verification.
 
 ### Stage 3.1 — Expand campus operations
 
-Support departments and campuses, shared asset pools, institutional sign-in, training, approvals, deposits, and loan limits.
+Start with a second department and its own equipment pool and rules. Agree on location, identity, and permissions before adding more campuses, institutional sign-in, training, approvals, deposits, and loan limits.
 
 ### Stage 3.2 — Manage equipment through its lifecycle
 
-Track kit components, condition, maintenance, damaged or missing items, recurring loans, and other pickup methods.
+Start with kit components and maintenance for damaged returns. Share condition and maintenance events with 3.3. Later cover missing items, recurring loans, and more pickup methods.
 
 ### Stage 3.3 — Handle more disruptions
 
-Recover from locker faults, wrong loads, damaged returns, no-shows, and demand spikes with clear staff escalation and retry rules.
+Start with a simulated damaged return and show how to recover the next booking. Later cover locker faults, wrong loads, no-shows, and demand spikes, with clear escalation and retry rules.
 
 ### Stage 3.4 — Connect real systems
 
-Pilot authorized inventory and identity integrations, staff notifications, and secure smart-locker adapters. Validate device events and physical custody with pilot partners.
+Prove one workflow with an approved pilot integration. Use 3.1 access rules and agree on trusted events with 3.2 and 3.3. Later expand to inventory and identity integrations, notifications, and secure smart-locker adapters. Validate device events and physical custody with pilot partners.
 
 ## Phase 4 — Multi-organization platform (P3)
 

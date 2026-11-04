@@ -4,7 +4,7 @@ When shared equipment comes back late, the next borrower can lose their booking.
 
 **Current status** — The project scaffold is ready. The planned demo covers booking, virtual locker pickup, and overdue recovery using fictional data.
 
-See the [Build Plan](docs/Build%20Plan.md) for team ownership, the prototype stop line, and the full roadmap.
+See the [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the full roadmap.
 
 ## Local setup
 

@@ -17,6 +17,12 @@
 - Use fictional data for the hackathon prototype. Keep credentials out of Git.
 - Follow the P0 stop line in the agreed plan. Ask before starting later roadmap work or deploying to the cloud.
 
+## Branches and pull requests
+
+- Before implementing a stage, create a feature branch from the latest `main`, or continue on the existing branch for that stage. Use a clear name like `feat/stage-1-1-reservations`.
+- Commit and push stage changes on the feature branch. Keep direct commits and pushes to `main` out of stage work.
+- Open a pull request into `main` and get a teammate to review it before merging. Include the stage number and the checks you ran.
+
 ## Git commits
 
 - Use Conventional Commits for commits made with AI assistance. Use the format `type(scope): short summary`. The scope is optional.

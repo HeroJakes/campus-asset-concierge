@@ -1,25 +1,3 @@
-import os
-
-import pytest
-from fastapi.testclient import TestClient
-
-from campus_asset_concierge.api.app import create_app
-from campus_asset_concierge.storage.local_state import LocalStateStore
-
-
-@pytest.fixture
-def local_app(monkeypatch):
-    if not os.environ.get("FIRESTORE_EMULATOR_HOST"):
-        pytest.skip("Start the Firestore emulator to run the Stage 1.0 tests.")
-    from uuid import uuid4
-
-    for account in ("BORROWER_A", "BORROWER_B", "STAFF", "OPERATOR"):
-        monkeypatch.setenv(f"LOCAL_{account}_PASSWORD", f"test-{account.lower()}")
-    store = LocalStateStore(document_id=f"test-{uuid4().hex}")
-    with TestClient(create_app(store)) as client:
-        yield client, store
-
-
 def test_local_sign_in_and_operator_permissions(local_app):
     client, _ = local_app
     assert client.get("/me").status_code == 401

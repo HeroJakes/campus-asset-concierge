@@ -25,3 +25,8 @@ A signed-in borrower can ask for one item, review a reservation offer, and confi
 - Use the local API as the required verification path. Run a live ADK chat check when Gemini model access is available. Verify the Gemini Enterprise connection separately in Stage 1.5.
 
 Opening hours, loan-length limits, category-specific borrowing rules, and multi-item requests are later work. The local API and ADK tools cover this stage's booking flow.
+
+## Integration notes
+
+- Use [the local API walkthrough](../README.md#run-the-local-prototype) to try booking. A local reset clears offers and reservations from the previous run.
+- The ADK agent factory takes a borrower ID from the host's authenticated session and the selected model name. The chat host must forward ADK's approval prompt and return the borrower's decision. Test that round trip when model access is available. Stage 1.5 verifies how the event app supplies a trusted identity and handles approval.

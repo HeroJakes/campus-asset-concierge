@@ -2,7 +2,7 @@
 
 When shared equipment comes back late, the next borrower can lose their booking. Campus Asset Concierge aims to flag that conflict and help staff find an available substitute or escalate the case.
 
-**Current status** — The shared project foundation supports sign-in, a local test clock, and two resettable scenarios. Booking, locker pickup, and overdue recovery are planned.
+**Current status** — Borrowers can find and confirm a reservation through the local API. The shared foundation provides sign-in, a local test clock, and two resettable scenarios. Locker pickup and overdue recovery are planned.
 
 The organizers reported a delay in Gemini Enterprise licences with no confirmed date. Cloud credit details are still pending. The lending features and locker page can be built locally while the in-app integration waits for access.
 
@@ -29,7 +29,7 @@ For local database development, install the [Firebase CLI and emulator prerequis
 firebase emulators:start --only firestore --project demo-campus-asset-concierge
 ```
 
-## Run the Stage 1.0 foundation
+## Run the local prototype
 
 With the emulator running, set four distinct local passwords using ASCII characters and start the API on loopback. For PowerShell 7:
 
@@ -44,7 +44,15 @@ uv run --locked uvicorn campus_asset_concierge.api.app:create_app --factory --ho
 
 Open [local API docs](http://127.0.0.1:8000/docs) and use **Authorize** to enter a local username and password. As `local-operator`, send `{"scenario":"spare_available"}` or `{"scenario":"spare_unavailable"}` to `POST /local-test/reset`. Use `GET /local-test/clock` to verify the reset and `POST /local-test/clock/advance` with `{"minutes":90}` to advance time. Borrowers can read their own seeded bookings at `GET /reservations`.
 
-Run `uv run --locked pytest` in a shell with `FIRESTORE_EMULATOR_HOST` set to test sign-in, role checks, and both resets.
+To try booking after a reset, authorize as `borrower-a` and send this body to `POST /reservation-offers`.
+
+```json
+{"category":"projector","pickup_at":"2026-11-07T12:00","duration_minutes":60}
+```
+
+Review the unit and Malaysia-time window. Use the returned ID in `POST /reservation-offers/{offer_id}/confirm`, then check `GET /reservations`.
+
+Run `uv run --locked pytest` in a shell with `FIRESTORE_EMULATOR_HOST` set to test sign-in, resets, and booking, including two borrowers competing for the last unit.
 
 ## Project layout
 

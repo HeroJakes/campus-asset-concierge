@@ -1,16 +1,23 @@
 import os
 from dataclasses import dataclass
-from datetime import timedelta
 from enum import StrEnum
 from secrets import compare_digest
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from google.api_core.exceptions import NotFound
 from pydantic import BaseModel, Field
 
+from campus_asset_concierge.domain.reservations import (
+    ReservationError,
+    ReservationRequest,
+    local_clock,
+    malaysia_times,
+)
 from campus_asset_concierge.domain.scenarios import BORROWER_A, BORROWER_B, TestScenario
+from campus_asset_concierge.reservations import Reservations
 from campus_asset_concierge.storage.local_state import LocalStateStore
 
 
@@ -64,7 +71,12 @@ class AdvanceRequest(BaseModel):
 
 def create_app(store: LocalStateStore | None = None) -> FastAPI:
     local_store = store if store is not None else LocalStateStore()
+    reservations = Reservations(local_store)
     app = FastAPI(title="Campus Asset Concierge · Local Development")
+
+    @app.exception_handler(ReservationError)
+    async def reservation_error(_: Request, error: ReservationError) -> JSONResponse:
+        return JSONResponse({"detail": str(error)}, status_code=error.status)
 
     def load_state() -> dict:
         state = local_store.load()
@@ -80,10 +92,18 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     def my_reservations(actor: Actor) -> list[dict]:
         require_role(actor, Role.BORROWER)
         return [
-            {"id": reservation_id, **reservation}
+            {"id": reservation_id, **malaysia_times(reservation)}
             for reservation_id, reservation in load_state()["reservations"].items()
             if reservation["borrower_id"] == actor.username
         ]
+
+    @app.post("/reservation-offers", status_code=201)
+    def offer_reservation(request: ReservationRequest, actor: Actor) -> dict:
+        return reservations.offer(actor.username, request)
+
+    @app.post("/reservation-offers/{offer_id}/confirm")
+    def confirm_reservation(offer_id: str, actor: Actor) -> dict:
+        return reservations.confirm(actor.username, offer_id)
 
     @app.post("/local-test/reset", status_code=204)
     def reset(request: ResetRequest, actor: Actor) -> Response:
@@ -95,8 +115,7 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     def clock(actor: Actor) -> dict:
         require_role(actor, Role.OPERATOR)
         state = load_state()
-        current_time = state["starts_at"] + timedelta(minutes=state["elapsed_minutes"])
-        return {"scenario": state["scenario"], "current_time": current_time}
+        return {"scenario": state["scenario"], "current_time": local_clock(state)}
 
     @app.post("/local-test/clock/advance", status_code=204)
     def advance(request: AdvanceRequest, actor: Actor) -> Response:

@@ -10,6 +10,9 @@ A single tracked piece of equipment, such as Projector A. A category such as pro
 **Reservation**
 A confirmed booking for an asset unit and a time window. A reservation can exist before the borrower collects the asset.
 
+**Reservation offer**
+An available asset unit, pickup location, and time window shown to a borrower for confirmation. The offer does not hold the unit. Availability is checked again when the borrower confirms.
+
 **Loan**
 The record of an asset in a borrower's custody. It starts when pickup is confirmed and stays open until the return is verified and processed.
 

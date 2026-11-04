@@ -80,6 +80,8 @@ See the [Stage 1.0 implementation doc](STAGE_1_0_IMPLEMENTATION.md) for the agre
 
 ### Stage 1.1 — Find and reserve equipment
 
+See the [Stage 1.1 implementation doc](STAGE_1_1_IMPLEMENTATION.md) for the agreed booking rules and acceptance checks.
+
 **Depends on** · 1.0
 
 **Done when** · A borrower can ask for equipment, see an eligible unit and time window, then confirm. Exactly one of two overlapping requests for the last unit succeeds.

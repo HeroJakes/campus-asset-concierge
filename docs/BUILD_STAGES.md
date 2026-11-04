@@ -23,7 +23,7 @@ Stage numbers are stable. Use them in feature discussions and status updates.
 | --- | --- | --- | --- | --- |
 | [0.1](#stage-01--project-scaffold) | Project scaffold | Team | Done | — |
 | [1.0](#stage-10--shared-project-foundation) | Shared project foundation | All four | Done | 0.1 |
-| [1.1](#stage-11--find-and-reserve-equipment) | Find and reserve equipment | A | Planned | 1.0 |
+| [1.1](#stage-11--find-and-reserve-equipment) | Find and reserve equipment | A | Ready for review | 1.0 |
 | [1.2](#stage-12--load-and-collect-equipment) | Load and collect equipment | B | Planned | 1.0, then 1.1 for integration |
 | [1.3](#stage-13--return-equipment) | Return equipment | C | Planned | 1.0, then 1.2 for integration |
 | [1.4](#stage-14--recover-an-at-risk-booking) | Recover an at-risk booking | D | Planned | 1.0, then 1.1 and 1.2 for integration |

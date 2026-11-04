@@ -36,13 +36,15 @@ Each teammate leads one feature end to end, including the rules, chat tools or s
 
 Before starting each numbered feature, run a short Grill Me round on its rules, failure cases, and acceptance checks. Keep detailed designs with that feature. Review the README when setup, demo steps, or project status changes.
 
-| Track | Feature | Handoff |
-| --- | --- | --- |
-| A | 1.1 Reservation | Share the booking flow and inventory lookup with B and D. |
-| B | 1.2 Pickup | Share confirmed pickup and active loan records with C and D. |
-| C | 1.3 Return | Share verified return and condition status with A and D. |
-| D | 1.4 Overdue recovery | Connect booking and loan records. Coordinate rehearsal in 1.6. |
-| A + D | 1.5 Gemini Enterprise | Run the first inventory check together when event access arrives. |
+| Teammate | P0 · Hackathon prototype | P1 · Optional follow-up | P2 · University product |
+| --- | --- | --- | --- |
+| A | [1.1 · Reservation](#stage-11--find-and-reserve-equipment) | [2.2 · Booking choices](#stage-22--expand-booking-choices) | [3.1 · Campus operations](#stage-31--expand-campus-operations) |
+| B | [1.2 · Pickup](#stage-12--load-and-collect-equipment) | [2.3 · Scheduled automation](#stage-23--run-automation-on-a-schedule) | [3.4 · Real system integrations](#stage-34--connect-real-systems) |
+| C | [1.3 · Return](#stage-13--return-equipment) | [2.4 · Staff visibility](#stage-24--improve-staff-visibility) | [3.2 · Equipment lifecycle](#stage-32--manage-equipment-through-its-lifecycle) |
+| D | [1.4 · Overdue recovery](#stage-14--recover-an-at-risk-booking) | [2.1 · Reassignment](#stage-21--approve-and-apply-a-reassignment) | [3.3 · Disruption recovery](#stage-33--handle-more-disruptions) |
+| Shared | A and D run the [Gemini Enterprise check](#stage-15--gemini-enterprise-access-check). All four rehearse, with D coordinating. | Agree on matching rules and reporting events. | Agree on pilot scope, access rules, and trusted device and inventory events. |
+
+For P0, A shares the booking flow and inventory lookup with B and D. B shares pickup and active loan records with C and D. C shares verified return and condition status with A and D. See the P1 and P2 sections for their first deliverables and handoffs.
 
 After 1.0, all four leads can start with agreed local test data and connect their features as the earlier flows land. Start with the existing Python, ADK, FastAPI, and Firestore emulator scaffold. Confirm the choices in the relevant feature round. If hosting is approved later, the current option is Cloud Run for the backend, hosted Firestore, and Agent Runtime for the registered agent.
 

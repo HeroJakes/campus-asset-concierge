@@ -72,6 +72,8 @@ Gemini Enterprise provides the chat screen when our agent is registered. The tea
 
 ### Stage 1.0 — Shared rules and demo data
 
+See the [Stage 1.0 implementation doc](STAGE_1_0_IMPLEMENTATION.md) for the agreed rules and fixture setup.
+
 **Depends on** · 0.1
 
 **Done when** · The team agrees on reservation and loan states, borrower and staff permissions, and resettable demo data with and without a spare unit.

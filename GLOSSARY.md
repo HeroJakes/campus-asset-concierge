@@ -13,6 +13,9 @@ A confirmed booking for an asset unit and a time window. A reservation can exist
 **Loan**
 The record of an asset in a borrower's custody. It starts when pickup is confirmed and stays open until the return is verified and processed.
 
+**Condition hold**
+The status of an asset that failed its return check. The returned loan is closed, and the asset stays unavailable pending staff follow-up.
+
 **At-risk reservation**
 A future booking that may be disrupted because its assigned asset is overdue.
 

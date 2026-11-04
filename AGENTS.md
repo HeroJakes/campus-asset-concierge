@@ -5,6 +5,12 @@
 - Use simple, clear English in docs, comments, UI text, and project updates.
 - Use short sentences and familiar words. Keep technical terms when they add precision, and explain unfamiliar terms on first use.
 
+## README
+
+- Treat `README.md` as the first page teammates and hackathon reviewers will read. Start with the problem, what the project does, and what works today.
+- Check the README with every change. Update it in the same change when features, setup commands, prerequisites, demo steps, or project status change.
+- Keep it short and verify commands before publishing. Put detailed design notes and future plans in separate docs. Label planned features clearly.
+
 ## Project scope
 
 - Follow the agreed build plan once it exists. Keep changes within the requested scope.

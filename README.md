@@ -1,6 +1,8 @@
 # Campus Asset Concierge
 
-Campus Asset Concierge helps borrowers reserve shared campus equipment and helps staff recover future bookings when equipment is overdue. The hackathon prototype uses synthetic data and a virtual locker. This repository starts with the project scaffold. Product implementation follows a separate build plan.
+When shared equipment comes back late, the next borrower can lose their booking. Campus Asset Concierge aims to flag that conflict and help staff find an available substitute or escalate the case.
+
+**Current status** — The project scaffold is ready. The planned demo covers booking, virtual locker pickup, and overdue recovery using fictional data.
 
 ## Local setup
 
@@ -8,10 +10,14 @@ Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run 
 
 ```sh
 uv sync --locked
-uv run python -c "import campus_asset_concierge; print('Package import OK')"
+uv run --locked python -c "import campus_asset_concierge; print('Package import OK')"
 ```
 
-The scaffold can be set up without a Google Cloud or Gemini Enterprise account. The Firestore emulator is available for local development once persistence work starts. With the [Firebase CLI and emulator prerequisites](https://firebase.google.com/docs/emulator-suite/install_and_configure) installed, start it with a demo project ID.
+Local setup works without a Google Cloud or Gemini Enterprise account.
+
+## Firestore emulator
+
+For local database development, install the [Firebase CLI and emulator prerequisites](https://firebase.google.com/docs/emulator-suite/install_and_configure), then start the emulator with a demo project ID.
 
 ```sh
 firebase emulators:start --only firestore --project demo-campus-asset-concierge

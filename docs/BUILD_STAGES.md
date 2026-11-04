@@ -132,6 +132,15 @@ See the [Stage 1.1 implementation doc](STAGE_1_1_IMPLEMENTATION.md) for the agre
 
 Start only after P0 is accepted and the team approves more work.
 
+| Stage | Feature lead | First deliverable | Handoff |
+| --- | --- | --- | --- |
+| 2.1 · Reassignment | D | Staff can approve and safely apply one substitution proposal. | Give C the audit events for reporting. |
+| 2.2 · Booking choices | A | Add richer equipment matching and agree on how bundles are booked. | Agree with D on shared matching rules. |
+| 2.3 · Scheduled automation | B | Run the overdue check on a schedule with safe retries. | Reuse D's overdue and reminder rules. Give C job outcomes for monitoring. |
+| 2.4 · Staff visibility | C | Give staff a view of overdue items, at-risk bookings, and outcomes. | Start with P0 records. Add reassignment and job outcomes as 2.1 and 2.3 land. |
+
+The four leads can start in parallel after the P0 sign-off. Each lead owns the feature's rules, tools or screens, tests, and demo evidence. Use the first deliverable to keep each track focused.
+
 ### Stage 2.1 — Approve and apply a reassignment
 
 Let authorized staff approve a proposal. Recheck stock and policy before moving the booking in one transaction, then verify the result.
@@ -149,6 +158,17 @@ Add durable scheduling and retries, notification delivery to consenting accounts
 Add utilization and overdue reporting, more failure scenarios, and stronger concurrency and monitoring checks.
 
 ## Phase 3 — Full university product (P2)
+
+After P1, review the results and agree on the first university pilot before starting P2. Keep real system access and hardware work subject to institutional approval.
+
+| Stage | Feature lead | First deliverable | Handoff |
+| --- | --- | --- | --- |
+| 3.1 · Campus operations | A | Support a second department with its own equipment pool and borrowing rules. | Agree on location, identity, and permission rules with all leads. |
+| 3.2 · Equipment lifecycle | C | Track kit components and move damaged returns into maintenance. | Share condition and maintenance events with D. |
+| 3.3 · Disruption recovery | D | Show how a damaged return affects the next booking and offer a recovery path. | Start with simulated events. Connect C's lifecycle events and B's device events as they land. |
+| 3.4 · Real system integrations | B | Pick an approved pilot integration and prove one workflow with it. | Use A's identity and access rules and agree with C and D on trusted device and inventory events. |
+
+A and C can start the shared rules and lifecycle work in parallel. D can test recovery with simulated events while B prepares the approved integration. Each lead stays responsible for their full feature through pilot verification.
 
 ### Stage 3.1 — Expand campus operations
 

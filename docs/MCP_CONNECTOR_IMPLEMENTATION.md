@@ -30,9 +30,9 @@ Gemini agent ──(MCP)──► mcp_server.py ──► domain classes ──�
 | `confirm_booking` | `borrower_id`, `offer_id` | `Reservations.confirm` | Yes (reservation) | Reservation, or `{"error"}` |
 | `check_pickup_status` | `borrower_id` | `Pickups.status` | No | Pickups, never the code |
 | `check_return_status` | `borrower_id` | `Returns.status` | No | Returns, never the code |
-| `list_overdue` | — | `Recovery.staff_page` | No | Overdue loans, at-risk bookings, proposals, escalations |
+| `run_overdue_recovery` | — | `Recovery.process` | Yes (idempotent) | Overdue loans, at-risk bookings, proposals, escalations |
 
-`find_equipment`, `check_pickup_status`, and `check_return_status` mirror the existing ADK tools. `list_overdue` is the staff / maximizing-workflow read. The locker device actions (load, unlock, drop, verify) stay on the staff locker page and are **not** exposed over MCP.
+`find_equipment`, `check_pickup_status`, and `check_return_status` mirror the existing ADK tools. `run_overdue_recovery` is the staff / maximizing-workflow tool: it runs the recovery pass (detect overdue, flag at-risk, record a proposal or escalation) and returns the current picture, so the workflow does not depend on the operator clock-advance having run it first. It is idempotent. The locker device actions (load, unlock, drop, verify) stay on the staff locker page and are **not** exposed over MCP.
 
 ## Code shape
 
@@ -58,12 +58,13 @@ Gemini agent ──(MCP)──► mcp_server.py ──► domain classes ──�
 - `find_equipment` returns the same offer the API returns; `confirm_booking` returns a confirmed reservation; a repeated confirm returns the same reservation.
 - `check_pickup_status` and `check_return_status` never include the code.
 - Bad input returns `{"error": ...}`, not a raised exception.
-- After a clock advance, `list_overdue` returns the proposal (spare available) or escalation (spare unavailable).
+- After the clock moves past a due time, `run_overdue_recovery` detects the overdue loan on its own and returns the proposal (spare available) or escalation (spare unavailable).
 
 ## Identity and security (shortcut)
 
-- `borrower_id` is trusted from the tool argument in P0.
-- `shortcut: borrower_id is trusted from the call, which lets a caller act for any borrower; before real use, bind the borrower from the authenticated Gemini session (Stage 1.5), not a free parameter.`
+- The connector has **no caller authentication** in P0. `borrower_id` is trusted from each call, so a caller can act for or read any borrower (find, confirm, pickup, return), and `run_overdue_recovery` returns staff data to any caller.
+- `shortcut: no caller auth yet; before real use, bind identity and role from the authenticated Gemini session (Stage 1.5), not free parameters.`
+- `shortcut: find_equipment writes an offer per call and offers are never pruned; fine for the demo (a reset clears them), add offer expiry before real use.`
 
 ## Dependencies and ordering
 

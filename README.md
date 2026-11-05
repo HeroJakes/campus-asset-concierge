@@ -54,6 +54,8 @@ Review the unit and Malaysia-time window. Use the returned ID in `POST /reservat
 
 Run `uv run --locked pytest` in a shell with `FIRESTORE_EMULATOR_HOST` set to test sign-in, resets, and booking, including two borrowers competing for the last unit.
 
+GitHub Actions runs the same tests with the Firestore emulator on pull requests into `main`.
+
 ## Project layout
 
 ```text

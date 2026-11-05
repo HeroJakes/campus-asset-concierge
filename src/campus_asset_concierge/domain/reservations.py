@@ -73,6 +73,15 @@ def eligible_unit(
         if loan["status"] == "active" and (loan["due_at"] < now or pickup < loan["due_at"]):
             return False
 
+    # A loaded unit cannot serve any window that starts before its booking ends.
+    for access in state.get("pickup_access", {}).values():
+        if (
+            access["asset_id"] == asset_id
+            and access["collected_at"] is None
+            and pickup < access["due_at"]
+        ):
+            return False
+
     return not any(
         booking["asset_id"] == asset_id
         and booking["status"] in {"confirmed", "ready_for_pickup"}

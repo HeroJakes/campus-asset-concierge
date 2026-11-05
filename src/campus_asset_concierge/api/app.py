@@ -1,12 +1,15 @@
 import os
 from dataclasses import dataclass
 from enum import StrEnum
+from pathlib import Path
 from secrets import compare_digest
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from google.api_core.exceptions import NotFound
 from pydantic import BaseModel, Field
 
@@ -17,8 +20,11 @@ from campus_asset_concierge.domain.reservations import (
     malaysia_times,
 )
 from campus_asset_concierge.domain.scenarios import BORROWER_A, BORROWER_B, TestScenario
+from campus_asset_concierge.pickups import Pickups
 from campus_asset_concierge.reservations import Reservations
 from campus_asset_concierge.storage.local_state import LocalStateStore
+
+PACKAGE_DIR = Path(__file__).resolve().parent.parent
 
 
 class Role(StrEnum):
@@ -69,10 +75,17 @@ class AdvanceRequest(BaseModel):
     minutes: Annotated[int, Field(strict=True, gt=0, le=1440)]
 
 
+class UnlockRequest(BaseModel):
+    code: Annotated[str, Field(min_length=1, max_length=12)]
+
+
 def create_app(store: LocalStateStore | None = None) -> FastAPI:
     local_store = store if store is not None else LocalStateStore()
     reservations = Reservations(local_store)
+    pickups = Pickups(local_store)
     app = FastAPI(title="Campus Asset Concierge · Local Development")
+    app.mount("/static", StaticFiles(directory=PACKAGE_DIR / "static"), name="static")
+    templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
 
     @app.exception_handler(ReservationError)
     async def reservation_error(_: Request, error: ReservationError) -> JSONResponse:
@@ -104,6 +117,42 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     @app.post("/reservation-offers/{offer_id}/confirm")
     def confirm_reservation(offer_id: str, actor: Actor) -> dict:
         return reservations.confirm(actor.username, offer_id)
+
+    # shortcut: browser-cached Basic sign-in has no CSRF protection, add it before hosting.
+    @app.post("/reservations/{reservation_id}/load")
+    def load_reservation(reservation_id: str, actor: Actor) -> dict:
+        require_role(actor, Role.STAFF)
+        return pickups.load(actor.username, reservation_id)
+
+    @app.get("/pickups")
+    def my_pickups(actor: Actor) -> list[dict]:
+        require_role(actor, Role.BORROWER)
+        return pickups.borrower_page(actor.username)
+
+    @app.post("/reservations/{reservation_id}/unlock")
+    def unlock_compartment(reservation_id: str, request: UnlockRequest, actor: Actor) -> dict:
+        require_role(actor, Role.BORROWER)
+        return pickups.unlock(actor.username, reservation_id, request.code)
+
+    @app.post("/reservations/{reservation_id}/confirm-pickup")
+    def confirm_pickup(reservation_id: str, actor: Actor) -> dict:
+        require_role(actor, Role.BORROWER)
+        return pickups.confirm(actor.username, reservation_id)
+
+    @app.get("/locker", response_class=HTMLResponse)
+    def locker_page(request: Request, actor: Actor) -> HTMLResponse:
+        if actor.role == Role.OPERATOR:
+            raise HTTPException(403, "Sign in as staff or a borrower to use the locker page.")
+        context = {
+            "username": actor.username,
+            "current_time": pickups.current_time(),
+            "is_staff": actor.role == Role.STAFF,
+        }
+        if actor.role == Role.STAFF:
+            context |= pickups.staff_page()
+        else:
+            context["pickups"] = pickups.borrower_page(actor.username)
+        return templates.TemplateResponse(request, "locker.html", context)
 
     @app.post("/local-test/reset", status_code=204)
     def reset(request: ResetRequest, actor: Actor) -> Response:

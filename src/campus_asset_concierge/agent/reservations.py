@@ -8,11 +8,13 @@ from campus_asset_concierge.domain.reservations import (
     ReservationError,
     ReservationRequest,
 )
+from campus_asset_concierge.pickups import Pickups
 from campus_asset_concierge.reservations import Reservations
 
 
 def create_reservation_agent(reservations: Reservations, borrower_id: str, model: str) -> Agent:
     """Bind a server-authenticated borrower to this agent before running a chat."""
+    pickups = Pickups(reservations.store)
 
     def find_equipment(
         category: str,
@@ -57,6 +59,13 @@ def create_reservation_agent(reservations: Reservations, borrower_id: str, model
         except ReservationError as error:
             return {"error": str(error)}
 
+    def check_pickup_status() -> dict:
+        """Show the signed-in borrower's pickups. This never returns a one-time code."""
+        try:
+            return {"pickups": pickups.status(borrower_id)}
+        except ReservationError as error:
+            return {"error": str(error)}
+
     def booking_instructions(_: ReadonlyContext) -> str:
         now = reservations.current_time()
         reference = (
@@ -70,12 +79,14 @@ def create_reservation_agent(reservations: Reservations, borrower_id: str, model
             "only when the reference date is known, or ask for the exact date. Show the offered "
             "asset, location, pickup time, and return time before asking for confirmation. "
             "Only call confirm_reservation after the borrower explicitly agrees to that offer. "
-            "If availability changed, offer to check again and show any new offer for review."
+            "If availability changed, offer to check again and show any new offer for review. "
+            "Use check_pickup_status for questions about pickup. The borrower sees their code, "
+            "enters it, and confirms pickup on the locker page, not in this chat."
         )
 
     return Agent(
         name="campus_asset_concierge",
         model=model,
         instruction=booking_instructions,
-        tools=[find_equipment, confirm_reservation],
+        tools=[find_equipment, confirm_reservation, check_pickup_status],
     )

@@ -2,7 +2,7 @@
 
 When shared equipment comes back late, the next borrower can lose their booking. Campus Asset Concierge aims to flag that conflict and help staff find an available substitute or escalate the case.
 
-**Current status** — Borrowers can find and confirm a reservation through the local API. The shared foundation provides sign-in, a local test clock, and two resettable scenarios. Locker pickup and overdue recovery are planned.
+**Current status** — Borrowers can find and confirm a reservation through the local API. Staff can load it into a virtual locker, and the borrower can unlock it with a one-time code and confirm pickup on the local locker page. The shared foundation provides sign-in, a local test clock, and two resettable scenarios. Returns and overdue recovery are planned.
 
 The organizers reported a delay in Gemini Enterprise licences with no confirmed date. Cloud credit details are still pending. The lending features and locker page can be built locally while the in-app integration waits for access.
 
@@ -52,7 +52,9 @@ To try booking after a reset, authorize as `borrower-a` and send this body to `P
 
 Review the unit and Malaysia-time window. Use the returned ID in `POST /reservation-offers/{offer_id}/confirm`, then check `GET /reservations`.
 
-Run `uv run --locked pytest` in a shell with `FIRESTORE_EMULATOR_HOST` set to test sign-in, resets, and booking, including two borrowers competing for the last unit.
+To try pickup, book with `"pickup_at":"2026-11-07T10:30"` instead, then open the [locker page](http://127.0.0.1:8000/locker). Sign in as `equipment-staff` and select **Confirm loading**. In a private browser window, open the same page as `borrower-a` to see the code. Use `POST /local-test/clock/advance` with `{"minutes":30}` to reach the pickup time, refresh the page, enter the code, and confirm pickup.
+
+Run `uv run --locked pytest` in a shell with `FIRESTORE_EMULATOR_HOST` set to test sign-in, resets, booking, and pickup, including two borrowers competing for the last unit.
 
 GitHub Actions runs the same tests with the Firestore emulator on pull requests into `main`.
 

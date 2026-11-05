@@ -25,6 +25,8 @@ Keep the reservation as `ready_for_pickup` until pickup. `eligible_unit` only tr
   - Both compartments are full.
 - The system picks the first empty compartment.
 - Blocking units on an open loan also blocks pickup for an at-risk reservation, as Stage 1.0 requires.
+- While a unit is in a compartment, `eligible_unit` rejects any new booking that starts before the loaded booking ends. Otherwise a borrower could book an earlier window that staff could never load.
+- The locker page shows staff why a booking can't be loaded, in place of the button.
 
 ## One-time code
 
@@ -83,7 +85,7 @@ Seeded Projector A stays on loan until Stage 1.3 exists, so test with a new book
 
 - **Locker page owner:** the build plan doesn't name one. This doc assumes Teammate B owns the page and that C and D add their staff actions to it.
 - **Audit format:** agree the format above with C and D.
-- **Loan handoff:** a unit received in Stage 1.3 but not yet checked must count as an open loan, so staff can't load it.
+- **Loan handoff:** loading treats every loan status except `returned` as open. Stage 1.3 should use `returned` for a closed loan, and any other status for a unit received but not yet checked.
 - **At-risk reservations:** check with D that blocking units on an open loan is enough for Stage 1.4.
 
 Staff reissue, loading time limits, no-show handling, and code entry in chat are out of scope for this stage.

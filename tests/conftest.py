@@ -23,6 +23,7 @@ def local_app(monkeypatch):
 
 BORROWER_A = ("borrower-a", "test-borrower_a")
 BORROWER_B = ("borrower-b", "test-borrower_b")
+STAFF = ("equipment-staff", "test-staff")
 OPERATOR = ("local-operator", "test-operator")
 
 

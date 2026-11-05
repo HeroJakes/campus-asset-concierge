@@ -1,10 +1,15 @@
 import os
 from collections.abc import Callable
+from threading import Lock
 
 from google.auth.credentials import AnonymousCredentials
 from google.cloud import firestore
 
 from campus_asset_concierge.domain.scenarios import TestScenario, starting_state
+
+
+# shortcut: this lock covers one process, revisit emulator contention for multi-process runs.
+_local_write_lock = Lock()
 
 
 class LocalStateStore:
@@ -22,13 +27,15 @@ class LocalStateStore:
         self.document = self.client.collection("demo").document(document_id)
 
     def reset(self, scenario: TestScenario) -> None:
-        self.document.set(starting_state(scenario))
+        with _local_write_lock:
+            self.document.set(starting_state(scenario))
 
     def load(self) -> dict | None:
         return self.document.get().to_dict()
 
     def advance(self, minutes: int) -> None:
-        self.document.update({"elapsed_minutes": firestore.Increment(minutes)})
+        with _local_write_lock:
+            self.document.update({"elapsed_minutes": firestore.Increment(minutes)})
 
     def change[T](self, apply: Callable[[dict | None], T]) -> T:
         @firestore.transactional
@@ -39,4 +46,5 @@ class LocalStateStore:
                 transaction.set(self.document, state)
             return result
 
-        return update(self.client.transaction())
+        with _local_write_lock:
+            return update(self.client.transaction())

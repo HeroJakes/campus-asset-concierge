@@ -67,6 +67,21 @@ def loaded_and_open(client):
     return reservation_id, code_for(client, reservation_id)
 
 
+def test_locker_displays_saved_projector_requirements(booking_app):
+    client, _ = booking_app
+    offered = client.post("/reservation-offers", auth=BORROWER_A, json={
+        "category": "projector", "pickup_at": "2026-11-07T13:00",
+        "duration_minutes": 60, "require_hdmi": True, "require_built_in_speakers": True,
+    }).json()
+    assert client.post(f"/reservation-offers/{offered['id']}/confirm", auth=BORROWER_A).status_code == 200
+    for account in (BORROWER_A, STAFF):
+        page = client.get("/locker", auth=account)
+        assert "Requirements: HDMI, Built-in speakers" in page.text
+    pickup = client.get("/pickups", auth=BORROWER_A).json()[0]
+    assert pickup["require_hdmi"] is True
+    assert pickup["require_built_in_speakers"] is True
+
+
 def test_full_flow_from_reservation_to_active_loan(booking_app):
     client, store = booking_app
     reservation_id = book(client)

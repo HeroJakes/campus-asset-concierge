@@ -18,6 +18,8 @@ POST /recovery/substitution-proposals/{reservation_id}/approve
 
 The endpoint requires the `staff` role. Borrowers and local operators receive `403`.
 
+Stage 2.2 adds a required JSON body: `{"proposal_id":"<id from GET /recovery>"}`. The service checks that ID before approving or returning an already-applied result. A replaced proposal returns `409` so staff must refresh and review the new proposal; a missing or invalid ID returns `422`.
+
 A successful response contains the applied proposal, the updated reservation, and the audit event. Approval is idempotent: repeating the request for an already applied proposal returns the same applied result and does not add another audit event.
 
 ## Transaction and revalidation rules
@@ -26,7 +28,7 @@ The approval service runs all checks and writes through one `LocalStateStore.cha
 
 1. Find the proposal and require `pending_staff_approval`, unless it is already `applied`.
 2. Require the reservation to still be `confirmed` and assigned to the proposal's original asset.
-3. Recheck the substitute with the shared `eligible_unit()` policy and the current local clock.
+3. Recheck the substitute with the shared `eligible_unit()` policy, saved borrower requirements, and the current local clock. Reject a past pickup time or existing pickup access.
 4. Change the reservation's `asset_id` to the substitute.
 5. Mark the proposal `applied`, recording `approved_by` and `applied_at`.
 6. Append one `substitution_applied` audit event with the original and substitute asset IDs.

@@ -39,6 +39,19 @@ def _agent(store):
     return create_reservation_agent(Reservations(store), BORROWER_A, model="none")
 
 
+def test_agent_captures_requirements_and_shows_them_for_confirmation(booking_app):
+    _, store = booking_app
+    agent = _agent(store)
+    find = _tool(agent, "find_equipment")
+    assert "error" in find("projector", "2026-11-07T12:00", duration_minutes=60, require_built_in_speakers=True)
+    offer = find("projector", "2026-11-07T13:00", duration_minutes=60, require_hdmi=True, require_built_in_speakers=True)
+    pending = FakeToolContext()
+    _tool(agent, "confirm_reservation")(offer["id"], pending)
+    assert "HDMI" in pending.requested["hint"]
+    assert "Built-in speakers" in pending.requested["hint"]
+    assert "error" in find("projector", "2026-11-07T13:00", duration_minutes=60, require_hdmi="yes")
+
+
 def test_find_equipment_tool_matches_the_api_offer(booking_app):
     _, store = booking_app
     find = _tool(_agent(store), "find_equipment")

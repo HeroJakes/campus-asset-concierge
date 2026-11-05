@@ -1,8 +1,8 @@
 # Stage 2.2 — Richer equipment matching
 
-**Status:** Agreed design and implementation plan. Not implemented.
+**Status:** Implemented locally. Teammate review pending in PR #12.
 
-Stage 2.1 is merged in PR #10. This plan extends its matching rules using the decisions in [design context](../CONTEXT.md) and terms in the [glossary](../GLOSSARY.md). It covers local development only.
+Stage 2.1 is merged in PR #10. This plan records the agreed interview decisions and extends its matching rules using terms in the [glossary](../GLOSSARY.md). It covers local development only.
 
 ## Result
 
@@ -161,12 +161,12 @@ $env:FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080'
 uv run --locked pytest
 ```
 
-These commands are planned validation, not evidence of a completed run. The current virtual environment points to a missing Python interpreter; restore the pinned Python 3.12 environment before testing. Run against the local emulator and fictional data only.
+Run against the local emulator and fictional data only. `uv sync --locked` restores the pinned environment when needed. Focused API, recovery, reassignment, tool, and locker-view tests cover the checks above; the full suite is the final regression check.
 
 ## Completion and limits
 
 Finish when the acceptance checks pass, both existing reset scenarios still work, the new rehearsal demonstrates capability-based matching, and a teammate reviews the implementation PR.
 
-No new dependency or database service is needed. Continue on a Stage 2.2 feature branch from the latest `main` when implementation is authorized; this documentation branch does not authorize coding or deployment.
+No new dependency or database service is needed. The user authorized implementation on the existing `docs/stage-2-2-planning` branch and PR #12. Cloud deployment remains out of scope.
 
 Keep the existing recovery limits explicit: only the next future booking is considered, proposals do not reserve units, and separate pending proposals can compete for a spare. Transaction-time approval must still prevent overlapping applied reservations. This stage does not add global allocation or process bookings skipped by a clock jump.

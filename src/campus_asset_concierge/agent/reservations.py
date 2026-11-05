@@ -7,6 +7,7 @@ from campus_asset_concierge.domain.reservations import (
     MALAYSIA_TIME,
     ReservationError,
     ReservationRequest,
+    requirements_text,
 )
 from campus_asset_concierge.pickups import Pickups
 from campus_asset_concierge.reservations import Reservations
@@ -23,8 +24,10 @@ def create_reservation_agent(reservations: Reservations, borrower_id: str, model
         pickup_at: str,
         due_at: str | None = None,
         duration_minutes: int | None = None,
+        require_hdmi: bool = False,
+        require_built_in_speakers: bool = False,
     ) -> dict:
-        """Find an offer for projector or raspberry_pi_kit using a full local date and time."""
+        """Find an offer using a full local date and time. For projectors, pass HDMI or built-in speaker needs only when required."""
         try:
             request = ReservationRequest.model_validate(
                 {
@@ -32,11 +35,13 @@ def create_reservation_agent(reservations: Reservations, borrower_id: str, model
                     "pickup_at": pickup_at,
                     "due_at": due_at,
                     "duration_minutes": duration_minutes,
+                    "require_hdmi": require_hdmi,
+                    "require_built_in_speakers": require_built_in_speakers,
                 }
             )
             return reservations.offer(borrower_id, request)
         except ValidationError:
-            return {"error": "Check the equipment category, pickup time, and return time or duration."}
+            return {"error": "Check the equipment category, times, and projector requirement booleans."}
         except ReservationError as error:
             return {"error": str(error)}
 
@@ -49,7 +54,8 @@ def create_reservation_agent(reservations: Reservations, borrower_id: str, model
                 tool_context.request_confirmation(
                     hint=(
                         f"Reserve {offer['asset_id']} at {offer['pickup_location']} from "
-                        f"{offer['pickup_at']} to {offer['due_at']} (Malaysia time)?"
+                        f"{offer['pickup_at']} to {offer['due_at']} (Malaysia time)? "
+                        f"Requirements: {requirements_text(offer)}."
                     ),
                     payload={"offer_id": offer_id},
                 )
@@ -87,6 +93,9 @@ def create_reservation_agent(reservations: Reservations, borrower_id: str, model
             "return time or duration. Interpret times in Malaysia time. Resolve relative dates "
             "only when the reference date is known, or ask for the exact date. Show the offered "
             "asset, location, pickup time, and return time before asking for confirmation. "
+            "Capture HDMI and built-in speaker requirements only when the borrower mentions "
+            "those needs; do not always ask about both. Show the requirements with the offer, "
+            "or say No extra requirements. False means not required, not forbidden. "
             "Only call confirm_reservation after the borrower explicitly agrees to that offer. "
             "If availability changed, offer to check again and show any new offer for review. "
             "Use check_pickup_status for questions about pickup and check_return_status for "

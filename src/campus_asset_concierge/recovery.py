@@ -1,10 +1,13 @@
 from datetime import datetime
+from uuid import uuid4
 
 from campus_asset_concierge.domain.reservations import (
     MALAYSIA_TIME,
     ReservationError,
     eligible_unit,
+    equipment_requirements,
     local_clock,
+    malaysia_times,
 )
 from campus_asset_concierge.storage.local_state import LocalStateStore
 
@@ -51,7 +54,10 @@ class Recovery:
                 _flag_at_risk(state, now, loan_id, reservation_id, reservation)
                 if reservation_id in state["substitution_proposals"] or reservation_id in state["escalations"]:
                     continue
-                _record_outcome(state, now, loan_id, reservation_id, reservation)
+                _record_outcome(
+                    state, now, loan_id, reservation_id, reservation,
+                    _find_substitute(state, now, reservation),
+                )
 
             return _result(state, now)
 
@@ -63,6 +69,57 @@ class Recovery:
             raise ReservationError(409, "Load a local test scenario first.")
         now = local_clock(state)
         return _result(state, now)
+
+    def recheck(self, staff_id: str, reservation_id: str) -> dict:
+        """Recheck a pending proposal without changing the reservation."""
+        def check(state: dict | None) -> dict:
+            if state is None:
+                raise ReservationError(409, "Load a local test scenario first.")
+            proposal = state.get("substitution_proposals", {}).get(reservation_id)
+            if proposal is None:
+                raise ReservationError(404, "Substitution proposal not found.")
+            if proposal["status"] != "pending_staff_approval":
+                raise ReservationError(409, "This substitution proposal is no longer pending.")
+            reservation = state["reservations"].get(reservation_id)
+            loan = state["loans"].get(proposal["loan_id"])
+            now = local_clock(state)
+            if (
+                not reservation or reservation["status"] != "confirmed"
+                or reservation["asset_id"] != proposal["original_asset_id"]
+                or reservation["asset_id"] not in state["assets"]
+                or reservation_id in state.get("pickup_access", {})
+                or reservation["pickup_at"] < now
+                or not loan or loan["status"] != "overdue"
+                or loan["asset_id"] != reservation["asset_id"]
+                or loan["due_at"] >= now
+                or (_next_booking(state, reservation["asset_id"], now) or (None,))[0] != reservation_id
+            ):
+                raise ReservationError(409, "This substitution proposal is no longer applicable.")
+
+            substitute = _find_substitute(state, now, reservation)
+            if substitute != proposal["substitute_asset_id"]:
+                del state["substitution_proposals"][reservation_id]
+                _record_outcome(state, now, proposal["loan_id"], reservation_id, reservation, substitute)
+                replacement = state["substitution_proposals"].get(reservation_id)
+                if replacement is not None:
+                    replacement["id"] = f"proposal-{uuid4().hex}"
+                state.setdefault("audit_events", []).append({
+                    "at": now, "actor": staff_id, "action": "substitute_rechecked",
+                    "reservation_id": reservation_id, "asset_id": reservation["asset_id"],
+                    "previous_proposal_id": proposal["id"],
+                    "proposal_id": replacement["id"] if replacement else None,
+                    "previous_substitute_asset_id": proposal["substitute_asset_id"],
+                    "substitute_asset_id": substitute,
+                })
+
+            result = _result(state, now)
+            return {
+                "proposal": next((p for p in result["substitution_proposals"] if p["reservation_id"] == reservation_id), None),
+                "escalation": next((e for e in result["escalations"] if e["reservation_id"] == reservation_id), None),
+                "reservation": {"id": reservation_id, **malaysia_times(reservation)},
+            }
+
+        return self.store.change(check)
 
 
 def _next_booking(state: dict, asset_id: str, now: datetime) -> tuple[str, dict] | None:
@@ -109,10 +166,8 @@ def _flag_at_risk(
     _audit(state, now, "booking_at_risk", reservation_id, reservation["asset_id"], loan_id=loan_id)
 
 
-def _record_outcome(
-    state: dict, now: datetime, loan_id: str, reservation_id: str, reservation: dict
-) -> None:
-    category = state["assets"][reservation["asset_id"]]["category"]
+def _find_substitute(state: dict, now: datetime, reservation: dict) -> str | None:
+    category = reservation.get("category") or state["assets"][reservation["asset_id"]]["category"]
     # shortcut: does not skip a spare already proposed to another overdue loan this pass; safe for
     # <=2 units per category, revisit before a category has 3+ units (overlaps Stage 2.1).
     for asset_id in sorted(state["assets"]):
@@ -125,20 +180,29 @@ def _record_outcome(
             reservation["pickup_at"],
             reservation["due_at"],
             now,
+            **equipment_requirements(reservation),
         ):
-            proposal_id = f"proposal-{reservation_id}"
-            state["substitution_proposals"][reservation_id] = {
-                "id": proposal_id,
-                "reservation_id": reservation_id,
-                "loan_id": loan_id,
-                "original_asset_id": reservation["asset_id"],
-                "substitute_asset_id": asset_id,
-                "status": "pending_staff_approval",
-                "verified": True,
-                "verified_at": now,
-            }
-            _audit(state, now, "substitute_proposed", reservation_id, reservation["asset_id"], loan_id=loan_id)
-            return
+            return asset_id
+    return None
+
+
+def _record_outcome(
+    state: dict, now: datetime, loan_id: str, reservation_id: str, reservation: dict,
+    substitute_asset_id: str | None,
+) -> None:
+    if substitute_asset_id is not None:
+        state["substitution_proposals"][reservation_id] = {
+            "id": f"proposal-{reservation_id}",
+            "reservation_id": reservation_id,
+            "loan_id": loan_id,
+            "original_asset_id": reservation["asset_id"],
+            "substitute_asset_id": substitute_asset_id,
+            "status": "pending_staff_approval",
+            "verified": True,
+            "verified_at": now,
+        }
+        _audit(state, now, "substitute_proposed", reservation_id, reservation["asset_id"], loan_id=loan_id)
+        return
 
     escalation_id = f"escalation-{reservation_id}"
     state["escalations"][reservation_id] = {
@@ -170,10 +234,13 @@ def _result(state: dict, now: datetime) -> dict:
         ],
         "substitution_proposals": [
             _times(record, "verified_at", "applied_at")
+            | equipment_requirements(state["reservations"].get(record["reservation_id"], {}))
             for record in state.get("substitution_proposals", {}).values()
         ],
         "escalations": [
-            _times(record, "created_at") for record in state.get("escalations", {}).values()
+            _times(record, "created_at")
+            | equipment_requirements(state["reservations"].get(record["reservation_id"], {}))
+            for record in state.get("escalations", {}).values()
         ],
         "audit_events": [_times(event, "at") for event in reversed(state.get("audit_events", []))],
     }

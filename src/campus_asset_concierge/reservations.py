@@ -5,6 +5,7 @@ from campus_asset_concierge.domain.reservations import (
     ReservationError,
     ReservationRequest,
     eligible_unit,
+    equipment_requirements,
     local_clock,
     malaysia_times,
 )
@@ -24,6 +25,7 @@ class Reservations:
         self._check_borrower(borrower_id)
         pickup, due = request.window()
         offer_id = uuid4().hex
+        requirements = equipment_requirements(request.model_dump())
 
         def make_offer(state: dict | None) -> dict:
             if state is None:
@@ -32,7 +34,7 @@ class Reservations:
             if pickup < now:
                 raise ReservationError(422, "Pickup time cannot be in the past.")
             for asset_id in sorted(state["assets"]):
-                if eligible_unit(state, asset_id, request.category, pickup, due, now):
+                if eligible_unit(state, asset_id, request.category, pickup, due, now, **requirements):
                     offer = {
                         "borrower_id": borrower_id,
                         "asset_id": asset_id,
@@ -40,6 +42,7 @@ class Reservations:
                         "pickup_location": state["location"]["name"],
                         "pickup_at": pickup,
                         "due_at": due,
+                        **requirements,
                     }
                     state.setdefault("reservation_offers", {})[offer_id] = offer
                     return {"id": offer_id, **malaysia_times(offer)}
@@ -62,7 +65,8 @@ class Reservations:
             now = local_clock(state)
             pickup, due = offer["pickup_at"], offer["due_at"]
             if pickup < now or not eligible_unit(
-                state, offer["asset_id"], offer["category"], pickup, due, now
+                state, offer["asset_id"], offer["category"], pickup, due, now,
+                **equipment_requirements(offer),
             ):
                 raise ReservationError(409, "Availability changed. Check again for a fresh offer.")
             reservation = {**offer, "status": "confirmed"}

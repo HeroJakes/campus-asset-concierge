@@ -18,6 +18,7 @@ from campus_asset_concierge.domain.reservations import (
     ReservationRequest,
     local_clock,
     malaysia_times,
+    requirements_text,
 )
 from campus_asset_concierge.domain.scenarios import BORROWER_A, BORROWER_B, TestScenario
 from campus_asset_concierge.pickups import Pickups
@@ -86,6 +87,10 @@ class VerifyRequest(BaseModel):
     result: Literal["pass", "fail"]
 
 
+class ApproveRequest(BaseModel):
+    proposal_id: Annotated[str, Field(strict=True, min_length=1)]
+
+
 def create_app(store: LocalStateStore | None = None) -> FastAPI:
     local_store = store if store is not None else LocalStateStore()
     reservations = Reservations(local_store)
@@ -96,6 +101,7 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     app = FastAPI(title="Campus Asset Concierge · Local Development")
     app.mount("/static", StaticFiles(directory=PACKAGE_DIR / "static"), name="static")
     templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
+    templates.env.globals["requirements_text"] = requirements_text
 
     @app.exception_handler(ReservationError)
     async def reservation_error(_: Request, error: ReservationError) -> JSONResponse:
@@ -145,9 +151,14 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
         return recovery.staff_page()
 
     @app.post("/recovery/substitution-proposals/{reservation_id}/approve")
-    def approve_substitution(reservation_id: str, actor: Actor) -> dict:
+    def approve_substitution(reservation_id: str, request: ApproveRequest, actor: Actor) -> dict:
         require_role(actor, Role.STAFF)
-        return reassignment.approve(actor.username, reservation_id)
+        return reassignment.approve(actor.username, reservation_id, request.proposal_id)
+
+    @app.post("/recovery/substitution-proposals/{reservation_id}/recheck")
+    def recheck_substitution(reservation_id: str, actor: Actor) -> dict:
+        require_role(actor, Role.STAFF)
+        return recovery.recheck(actor.username, reservation_id)
 
     @app.post("/reservations/{reservation_id}/unlock")
     def unlock_compartment(reservation_id: str, request: UnlockRequest, actor: Actor) -> dict:

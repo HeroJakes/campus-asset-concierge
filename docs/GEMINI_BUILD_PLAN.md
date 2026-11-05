@@ -17,6 +17,8 @@ The hackathon deliverable is built **inside Gemini Enterprise**: one borrower ch
 - **Instructions** (adapted from `booking_instructions`): help the signed-in borrower reserve one item; ask for a missing pickup time and a return time or duration; interpret times in Malaysia time; show the offered asset, location, and pickup and return times before asking for confirmation; only call `confirm_booking` after the borrower explicitly agrees; use the status tools for pickup and return questions. Codes, pickup, and drop-off happen on the locker page, not in chat.
 - **Identity:** the borrower comes from the Gemini session (Stage 1.5), then maps to `borrower_id`.
 
+Stage 2.2 adds optional `require_hdmi` and `require_built_in_speakers` booleans to `find_equipment` for projectors. Capture needs the borrower mentions without always asking both questions. Show required capabilities with the offered unit before confirmation, or say "No extra requirements." False means not required, not forbidden. Recovery and approval recheck the saved requirements. Staff can check a pending proposal again on the locker page; this action is not an MCP tool.
+
 ## Maximizing workflow
 
 Purpose: protect the next booking when equipment is late, without a human watching. Each run detects overdue loans and hands staff a ready-to-approve recovery action.

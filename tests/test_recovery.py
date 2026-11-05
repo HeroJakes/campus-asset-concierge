@@ -1,6 +1,20 @@
 from conftest import BORROWER_B, OPERATOR, STAFF
 
 
+def test_recovery_escalates_when_spare_lacks_required_speakers(booking_app):
+    client, store = booking_app
+
+    def need_speakers(state):
+        state["reservations"]["next-projector"]["require_built_in_speakers"] = True
+
+    store.change(need_speakers)
+    advance(client)
+    body = client.get("/recovery", auth=STAFF).json()
+    assert body["substitution_proposals"] == []
+    assert body["escalations"][0]["require_built_in_speakers"] is True
+    assert body["escalations"][0]["owner"] == "equipment-staff"
+
+
 def advance(client, minutes=61):
     response = client.post(
         "/local-test/clock/advance", auth=OPERATOR, json={"minutes": minutes}

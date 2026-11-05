@@ -26,13 +26,15 @@ Gemini agent ──(MCP)──► mcp_server.py ──► domain classes ──�
 
 | Tool | Parameters | Wraps | Writes? | Returns |
 | --- | --- | --- | --- | --- |
-| `find_equipment` | `borrower_id`, `category`, `pickup_at`, `due_at?`, `duration_minutes?` | `Reservations.offer` | Yes (offer) | Offer, or `{"error"}` |
+| `find_equipment` | `borrower_id`, `category`, `pickup_at`, `due_at?`, `duration_minutes?`, `require_hdmi?`, `require_built_in_speakers?` | `Reservations.offer` | Yes (offer) | Offer, or `{"error"}` |
 | `confirm_booking` | `borrower_id`, `offer_id` | `Reservations.confirm` | Yes (reservation) | Reservation, or `{"error"}` |
 | `check_pickup_status` | `borrower_id` | `Pickups.status` | No | Pickups, never the code |
 | `check_return_status` | `borrower_id` | `Returns.status` | No | Returns, never the code |
 | `run_overdue_recovery` | — | `Recovery.process` | Yes (idempotent) | Overdue loans, at-risk bookings, proposals, escalations |
 
 `find_equipment`, `check_pickup_status`, and `check_return_status` mirror the existing ADK tools. `run_overdue_recovery` is the staff / maximizing-workflow tool: it runs the recovery pass (detect overdue, flag at-risk, record a proposal or escalation) and returns the current picture, so the workflow does not depend on the operator clock-advance having run it first. It is idempotent. The locker device actions (load, unlock, drop, verify) stay on the staff locker page and are **not** exposed over MCP.
+
+Stage 2.2 adds strict boolean projector requirements. True means required; false or omitted is unrestricted. Offers and reservations retain the flags, and recovery results include them with proposals and escalations. Shared request validation returns `{"error"}` for invalid direct tool inputs; malformed MCP arguments can be rejected earlier as MCP tool errors. Staff recheck and approval actions stay on the authenticated API and locker page.
 
 ## Code shape
 

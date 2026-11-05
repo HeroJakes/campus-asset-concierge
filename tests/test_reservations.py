@@ -18,6 +18,61 @@ def confirm(client, auth, offer_id):
     return client.post(f"/reservation-offers/{offer_id}/confirm", auth=auth)
 
 
+def test_projector_requirements_are_saved_and_rechecked(booking_app):
+    client, store = booking_app
+    assert offer(client, BORROWER_A, require_built_in_speakers=True).status_code == 409
+    response = offer(client, BORROWER_A, require_hdmi=True)
+    assert response.status_code == 201
+    offered = response.json()
+    assert offered["require_hdmi"] is True
+    assert offered["require_built_in_speakers"] is False
+
+    def remove_hdmi(state):
+        state["assets"]["projector-b"].pop("has_hdmi")
+
+    store.change(remove_hdmi)
+    assert confirm(client, BORROWER_A, offered["id"]).status_code == 409
+    assert client.get("/reservations", auth=BORROWER_A).json() == []
+    assert offer(client, BORROWER_A).status_code == 201
+
+
+@pytest.mark.parametrize("field", ["require_hdmi", "require_built_in_speakers"])
+@pytest.mark.parametrize("value", ["true", "false", 1, 0, None])
+def test_requirements_reject_non_boolean_values(booking_app, field, value):
+    client, _ = booking_app
+    assert offer(client, BORROWER_A, **{field: value}).status_code == 422
+
+
+@pytest.mark.parametrize("field", ["require_hdmi", "require_built_in_speakers"])
+def test_projector_requirements_cannot_be_applied_to_kits(booking_app, field):
+    client, _ = booking_app
+    assert offer(client, BORROWER_A, category="raspberry_pi_kit", **{field: True}).status_code == 422
+    assert offer(client, BORROWER_A, category="raspberry_pi_kit", **{field: False}).status_code == 201
+
+
+@pytest.mark.parametrize("hdmi,speakers", [(True, False), (False, True), (True, True), (False, False)])
+def test_all_requirement_combinations_use_stable_unit_order(booking_app, hdmi, speakers):
+    client, _ = booking_app
+    offered = offer(client, BORROWER_A, "2026-11-07T13:00", require_hdmi=hdmi, require_built_in_speakers=speakers).json()
+    assert offered["asset_id"] == "projector-a"
+    booked = confirm(client, BORROWER_A, offered["id"]).json()
+    assert booked["require_hdmi"] is hdmi
+    assert booked["require_built_in_speakers"] is speakers
+
+
+def test_existing_offer_without_requirements_still_confirms(booking_app):
+    client, store = booking_app
+    offered = offer(client, BORROWER_A).json()
+
+    def old_offer(state):
+        saved = state["reservation_offers"][offered["id"]]
+        del saved["require_hdmi"]
+        del saved["require_built_in_speakers"]
+
+    store.change(old_offer)
+    assert confirm(client, BORROWER_A, offered["id"]).status_code == 200
+
+
 def test_borrower_reviews_and_confirms_one_unit(booking_app):
     client, _ = booking_app
     response = offer(client, BORROWER_A)

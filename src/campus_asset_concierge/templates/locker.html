@@ -1,5 +1,6 @@
 {%- macro name(value) %}{{ value | replace("-", " ") | title }}{% endmacro -%}
 {%- macro hhmm(value) %}{{ value[11:16] }}{% endmacro -%}
+{%- macro requirements(value) %}<span class="meta">Requirements: {{ requirements_text(value) }}</span>{% endmacro -%}
 {%- macro door(compartment, state, label) %}
 <div class="door door--{{ state }}">
   <span class="door-name">Compartment {{ compartment | upper }}</span>
@@ -78,7 +79,7 @@
           <tbody>
             {% for booking in reservations %}
             <tr>
-              <td class="identity">{{ name(booking.asset_id) }}</td>
+              <td class="identity">{{ name(booking.asset_id) }}<br>{{ requirements(booking) }}</td>
               <td>{{ name(booking.borrower_id) }}</td>
               <td class="figure">{{ hhmm(booking.pickup_at) }}</td>
               <td class="figure">{{ hhmm(booking.due_at) }}</td>
@@ -164,6 +165,7 @@
             "booking_at_risk": "flagged a booking as at risk",
             "substitute_proposed": "recorded a substitute proposal",
             "substitution_applied": "approved and applied a substitute",
+            "substitute_rechecked": "checked substitutes again",
             "escalation_created": "created a staff-owned escalation",
           }.get(event.action, event.action) }}</span>
           <span class="booking-id">{% if event.reservation_id %}{{ event.reservation_id[-8:] }}{% else %}{{ name(event.asset_id) }}{% endif %}</span>
@@ -186,13 +188,13 @@
         {% endfor %}
         {% for proposal in recovery.substitution_proposals %}
         {% if proposal.status == "applied" %}
-        <p class="next"><strong>Reassignment applied:</strong> {{ name(proposal.substitute_asset_id) }} is assigned to {{ name(proposal.reservation_id) }}. Approved by {{ name(proposal.approved_by) }}.</p>
+        <p class="next"><strong>Reassignment applied:</strong> {{ name(proposal.substitute_asset_id) }} is assigned to {{ name(proposal.reservation_id) }}. Approved by {{ name(proposal.approved_by) }}. {{ requirements(proposal) }}</p>
         {% else %}
-        <p class="next"><strong>Verified substitute proposal:</strong> {{ name(proposal.substitute_asset_id) }} for {{ name(proposal.reservation_id) }}. Awaiting staff approval. <button class="button button--primary" type="button" data-post="/recovery/substitution-proposals/{{ proposal.reservation_id }}/approve">Approve and apply</button> The original booking remains assigned to {{ name(proposal.original_asset_id) }} until approval.</p>
+        <p class="next"><strong>Verified substitute proposal:</strong> {{ name(proposal.substitute_asset_id) }} for {{ name(proposal.reservation_id) }}. {{ requirements(proposal) }} Awaiting staff approval. <button class="button button--primary" type="button" data-post="/recovery/substitution-proposals/{{ proposal.reservation_id }}/approve" data-body='{{ {"proposal_id": proposal.id} | tojson }}'>Approve and apply</button> <button class="button button--secondary" type="button" data-post="/recovery/substitution-proposals/{{ proposal.reservation_id }}/recheck">Check substitutes again</button> The original booking remains assigned to {{ name(proposal.original_asset_id) }} until approval.</p>
         {% endif %}
         {% endfor %}
         {% for escalation in recovery.escalations %}
-        <p class="notice notice--error"><strong>Staff-owned escalation:</strong> {{ name(escalation.reservation_id) }}. Owner: {{ name(escalation.owner) }}.</p>
+        <p class="notice notice--error"><strong>Staff-owned escalation:</strong> {{ name(escalation.reservation_id) }}. Owner: {{ name(escalation.owner) }}. {{ requirements(escalation) }}</p>
         {% endfor %}
       {% else %}
         <p class="empty">No overdue recovery actions yet. Advance the local test clock past a loan due time.</p>
@@ -217,6 +219,7 @@
       <div class="pickup-main">
         <h2 id="pickup-{{ loop.index }}">{{ name(pickup.asset_id) }}</h2>
         <p class="meta">{{ pickup.pickup_location }} · {{ pickup.pickup_at[:10] }} · pickup {{ hhmm(pickup.pickup_at) }}, return by {{ hhmm(pickup.due_at) }}</p>
+        <p>{{ requirements(pickup) }}</p>
 
         {% if pickup.step == "waiting_for_loading" %}
           <p class="next">Staff haven't loaded this item yet. Your code appears here once they do.</p>

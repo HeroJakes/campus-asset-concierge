@@ -21,6 +21,7 @@ from campus_asset_concierge.domain.reservations import (
 )
 from campus_asset_concierge.domain.scenarios import BORROWER_A, BORROWER_B, TestScenario
 from campus_asset_concierge.pickups import Pickups
+from campus_asset_concierge.recovery import Recovery
 from campus_asset_concierge.reservations import Reservations
 from campus_asset_concierge.storage.local_state import LocalStateStore
 
@@ -83,6 +84,7 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     local_store = store if store is not None else LocalStateStore()
     reservations = Reservations(local_store)
     pickups = Pickups(local_store)
+    recovery = Recovery(local_store)
     app = FastAPI(title="Campus Asset Concierge · Local Development")
     app.mount("/static", StaticFiles(directory=PACKAGE_DIR / "static"), name="static")
     templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
@@ -129,6 +131,11 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
         require_role(actor, Role.BORROWER)
         return pickups.borrower_page(actor.username)
 
+    @app.get("/recovery")
+    def recovery_status(actor: Actor) -> dict:
+        require_role(actor, Role.STAFF)
+        return recovery.staff_page()
+
     @app.post("/reservations/{reservation_id}/unlock")
     def unlock_compartment(reservation_id: str, request: UnlockRequest, actor: Actor) -> dict:
         require_role(actor, Role.BORROWER)
@@ -150,6 +157,7 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
         }
         if actor.role == Role.STAFF:
             context |= pickups.staff_page()
+            context["recovery"] = recovery.staff_page()
         else:
             context["pickups"] = pickups.borrower_page(actor.username)
         return templates.TemplateResponse(request, "locker.html", context)
@@ -171,6 +179,7 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
         require_role(actor, Role.OPERATOR)
         try:
             local_store.advance(request.minutes)
+            recovery.process()
         except NotFound as error:
             raise HTTPException(409, "Load a local test scenario first.") from error
         return Response(status_code=204)

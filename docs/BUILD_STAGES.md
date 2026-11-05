@@ -48,7 +48,7 @@ After 1.0, all four leads can start with agreed local test data and connect thei
 | [1.5](#stage-15--gemini-enterprise-access-check) | Gemini Enterprise access check | Blocked by licence delay. MCP connector built (PR #9); waiting on the licence to register it in Gemini Enterprise. | 1.1 inventory lookup, event app access, and Agent Runtime permissions |
 | [1.6](#stage-16--rehearsal-and-submission) | Rehearsal and submission | Planned | 1.1–1.4 and an outcome for 1.5 |
 | [2.1](#stage-21--approve-and-apply-a-reassignment) | Apply a reassignment | Done locally · PR #10 merged | P0 sign-off and approval to start P1 |
-| [2.2](#stage-22--expand-booking-choices) | Expand booking choices | Implemented locally · richer matching only; review pending in PR #12 | P0 sign-off and approval to start P1 |
+| [2.2](#stage-22--expand-booking-choices) | Expand booking choices | Done locally · richer matching only; PR #12 merged | P0 sign-off and approval to start P1 |
 | [2.3](#stage-23--run-automation-on-a-schedule) | Schedule overdue checks | Deferred · P1 | P0 sign-off and approval to start P1 |
 | [2.4](#stage-24--improve-staff-visibility) | Improve staff visibility | Deferred · P1 | P0 sign-off. Add outcomes as 2.1 and 2.3 land. |
 | [3.1](#stage-31--expand-campus-operations) | Expand campus operations | Deferred · P2 | P1 review and pilot agreement |

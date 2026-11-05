@@ -6,7 +6,7 @@ When shared equipment comes back late, the next borrower can lose their booking.
 
 The organizers reported a delay in Gemini Enterprise licences with no confirmed date. Cloud credit details are still pending. The lending features and locker page can be built locally while the in-app integration waits for access.
 
-**Stage 2.2 works locally:** projector bookings can require HDMI, built-in speakers, or both. Booking, recovery, and reassignment use the same requirements. Staff can check substitutes again for a pending proposal. See the [implementation plan and acceptance checks](docs/STAGE_2_2_IMPLEMENTATION.md). Teammate review is pending.
+**Stage 2.2 works locally:** projector bookings can require HDMI, built-in speakers, or both. Booking, recovery, and reassignment use the same requirements. Staff can check substitutes again for a pending proposal. See the [implementation plan and acceptance checks](docs/STAGE_2_2_IMPLEMENTATION.md). PR #12 is merged into `main`.
 
 Gemini Enterprise is the planned chat interface. Our prototype will have a separate virtual locker page for staff loading, one-time code entry, and pickup confirmation.
 

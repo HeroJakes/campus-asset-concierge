@@ -1,6 +1,6 @@
 # Stage 2.2 — Richer equipment matching
 
-**Status:** Implemented locally. Teammate review pending in PR #12.
+**Status:** Done locally. PR #12 merged into `main`.
 
 Stage 2.1 is merged in PR #10. This plan records the agreed interview decisions and extends its matching rules using terms in the [glossary](../GLOSSARY.md). It covers local development only.
 

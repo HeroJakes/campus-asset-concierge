@@ -4,8 +4,10 @@ from campus_asset_concierge.domain.reservations import (
     MALAYSIA_TIME,
     ReservationError,
     eligible_unit,
+    equipment_requirements,
     local_clock,
     malaysia_times,
+    reassignment_applicable,
 )
 from campus_asset_concierge.storage.local_state import LocalStateStore
 
@@ -16,7 +18,7 @@ class Reassignment:
     def __init__(self, store: LocalStateStore) -> None:
         self.store = store
 
-    def approve(self, staff_id: str, reservation_id: str) -> dict:
+    def approve(self, staff_id: str, reservation_id: str, proposal_id: str) -> dict:
         """Recheck and apply a proposal in the same Firestore transaction."""
 
         def apply(state: dict | None) -> dict:
@@ -26,6 +28,8 @@ class Reassignment:
             proposal = state.get("substitution_proposals", {}).get(reservation_id)
             if proposal is None:
                 raise ReservationError(404, "Substitution proposal not found.")
+            if proposal["id"] != proposal_id:
+                raise ReservationError(409, "The proposal changed. Refresh and review it before approval.")
 
             reservation = state.get("reservations", {}).get(reservation_id)
             if reservation is None:
@@ -38,9 +42,9 @@ class Reassignment:
 
             original_asset_id = proposal["original_asset_id"]
             substitute_asset_id = proposal["substitute_asset_id"]
+            now = local_clock(state)
             if (
-                reservation["status"] != "confirmed"
-                or reservation["asset_id"] != original_asset_id
+                not reassignment_applicable(state, reservation_id, original_asset_id, now)
                 or original_asset_id == substitute_asset_id
             ):
                 raise ReservationError(409, "This substitution proposal is no longer applicable.")
@@ -49,14 +53,14 @@ class Reassignment:
             if original_asset is None:
                 raise ReservationError(409, "The original asset for this proposal no longer exists.")
 
-            now = local_clock(state)
             if not eligible_unit(
                 state,
                 substitute_asset_id,
-                original_asset["category"],
+                reservation.get("category") or original_asset["category"],
                 reservation["pickup_at"],
                 reservation["due_at"],
                 now,
+                **equipment_requirements(reservation),
             ):
                 raise ReservationError(409, "The proposed substitute is no longer eligible.")
 
@@ -101,7 +105,7 @@ def _approval_result(
             None,
         )
     return {
-        "proposal": _times(proposal, "verified_at", "applied_at"),
+        "proposal": _times(proposal, "verified_at", "applied_at") | equipment_requirements(reservation),
         "reservation": {"id": reservation_id, **malaysia_times(reservation)},
         "audit_event": _times(event, "at") if event else None,
     }

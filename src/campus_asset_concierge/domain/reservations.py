@@ -1,12 +1,29 @@
 from datetime import datetime, timedelta, timezone
 from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, Self
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 
 MALAYSIA_TIME = timezone(timedelta(hours=8), "MYT")
 # A return code is usable from the moment it is issued until this long after.
 RETURN_CODE_WINDOW = timedelta(minutes=30)
+
+
+def equipment_requirements(record: dict) -> dict[str, bool]:
+    return {
+        "require_hdmi": record.get("require_hdmi", False),
+        "require_built_in_speakers": record.get("require_built_in_speakers", False),
+    }
+
+
+def requirements_text(record: dict) -> str:
+    needs = equipment_requirements(record)
+    return ", ".join(
+        label for key, label in (
+            ("require_hdmi", "HDMI"),
+            ("require_built_in_speakers", "Built-in speakers"),
+        ) if needs[key]
+    ) or "No extra requirements"
 
 
 class EquipmentCategory(StrEnum):
@@ -39,6 +56,16 @@ class ReservationRequest(BaseModel):
     pickup_at: str
     due_at: str | None = None
     duration_minutes: Annotated[int, Field(strict=True, gt=0)] | None = None
+    require_hdmi: StrictBool = False
+    require_built_in_speakers: StrictBool = False
+
+    @model_validator(mode="after")
+    def projector_requirements(self) -> Self:
+        if self.category != EquipmentCategory.PROJECTOR and (
+            self.require_hdmi or self.require_built_in_speakers
+        ):
+            raise ValueError("HDMI and built-in speaker requirements apply to projectors only.")
+        return self
 
     def window(self) -> tuple[datetime, datetime]:
         pickup = parse_booking_time(self.pickup_at)
@@ -60,11 +87,29 @@ def local_clock(state: dict) -> datetime:
     return state["starts_at"] + timedelta(minutes=state["elapsed_minutes"])
 
 
+def reassignment_applicable(
+    state: dict, reservation_id: str, original_asset_id: str, now: datetime,
+) -> bool:
+    reservation = state["reservations"].get(reservation_id)
+    return bool(
+        reservation
+        and reservation["status"] == "confirmed"
+        and reservation["asset_id"] == original_asset_id
+        and reservation_id not in state.get("pickup_access", {})
+        and reservation["pickup_at"] >= now
+    )
+
+
 def eligible_unit(
-    state: dict, asset_id: str, category: str, pickup: datetime, due: datetime, now: datetime
+    state: dict, asset_id: str, category: str, pickup: datetime, due: datetime, now: datetime,
+    require_hdmi: bool = False, require_built_in_speakers: bool = False,
 ) -> bool:
     asset = state["assets"].get(asset_id)
     if not asset or asset["category"] != category or asset["condition"] != "good":
+        return False
+    if require_hdmi and asset.get("has_hdmi") is not True:
+        return False
+    if require_built_in_speakers and asset.get("has_built_in_speakers") is not True:
         return False
 
     for loan in state["loans"].values():

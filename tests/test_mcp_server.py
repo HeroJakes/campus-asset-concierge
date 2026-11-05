@@ -1,6 +1,11 @@
 """The MCP tools are thin wrappers, so we test them at the same seam as the ADK agent:
 call the tool functions directly against the emulator and check parity with the API."""
 
+import asyncio
+
+import pytest
+from mcp.server.fastmcp.exceptions import ToolError
+
 from campus_asset_concierge.domain.scenarios import BORROWER_A as BORROWER_A_ID
 from campus_asset_concierge.mcp_server import build_tools, create_mcp_server
 from conftest import BORROWER_A
@@ -8,6 +13,27 @@ from conftest import BORROWER_A
 
 def tools(store):
     return {tool.__name__: tool for tool in build_tools(store)}
+
+
+def test_mcp_preserves_and_validates_projector_requirements(booking_app):
+    _, store = booking_app
+    tool = tools(store)
+    find = tool["find_equipment"]
+    assert "error" in find(BORROWER_A_ID, "projector", "2026-11-07T12:00", duration_minutes=60, require_built_in_speakers=True)
+    offer = find(BORROWER_A_ID, "projector", "2026-11-07T13:00", duration_minutes=60, require_hdmi=True)
+    reservation = tool["confirm_booking"](BORROWER_A_ID, offer["id"])
+    assert reservation["require_hdmi"] is True
+    assert "error" in find(BORROWER_A_ID, "projector", "2026-11-07T13:00", duration_minutes=60, require_hdmi="yes")
+
+
+def test_mcp_transport_rejects_numeric_requirement_before_coercion(booking_app):
+    _, store = booking_app
+    server = create_mcp_server(store)
+    with pytest.raises(ToolError, match="boolean"):
+        asyncio.run(server.call_tool("find_equipment", {
+            "borrower_id": BORROWER_A_ID, "category": "projector",
+            "pickup_at": "2026-11-07T13:00", "duration_minutes": 60, "require_hdmi": 1,
+        }))
 
 
 def test_find_equipment_matches_the_api_offer(booking_app):

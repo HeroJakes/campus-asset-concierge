@@ -7,7 +7,7 @@ docs/MCP_CONNECTOR_IMPLEMENTATION.md.
 from collections.abc import Callable
 
 from mcp.server.fastmcp import FastMCP
-from pydantic import ValidationError
+from pydantic import StrictBool, ValidationError
 
 from campus_asset_concierge.domain.reservations import ReservationError, ReservationRequest
 from campus_asset_concierge.pickups import Pickups
@@ -34,8 +34,10 @@ def build_tools(store: LocalStateStore) -> list[Callable]:
         pickup_at: str,
         due_at: str | None = None,
         duration_minutes: int | None = None,
+        require_hdmi: StrictBool = False,
+        require_built_in_speakers: StrictBool = False,
     ) -> dict:
-        """Find a reservation offer for a borrower. Category is projector or raspberry_pi_kit; use a full local date and time."""
+        """Find an offer for projector or raspberry_pi_kit using a full local date and time. Projector HDMI and built-in speaker flags mean required when true, unrestricted when false."""
         # shortcut: each call writes an offer that is never pruned; fine for the demo (a reset
         # clears offers), revisit with offer expiry before real use.
         try:
@@ -45,11 +47,13 @@ def build_tools(store: LocalStateStore) -> list[Callable]:
                     "pickup_at": pickup_at,
                     "due_at": due_at,
                     "duration_minutes": duration_minutes,
+                    "require_hdmi": require_hdmi,
+                    "require_built_in_speakers": require_built_in_speakers,
                 }
             )
             return reservations.offer(borrower_id, request)
         except ValidationError:
-            return {"error": "Check the equipment category, pickup time, and return time or duration."}
+            return {"error": "Check the equipment category, times, and projector requirement booleans."}
         except ReservationError as error:
             return {"error": str(error)}
 

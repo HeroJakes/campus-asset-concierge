@@ -42,8 +42,14 @@ def starting_state(scenario: TestScenario) -> dict:
             "compartments": {"a1": "empty", "a2": "empty"},
         },
         "assets": {
-            "projector-a": {"category": "projector", "condition": "good"},
-            "projector-b": {"category": "projector", "condition": "good"},
+            "projector-a": {
+                "category": "projector", "condition": "good",
+                "has_hdmi": True, "has_built_in_speakers": True,
+            },
+            "projector-b": {
+                "category": "projector", "condition": "good",
+                "has_hdmi": True, "has_built_in_speakers": False,
+            },
             "raspberry-pi-kit": {"category": "raspberry_pi_kit", "condition": "good"},
         },
         "reservations": reservations,

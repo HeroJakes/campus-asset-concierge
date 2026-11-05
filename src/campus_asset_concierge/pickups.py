@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from secrets import compare_digest, randbelow
 
 from campus_asset_concierge.domain.reservations import (
+    equipment_requirements,
     MALAYSIA_TIME,
     ReservationError,
     local_clock,
@@ -255,6 +256,7 @@ def _view(state: dict, reservation_id: str, reservation: dict, now: datetime) ->
             "code_closes_at": _malaysia_iso(_code_closes_at(reservation)),
             "compartment": access["compartment"] if access else None,
             "step": _step(reservation, access, now),
+            **equipment_requirements(reservation),
         }
     )
 

@@ -163,6 +163,7 @@
             "reminder_queued": "queued a simulated reminder",
             "booking_at_risk": "flagged a booking as at risk",
             "substitute_proposed": "recorded a substitute proposal",
+            "substitution_applied": "approved and applied a substitute",
             "escalation_created": "created a staff-owned escalation",
           }.get(event.action, event.action) }}</span>
           <span class="booking-id">{% if event.reservation_id %}{{ event.reservation_id[-8:] }}{% else %}{{ name(event.asset_id) }}{% endif %}</span>
@@ -184,7 +185,11 @@
         <p class="next">Simulated reminder queued for {{ name(reminder.reservation_id) }}.</p>
         {% endfor %}
         {% for proposal in recovery.substitution_proposals %}
-        <p class="next"><strong>Verified substitute proposal:</strong> {{ name(proposal.substitute_asset_id) }} for {{ name(proposal.reservation_id) }}. Awaiting staff approval. The original booking remains confirmed.</p>
+        {% if proposal.status == "applied" %}
+        <p class="next"><strong>Reassignment applied:</strong> {{ name(proposal.substitute_asset_id) }} is assigned to {{ name(proposal.reservation_id) }}. Approved by {{ name(proposal.approved_by) }}.</p>
+        {% else %}
+        <p class="next"><strong>Verified substitute proposal:</strong> {{ name(proposal.substitute_asset_id) }} for {{ name(proposal.reservation_id) }}. Awaiting staff approval. <button class="button button--primary" type="button" data-post="/recovery/substitution-proposals/{{ proposal.reservation_id }}/approve">Approve and apply</button> The original booking remains assigned to {{ name(proposal.original_asset_id) }} until approval.</p>
+        {% endif %}
         {% endfor %}
         {% for escalation in recovery.escalations %}
         <p class="notice notice--error"><strong>Staff-owned escalation:</strong> {{ name(escalation.reservation_id) }}. Owner: {{ name(escalation.owner) }}.</p>

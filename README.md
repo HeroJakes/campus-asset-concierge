@@ -2,7 +2,7 @@
 
 When shared equipment comes back late, the next borrower can lose their booking. Campus Asset Concierge aims to flag that conflict and help staff find an available substitute or escalate the case.
 
-**Current status** — Borrowers can find and confirm a reservation through the local API. Staff can load it into a virtual locker, and the borrower can unlock it with a one-time code and confirm pickup on the local locker page. The borrower can also return an item through the locker, and staff verify its condition to close the loan. Overdue recovery marks late loans, queues simulated reminders, and records a verified substitute proposal or staff-owned escalation. The shared foundation provides sign-in, a local test clock, and two resettable scenarios.
+**Current status** — Borrowers can find and confirm a reservation through the local API. Staff can load it into a virtual locker, and the borrower can unlock it with a one-time code and confirm pickup on the local locker page. The borrower can also return an item through the locker, and staff verify its condition to close the loan. Overdue recovery marks late loans, queues simulated reminders, and records a verified substitute proposal or staff-owned escalation. Authorized staff can now approve a pending proposal after a transaction-time stock and policy check, moving the future booking to the substitute and recording the audit event. The shared foundation provides sign-in, a local test clock, and two resettable scenarios.
 
 The organizers reported a delay in Gemini Enterprise licences with no confirmed date. Cloud credit details are still pending. The lending features and locker page can be built locally while the in-app integration waits for access.
 
@@ -58,7 +58,9 @@ To try a return, use `borrower-a`, who starts each reset with Projector A on loa
 
 To rehearse overdue recovery, reset as `local-operator` with `{"scenario":"spare_available"}` or `{"scenario":"spare_unavailable"}`, then advance the clock past the seeded 11:00 MYT due time with `POST /local-test/clock/advance` and `{"minutes":61}`. Sign in as `equipment-staff` and open the [locker page](http://127.0.0.1:8000/locker), or read `GET /recovery`. The spare-available scenario shows a verified Projector B proposal awaiting staff approval. The spare-unavailable scenario shows an escalation owned by Equipment Staff. Both outcomes keep the original reservation confirmed and the Projector A loan overdue. Reminders are simulated and queued in local state; no messages are sent.
 
-Run `uv run --locked pytest` in a shell with `FIRESTORE_EMULATOR_HOST` set to test sign-in, resets, booking, pickup, return, and overdue recovery, including two borrowers competing for the last unit.
+To approve the spare-available proposal, sign in as `equipment-staff` after the recovery step and open the [locker page](http://127.0.0.1:8000/locker). Select **Approve and apply**. The reservation moves to Projector B only after the service rechecks current stock and booking rules. `GET /recovery` shows the applied proposal and its `substitution_applied` audit event. Repeating the approval is safe. If Projector B becomes unavailable first, the approval returns a conflict and leaves the original reservation unchanged.
+
+Run `uv run --locked pytest` in a shell with `FIRESTORE_EMULATOR_HOST` set to test sign-in, resets, booking, pickup, return, overdue recovery, and reassignment, including two borrowers competing for the last unit.
 
 GitHub Actions runs the same tests with the Firestore emulator on pull requests into `main`.
 

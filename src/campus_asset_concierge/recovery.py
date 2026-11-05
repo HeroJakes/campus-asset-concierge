@@ -169,12 +169,13 @@ def _result(state: dict, now: datetime) -> dict:
             for record in state.get("at_risk_reservations", {}).values()
         ],
         "substitution_proposals": [
-            _times(record, "verified_at")
+            _times(record, "verified_at", "applied_at")
             for record in state.get("substitution_proposals", {}).values()
         ],
         "escalations": [
             _times(record, "created_at") for record in state.get("escalations", {}).values()
         ],
+        "audit_events": [_times(event, "at") for event in reversed(state.get("audit_events", []))],
     }
 
 

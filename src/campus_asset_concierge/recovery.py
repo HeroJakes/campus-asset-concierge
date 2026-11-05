@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from campus_asset_concierge.domain.reservations import (
+    MALAYSIA_TIME,
     ReservationError,
     eligible_unit,
     local_clock,
@@ -36,7 +37,7 @@ class Recovery:
                     loan["status"] = "overdue"
                     next_booking = _next_booking(state, loan["asset_id"], now)
                     reservation_id = next_booking[0] if next_booking else loan_id
-                    _audit(state, now, "overdue_marked", reservation_id, loan_id=loan_id)
+                    _audit(state, now, "overdue_marked", reservation_id, loan["asset_id"], loan_id=loan_id)
 
                 if loan["status"] != "overdue":
                     continue
@@ -65,6 +66,8 @@ class Recovery:
 
 
 def _next_booking(state: dict, asset_id: str, now: datetime) -> tuple[str, dict] | None:
+    # shortcut: only the next booking whose pickup is still ahead; a clock jump past that pickup
+    # skips it. Fine for the demo's 61-minute advance, revisit if advances cross a booking window.
     bookings = [
         (reservation_id, reservation)
         for reservation_id, reservation in state["reservations"].items()
@@ -87,7 +90,7 @@ def _queue_reminder(state: dict, now: datetime, loan_id: str, reservation_id: st
         "simulated": True,
         "queued_at": now,
     }
-    _audit(state, now, "reminder_queued", reservation_id, loan_id=loan_id)
+    _audit(state, now, "reminder_queued", reservation_id, state["loans"][loan_id]["asset_id"], loan_id=loan_id)
 
 
 def _flag_at_risk(
@@ -103,13 +106,15 @@ def _flag_at_risk(
         "status": reservation["status"],
         "flagged_at": now,
     }
-    _audit(state, now, "booking_at_risk", reservation_id, loan_id=loan_id)
+    _audit(state, now, "booking_at_risk", reservation_id, reservation["asset_id"], loan_id=loan_id)
 
 
 def _record_outcome(
     state: dict, now: datetime, loan_id: str, reservation_id: str, reservation: dict
 ) -> None:
     category = state["assets"][reservation["asset_id"]]["category"]
+    # shortcut: does not skip a spare already proposed to another overdue loan this pass; safe for
+    # <=2 units per category, revisit before a category has 3+ units (overlaps Stage 2.1).
     for asset_id in sorted(state["assets"]):
         if asset_id == reservation["asset_id"]:
             continue
@@ -132,7 +137,7 @@ def _record_outcome(
                 "verified": True,
                 "verified_at": now,
             }
-            _audit(state, now, "substitute_proposed", reservation_id, loan_id=loan_id)
+            _audit(state, now, "substitute_proposed", reservation_id, reservation["asset_id"], loan_id=loan_id)
             return
 
     escalation_id = f"escalation-{reservation_id}"
@@ -147,12 +152,12 @@ def _record_outcome(
         "reason": "No eligible substitute is available for the at-risk booking.",
         "created_at": now,
     }
-    _audit(state, now, "escalation_created", reservation_id, loan_id=loan_id)
+    _audit(state, now, "escalation_created", reservation_id, reservation["asset_id"], loan_id=loan_id)
 
 
 def _result(state: dict, now: datetime) -> dict:
     return {
-        "current_time": now.isoformat(),
+        "current_time": now.astimezone(MALAYSIA_TIME).isoformat(),
         "overdue_loans": [
             {"id": loan_id, **_times(loan, "picked_up_at", "due_at")}
             for loan_id, loan in state["loans"].items()
@@ -178,18 +183,20 @@ def _times(record: dict, *fields: str) -> dict:
     for field in fields:
         value = result.get(field)
         if isinstance(value, datetime):
-            result[field] = value.isoformat()
+            result[field] = value.astimezone(MALAYSIA_TIME).isoformat()
     return result
 
 
 def _audit(
-    state: dict, now: datetime, action: str, reservation_id: str, *, loan_id: str
+    state: dict, now: datetime, action: str, reservation_id: str, asset_id: str, *, loan_id: str
 ) -> None:
+    # asset_id keeps the shared audit shape from stages 1.2/1.3; loan_id is extra recovery context.
     state.setdefault("audit_events", []).append(
         {
             "at": now,
             "actor": RECOVERY_ACTOR,
             "action": action,
+            "asset_id": asset_id,
             "reservation_id": reservation_id,
             "loan_id": loan_id,
         }

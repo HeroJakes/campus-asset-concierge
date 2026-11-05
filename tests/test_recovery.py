@@ -29,6 +29,8 @@ def test_overdue_recovery_records_a_verified_spare_proposal(booking_app):
         "verified_at": saved["substitution_proposals"]["next-projector"]["verified_at"],
     }
     assert saved["escalations"] == {}
+    # Recovery events keep the shared audit shape (asset_id on every event).
+    assert all(event["asset_id"] == "projector-a" for event in saved["audit_events"])
 
     recovery = client.get("/recovery", auth=STAFF)
     assert recovery.status_code == 200

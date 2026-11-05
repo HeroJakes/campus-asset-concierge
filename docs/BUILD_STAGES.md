@@ -44,8 +44,8 @@ After 1.0, all four leads can start with agreed local test data and connect thei
 | [1.1](#stage-11--find-and-reserve-equipment) | Find and reserve equipment | Done locally · PR #2 merged | 1.0 |
 | [1.2](#stage-12--load-and-collect-equipment) | Load and collect equipment | Done locally · PR #5 merged | 1.0, then 1.1 for integration |
 | [1.3](#stage-13--return-equipment) | Return equipment | Done locally · PR #6 merged | 1.0, then 1.2 for integration |
-| [1.4](#stage-14--recover-an-at-risk-booking) | Recover an at-risk booking | Done locally | 1.0, then 1.1 and 1.2 for integration |
-| [1.5](#stage-15--gemini-enterprise-access-check) | Gemini Enterprise access check | Blocked by licence delay | 1.1 inventory lookup, event app access, and Agent Runtime permissions |
+| [1.4](#stage-14--recover-an-at-risk-booking) | Recover an at-risk booking | Done locally · PR #7 merged | 1.0, then 1.1 and 1.2 for integration |
+| [1.5](#stage-15--gemini-enterprise-access-check) | Gemini Enterprise access check | Blocked by licence delay. MCP connector built (PR #9); waiting on the licence to register it in Gemini Enterprise. | 1.1 inventory lookup, event app access, and Agent Runtime permissions |
 | [1.6](#stage-16--rehearsal-and-submission) | Rehearsal and submission | Planned | 1.1–1.4 and an outcome for 1.5 |
 | [2.1](#stage-21--approve-and-apply-a-reassignment) | Apply a reassignment | Deferred · P1 | P0 sign-off and approval to start P1 |
 | [2.2](#stage-22--expand-booking-choices) | Expand booking choices | Deferred · P1 | P0 sign-off and approval to start P1 |

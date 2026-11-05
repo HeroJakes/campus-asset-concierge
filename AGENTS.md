@@ -17,6 +17,12 @@
 - Use fictional data for the hackathon prototype. Keep credentials out of Git.
 - Follow the P0 stop line in the agreed plan. Ask before starting later roadmap work or deploying to the cloud.
 
+## Coding standards
+
+- Follow DRY (Don't Repeat Yourself). Before writing new logic, look for an existing helper, class, or pattern in the codebase and reuse it. Do not copy and paste the same logic into more than one place.
+- When the same logic is needed in two places, extract it into one shared function and call it from both.
+- When you must repeat a shape because two parts stay deliberately parallel (for example, two sibling modules), keep them consistent and say why in a short comment.
+
 ## Branches and pull requests
 
 - Before implementing a stage, create a feature branch from the latest `main`, or continue on the existing branch for that stage. Use a clear name like `feat/stage-1-1-reservations`.

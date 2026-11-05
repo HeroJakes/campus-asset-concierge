@@ -28,7 +28,9 @@ function showError(message) {
 }
 
 document.querySelectorAll("[data-post]").forEach((button) => {
-  button.addEventListener("click", () => send(button.dataset.post, null, button));
+  button.addEventListener("click", () =>
+    send(button.dataset.post, button.dataset.body ? JSON.parse(button.dataset.body) : null, button),
+  );
 });
 
 document.querySelectorAll("[data-unlock]").forEach((form) => {

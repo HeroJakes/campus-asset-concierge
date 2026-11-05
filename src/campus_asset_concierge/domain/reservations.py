@@ -87,6 +87,19 @@ def local_clock(state: dict) -> datetime:
     return state["starts_at"] + timedelta(minutes=state["elapsed_minutes"])
 
 
+def reassignment_applicable(
+    state: dict, reservation_id: str, original_asset_id: str, now: datetime,
+) -> bool:
+    reservation = state["reservations"].get(reservation_id)
+    return bool(
+        reservation
+        and reservation["status"] == "confirmed"
+        and reservation["asset_id"] == original_asset_id
+        and reservation_id not in state.get("pickup_access", {})
+        and reservation["pickup_at"] >= now
+    )
+
+
 def eligible_unit(
     state: dict, asset_id: str, category: str, pickup: datetime, due: datetime, now: datetime,
     require_hdmi: bool = False, require_built_in_speakers: bool = False,

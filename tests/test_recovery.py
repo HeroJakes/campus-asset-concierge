@@ -1,3 +1,5 @@
+import pytest
+
 from conftest import BORROWER_B, OPERATOR, STAFF
 
 
@@ -13,6 +15,36 @@ def test_recovery_escalates_when_spare_lacks_required_speakers(booking_app):
     assert body["substitution_proposals"] == []
     assert body["escalations"][0]["require_built_in_speakers"] is True
     assert body["escalations"][0]["owner"] == "equipment-staff"
+
+
+@pytest.mark.parametrize("speakers_required", [True, False])
+def test_new_booking_requirements_follow_the_full_recovery_rehearsal(booking_app, speakers_required):
+    client, _ = booking_app
+    offer = client.post("/reservation-offers", auth=BORROWER_B, json={
+        "category": "projector", "pickup_at": "2026-11-07T13:00", "duration_minutes": 60,
+        "require_hdmi": True, "require_built_in_speakers": speakers_required,
+    }).json()
+    booking = client.post(f"/reservation-offers/{offer['id']}/confirm", auth=BORROWER_B).json()
+    assert booking["asset_id"] == "projector-a"
+    advance(client)
+    seeded = client.get("/recovery", auth=STAFF).json()["substitution_proposals"][0]
+    assert client.post("/recovery/substitution-proposals/next-projector/approve", auth=STAFF,
+                       json={"proposal_id": seeded["id"]}).status_code == 200
+    advance(client, 1)
+    recovery = client.get("/recovery", auth=STAFF).json()
+    if speakers_required:
+        escalation = next(e for e in recovery["escalations"] if e["reservation_id"] == booking["id"])
+        assert escalation["require_built_in_speakers"] is True
+        assert escalation["owner"] == "equipment-staff"
+    else:
+        path = f"/recovery/substitution-proposals/{booking['id']}"
+        checked = client.post(f"{path}/recheck", auth=STAFF).json()["proposal"]
+        assert checked["substitute_asset_id"] == "projector-b"
+        applied = client.post(f"{path}/approve", auth=STAFF, json={"proposal_id": checked["id"]}).json()
+        assert applied["reservation"]["require_hdmi"] is True
+        assert applied["reservation"]["require_built_in_speakers"] is False
+        assert applied["reservation"]["asset_id"] == "projector-b"
+    assert client.get("/recovery", auth=STAFF).json()["overdue_loans"][0]["id"] == "active-projector"
 
 
 def advance(client, minutes=61):

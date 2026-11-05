@@ -7,6 +7,7 @@ from campus_asset_concierge.domain.reservations import (
     equipment_requirements,
     local_clock,
     malaysia_times,
+    reassignment_applicable,
 )
 from campus_asset_concierge.storage.local_state import LocalStateStore
 
@@ -41,11 +42,10 @@ class Reassignment:
 
             original_asset_id = proposal["original_asset_id"]
             substitute_asset_id = proposal["substitute_asset_id"]
+            now = local_clock(state)
             if (
-                reservation["status"] != "confirmed"
-                or reservation["asset_id"] != original_asset_id
+                not reassignment_applicable(state, reservation_id, original_asset_id, now)
                 or original_asset_id == substitute_asset_id
-                or reservation_id in state.get("pickup_access", {})
             ):
                 raise ReservationError(409, "This substitution proposal is no longer applicable.")
 
@@ -53,8 +53,7 @@ class Reassignment:
             if original_asset is None:
                 raise ReservationError(409, "The original asset for this proposal no longer exists.")
 
-            now = local_clock(state)
-            if reservation["pickup_at"] < now or not eligible_unit(
+            if not eligible_unit(
                 state,
                 substitute_asset_id,
                 reservation.get("category") or original_asset["category"],

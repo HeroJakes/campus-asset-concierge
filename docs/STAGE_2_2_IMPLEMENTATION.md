@@ -163,6 +163,8 @@ uv run --locked pytest
 
 Run against the local emulator and fictional data only. `uv sync --locked` restores the pinned environment when needed. Focused API, recovery, reassignment, tool, and locker-view tests cover the checks above; the full suite is the final regression check.
 
+Local verification on 2026-11-05: all 122 tests passed against the Firestore emulator, including both rehearsal outcomes and changed-stock approval/recheck races. Python compilation and Git whitespace checks passed. Independent standards and spec reviews found repeated applicability checks and a missing changed-stock race test; both were fixed. No static type checker is configured. Live Gemini chat and a visual browser rehearsal remain unverified.
+
 ## Completion and limits
 
 Finish when the acceptance checks pass, both existing reset scenarios still work, the new rehearsal demonstrates capability-based matching, and a teammate reviews the implementation PR.

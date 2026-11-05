@@ -8,6 +8,7 @@ from campus_asset_concierge.domain.reservations import (
     equipment_requirements,
     local_clock,
     malaysia_times,
+    reassignment_applicable,
 )
 from campus_asset_concierge.storage.local_state import LocalStateStore
 
@@ -84,17 +85,16 @@ class Recovery:
             loan = state["loans"].get(proposal["loan_id"])
             now = local_clock(state)
             if (
-                not reservation or reservation["status"] != "confirmed"
-                or reservation["asset_id"] != proposal["original_asset_id"]
+                not reassignment_applicable(state, reservation_id, proposal["original_asset_id"], now)
                 or reservation["asset_id"] not in state["assets"]
-                or reservation_id in state.get("pickup_access", {})
-                or reservation["pickup_at"] < now
                 or not loan or loan["status"] != "overdue"
                 or loan["asset_id"] != reservation["asset_id"]
                 or loan["due_at"] >= now
-                or (_next_booking(state, reservation["asset_id"], now) or (None,))[0] != reservation_id
             ):
                 raise ReservationError(409, "This substitution proposal is no longer applicable.")
+            next_booking = _next_booking(state, reservation["asset_id"], now)
+            if next_booking is None or next_booking[0] != reservation_id:
+                raise ReservationError(409, "This reservation is no longer the next booking at risk.")
 
             substitute = _find_substitute(state, now, reservation)
             if substitute != proposal["substitute_asset_id"]:

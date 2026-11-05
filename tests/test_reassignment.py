@@ -210,6 +210,8 @@ def test_recheck_rejects_stale_booking_without_writes(booking_app, change):
     store.change(stale)
     before = store.load()
     assert client.post(f"/recovery/substitution-proposals/{RES}/recheck", auth=STAFF).status_code == 409
+    if change != "returned_loan":
+        assert approve(client, proposal_id="proposal-next-projector").status_code == 409
     assert store.load() == before
 
 
@@ -242,3 +244,37 @@ def test_concurrent_recheck_cannot_replace_an_applied_proposal(booking_app):
     assert body["substitution_proposals"][0]["status"] == "applied"
     assert body["at_risk_reservations"] == []
     assert actions(store).count("substitution_applied") == 1
+
+
+def test_concurrent_replacement_never_applies_an_unreviewed_unit(booking_app):
+    client, store = booking_app
+    advance(client)
+
+    def change_stock(state):
+        state["assets"]["projector-b"]["condition"] = "hold"
+        state["assets"]["projector-c"] = {"category": "projector", "condition": "good"}
+
+    store.change(change_stock)
+    start = Barrier(2)
+
+    def recheck():
+        start.wait(timeout=5)
+        return client.post(f"/recovery/substitution-proposals/{RES}/recheck", auth=STAFF)
+
+    def apply_old():
+        start.wait(timeout=5)
+        return approve(client, proposal_id="proposal-next-projector")
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        check = pool.submit(recheck)
+        application = pool.submit(apply_old)
+        replacement = check.result(timeout=20)
+        assert replacement.status_code == 200
+        assert application.result(timeout=20).status_code == 409
+    body = client.get("/recovery", auth=STAFF).json()
+    proposal = body["substitution_proposals"][0]
+    assert proposal["substitute_asset_id"] == "projector-c"
+    assert proposal["status"] == "pending_staff_approval"
+    assert replacement.json()["reservation"]["asset_id"] == "projector-a"
+    assert not any(e["action"] == "substitution_applied" for e in body["audit_events"])
+    assert approve(client, proposal_id=proposal["id"]).status_code == 200

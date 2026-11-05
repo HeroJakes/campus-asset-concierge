@@ -133,6 +133,10 @@ See the [Stage 1.2 implementation doc](STAGE_1_2_IMPLEMENTATION.md) for the agre
 
 **Done when** · The team can reset and replay both overdue outcomes, show a verified return, and prepare the repository and pitch deck for submission.
 
+**Tasks**
+
+- Locker page UI polish. Owner: B (locker page owner). Do one coordinated visual pass on the shared locker page and `locker.css` after 1.4 lands, so the pickup, return, and at-risk screens look consistent for the demo. Keep it CSS-level; avoid markup or logic changes that collide with feature work.
+
 ### P0 stop line
 
 **Stop the hackathon build once all P0 acceptance checks pass.** The team must be able to:

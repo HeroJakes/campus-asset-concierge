@@ -47,8 +47,8 @@ After 1.0, all four leads can start with agreed local test data and connect thei
 | [1.4](#stage-14--recover-an-at-risk-booking) | Recover an at-risk booking | Done locally · PR #7 merged | 1.0, then 1.1 and 1.2 for integration |
 | [1.5](#stage-15--gemini-enterprise-access-check) | Gemini Enterprise access check | Blocked by licence delay. MCP connector built (PR #9); waiting on the licence to register it in Gemini Enterprise. | 1.1 inventory lookup, event app access, and Agent Runtime permissions |
 | [1.6](#stage-16--rehearsal-and-submission) | Rehearsal and submission | Planned | 1.1–1.4 and an outcome for 1.5 |
-| [2.1](#stage-21--approve-and-apply-a-reassignment) | Apply a reassignment | Done locally · review pending | P0 sign-off and approval to start P1 |
-| [2.2](#stage-22--expand-booking-choices) | Expand booking choices | Deferred · P1 | P0 sign-off and approval to start P1 |
+| [2.1](#stage-21--approve-and-apply-a-reassignment) | Apply a reassignment | Done locally · PR #10 merged | P0 sign-off and approval to start P1 |
+| [2.2](#stage-22--expand-booking-choices) | Expand booking choices | Plan written · richer matching only; implementation not started | P0 sign-off and approval to start P1 |
 | [2.3](#stage-23--run-automation-on-a-schedule) | Schedule overdue checks | Deferred · P1 | P0 sign-off and approval to start P1 |
 | [2.4](#stage-24--improve-staff-visibility) | Improve staff visibility | Deferred · P1 | P0 sign-off. Add outcomes as 2.1 and 2.3 land. |
 | [3.1](#stage-31--expand-campus-operations) | Expand campus operations | Deferred · P2 | P1 review and pilot agreement |
@@ -165,7 +165,7 @@ Start with one substitution proposal. Let authorized staff approve it and share 
 
 ### Stage 2.2 — Expand booking choices
 
-Start with richer substitute matching and agree on shared matching rules with 2.1. Then add bundles, split or alternate pickup locations, waitlists, and optional QR pickup.
+The agreed first scope is richer equipment matching for both new bookings and recovery substitutes, within one category and the existing single location. See the [Stage 2.2 implementation plan](STAGE_2_2_IMPLEMENTATION.md) for the HDMI and speaker requirements, staff recheck action, and acceptance checks. The [design context](../CONTEXT.md) records the interview decisions. Bundles, split or alternate pickup locations, waitlists, multiple booking choices, and optional QR pickup remain deferred.
 
 ### Stage 2.3 — Run automation on a schedule
 

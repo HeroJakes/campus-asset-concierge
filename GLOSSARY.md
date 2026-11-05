@@ -4,6 +4,13 @@ Campus Asset Concierge tracks shared equipment from reservation through return a
 
 ## Language
 
+**Equipment requirement**
+A borrower-specified capability that an asset unit must have for a reservation. The requirement also applies to any substitute for that reservation.
+_Avoid_: preference
+
+**Asset specification**
+A recorded capability of an asset unit, such as HDMI support or built-in speakers.
+
 **Asset unit**
 A single tracked piece of equipment, such as Projector A. A category such as projector can contain several asset units.
 

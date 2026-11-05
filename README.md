@@ -6,6 +6,8 @@ When shared equipment comes back late, the next borrower can lose their booking.
 
 The organizers reported a delay in Gemini Enterprise licences with no confirmed date. Cloud credit details are still pending. The lending features and locker page can be built locally while the in-app integration waits for access.
 
+**Planned next:** [Stage 2.2](docs/STAGE_2_2_IMPLEMENTATION.md) adds optional HDMI and built-in speaker requirements to projector bookings and recovery substitutes, plus a staff action to check substitutes again. The plan is written; these features are not implemented.
+
 Gemini Enterprise is the planned chat interface. Our prototype will have a separate virtual locker page for staff loading, one-time code entry, and pickup confirmation.
 
 See the [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the full roadmap, and [Target architecture](docs/ARCHITECTURE.md) for how this prototype connects to Gemini Enterprise.

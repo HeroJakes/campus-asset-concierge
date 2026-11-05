@@ -40,9 +40,9 @@ We keep our **FastAPI + Firestore** backend (Stages 1.1–1.3) and connect it to
 | Piece | Built where | Status |
 | --- | --- | --- |
 | Chat interface + borrower agent | Gemini Enterprise (no-code) | To build — needs the licence |
-| Maximizing overdue workflow | Gemini Enterprise (no-code) | To build — needs Stage 1.4 logic |
-| MCP connector (thin wrapper over the backend) | Our FastAPI, Python MCP SDK | New, small layer over existing code |
-| Backend logic and data | FastAPI + Firestore | Mostly built (Stages 1.1–1.3) |
+| Maximizing overdue workflow | Gemini Enterprise (no-code) | To build — local recovery logic is ready; needs the licence |
+| MCP connector (thin wrapper over the backend) | Our FastAPI, Python MCP SDK | Built locally (PR #9); hosted integration pending |
+| Backend logic and data | FastAPI + Firestore | Built locally through Stage 1.4 and Stage 2.1 (PR #10) |
 | Staff locker page | Our web UI (`/locker`) | Built |
 | Hosting | Cloud Run + Cloud Firestore | Google credits expected to cover it |
 | Staff email (optional) | Gmail 1P connector | Easy to add later |
@@ -53,8 +53,7 @@ The Gemini chat and the locker page read and write the **same Firestore**. A boo
 
 ## What is left to build
 
-- **Stage 1.4** (overdue recovery) — the logic the maximizing workflow shows off.
-- **MCP wrapper** — expose the existing backend functions as MCP tools. Reuse, not rewrite.
+- **Hosted identity and access** — bind MCP callers to trusted identities and roles. The local connector currently trusts borrower IDs supplied by callers.
 - **Deploy** the backend to Cloud Run and wire the MCP connector into Gemini Enterprise (the fiddly part is the connector auth: client ID, secret, redirect URL).
 - **Gemini Enterprise build** — the chat agent and the workflow. Blocked until the licence is distributed.
 

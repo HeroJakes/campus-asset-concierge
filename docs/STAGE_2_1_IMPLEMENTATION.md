@@ -1,5 +1,7 @@
 # Stage 2.1 — Approve and apply a reassignment
 
+**Status:** Done locally. PR #10 merged into `main`.
+
 ## Scope
 
 Stage 2.1 takes the verified substitution proposal created by Stage 1.4 and lets an equipment staff account apply it. The first version supports one proposal at a time and changes only the threatened future reservation. The overdue loan remains open and overdue for staff follow-up.

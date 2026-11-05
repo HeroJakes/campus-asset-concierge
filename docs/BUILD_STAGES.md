@@ -42,7 +42,7 @@ After 1.0, all four leads can start with agreed local test data and connect thei
 | [0.1](#stage-01--project-scaffold) | Project scaffold | Done | — |
 | [1.0](#stage-10--shared-project-foundation) | Shared project foundation | Done | 0.1 |
 | [1.1](#stage-11--find-and-reserve-equipment) | Find and reserve equipment | Done locally · PR #2 merged | 1.0 |
-| [1.2](#stage-12--load-and-collect-equipment) | Load and collect equipment | In progress · not reviewed yet | 1.0, then 1.1 for integration |
+| [1.2](#stage-12--load-and-collect-equipment) | Load and collect equipment | Done locally · PR #5 merged | 1.0, then 1.1 for integration |
 | [1.3](#stage-13--return-equipment) | Return equipment | Planned | 1.0, then 1.2 for integration |
 | [1.4](#stage-14--recover-an-at-risk-booking) | Recover an at-risk booking | Planned | 1.0, then 1.1 and 1.2 for integration |
 | [1.5](#stage-15--gemini-enterprise-access-check) | Gemini Enterprise access check | Blocked by licence delay | 1.1 inventory lookup, event app access, and Agent Runtime permissions |

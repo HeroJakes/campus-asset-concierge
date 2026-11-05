@@ -14,10 +14,18 @@ A confirmed booking for an asset unit and a time window. A reservation can exist
 An available asset unit, pickup location, and time window shown to a borrower for confirmation. The offer does not hold the unit. Availability is checked again when the borrower confirms.
 
 **One-time code**
-A code that lets one borrower unlock the locker compartment holding their reserved asset. It works once, from the pickup time until 30 minutes later.
+A code that lets one borrower unlock the locker compartment holding their reserved asset for pickup. It works once, from the pickup time until 30 minutes later.
+_Avoid_: pickup code
+
+**Return code**
+A one-time code that lets a borrower unlock a locker compartment to drop off an item they are returning. It works once, from the moment it is issued until 30 minutes later.
 
 **Loan**
-The record of an asset in a borrower's custody. It starts when pickup is confirmed and stays open until the return is verified and processed.
+The record of an asset in a borrower's custody. It starts when pickup is confirmed and stays open until the return check is done.
+
+**Return check**
+The staff inspection of a returned asset that closes its loan. A pass returns the unit to service; a fail places it on condition hold. A loan is awaiting its return check from when the borrower drops the item off until staff inspect it.
+_Avoid_: inspection, QA
 
 **Condition hold**
 The status of an asset that failed its return check. The returned loan is closed, and the asset stays unavailable pending staff follow-up.

@@ -43,7 +43,7 @@ class Pickups:
                 }
                 state["locker"]["compartments"][compartment] = "loaded"
                 reservation["status"] = "ready_for_pickup"
-                _audit(state, now, staff_id, "loaded", reservation_id)
+                _audit(state, now, staff_id, "loaded", reservation_id, reservation["asset_id"])
             return _view(state, reservation_id, reservation, now)
 
         return self.store.change(confirm_loading)
@@ -55,7 +55,7 @@ class Pickups:
             now = local_clock(state)
             if reservation["borrower_id"] != borrower_id:
                 # Keep this out of the try count so one borrower cannot block another's code.
-                _audit(state, now, borrower_id, "code_wrong_user", reservation_id)
+                _audit(state, now, borrower_id, "code_wrong_user", reservation_id, reservation["asset_id"])
                 return ReservationError(404, "Reservation not found.")
 
             access = state.get("pickup_access", {}).get(reservation_id)
@@ -72,12 +72,12 @@ class Pickups:
 
             if not compare_digest(access["code"].encode(), code.encode()):
                 access["failed_tries"] += 1
-                _audit(state, now, borrower_id, "code_wrong", reservation_id)
+                _audit(state, now, borrower_id, "code_wrong", reservation_id, reservation["asset_id"])
                 return ReservationError(403, "That code is not correct.")
 
             access["used_at"] = now
             state["locker"]["compartments"][access["compartment"]] = "unlocked"
-            _audit(state, now, borrower_id, "unlocked", reservation_id)
+            _audit(state, now, borrower_id, "unlocked", reservation_id, reservation["asset_id"])
             return _view(state, reservation_id, reservation, now)
 
         outcome = self.store.change(try_code)
@@ -116,7 +116,7 @@ class Pickups:
             reservation["status"] = "collected"
             access["collected_at"] = now
             state["locker"]["compartments"][access["compartment"]] = "empty"
-            _audit(state, now, borrower_id, "picked_up", reservation_id)
+            _audit(state, now, borrower_id, "picked_up", reservation_id, reservation["asset_id"])
             return _loan_view(loan_id, loan)
 
         return self.store.change(start_loan)
@@ -277,9 +277,17 @@ def _loan_view(loan_id: str, loan: dict) -> dict:
     }
 
 
-def _audit(state: dict, now: datetime, actor: str, action: str, reservation_id: str) -> None:
+def _audit(
+    state: dict, now: datetime, actor: str, action: str, reservation_id: str, asset_id: str
+) -> None:
     state.setdefault("audit_events", []).append(
-        {"at": now, "actor": actor, "action": action, "reservation_id": reservation_id}
+        {
+            "at": now,
+            "actor": actor,
+            "action": action,
+            "asset_id": asset_id,
+            "reservation_id": reservation_id,
+        }
     )
 
 

@@ -3,7 +3,7 @@
 {%- macro door(compartment, state, label) %}
 <div class="door door--{{ state }}">
   <span class="door-name">Compartment {{ compartment | upper }}</span>
-  <span class="door-state">{{ {"empty": "Empty", "loaded": "Loaded, locked", "unlocked": "Open"}[state] }}</span>
+  <span class="door-state">{{ {"empty": "Empty", "loaded": "Loaded, locked", "unlocked": "Open", "return_reserved": "Return, locked", "returned": "Returned, awaiting check"}.get(state, state) }}</span>
   {% if label %}<span class="door-label">{{ label }}</span>{% endif %}
 </div>
 {% endmacro -%}
@@ -60,7 +60,9 @@
       <div class="doors">
         {% for compartment, state in compartments | dictsort %}
           {% set held = reservations | selectattr("compartment", "equalto", compartment) | rejectattr("status", "equalto", "collected") | first %}
-          {{ door(compartment, state, (name(held.asset_id) ~ " for " ~ name(held.borrower_id)) if held else "") }}
+          {% set back = returns | selectattr("compartment", "equalto", compartment) | first %}
+          {% set who = held or back %}
+          {{ door(compartment, state, (name(who.asset_id) ~ " for " ~ name(who.borrower_id)) if who else "") }}
         {% endfor %}
       </div>
     </section>
@@ -110,6 +112,33 @@
       {% endif %}
     </section>
 
+    {% set to_check = returns | selectattr("step", "equalto", "awaiting_check") | list %}
+    {% if to_check %}
+    <section class="panel" aria-labelledby="returns-title">
+      <h2 id="returns-title">Returns to check</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Item</th><th>Borrower</th><th>Compartment</th><th><span class="sr-only">Action</span></th></tr>
+          </thead>
+          <tbody>
+            {% for item in to_check %}
+            <tr>
+              <td class="identity">{{ name(item.asset_id) }}</td>
+              <td>{{ name(item.borrower_id) }}</td>
+              <td>{{ item.compartment | upper }}</td>
+              <td class="action">
+                <button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/verify-return" data-body='{"result":"pass"}'>Pass</button>
+                <button class="button button--secondary" type="button" data-post="/assets/{{ item.asset_id }}/verify-return" data-body='{"result":"fail"}'>Fail</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endif %}
+
     <section class="panel" aria-labelledby="activity-title">
       <h2 id="activity-title">Activity</h2>
       {% if audit_events %}
@@ -123,13 +152,20 @@
             "picked_up": "confirmed pickup",
             "code_wrong": "entered a wrong code",
             "code_wrong_user": "tried a code for another borrower's booking",
+            "return_requested": "requested a return",
+            "return_unlocked": "unlocked the return compartment",
+            "returned_dropped": "dropped the item off",
+            "return_passed": "passed the return check",
+            "return_failed": "failed the return check",
+            "return_code_wrong": "entered a wrong return code",
+            "return_code_wrong_user": "tried a return code for another borrower's item",
             "overdue_marked": "marked a loan overdue",
             "reminder_queued": "queued a simulated reminder",
             "booking_at_risk": "flagged a booking as at risk",
             "substitute_proposed": "recorded a substitute proposal",
             "escalation_created": "created a staff-owned escalation",
           }.get(event.action, event.action) }}</span>
-          <span class="booking-id">{{ event.reservation_id[-8:] }}</span>
+          <span class="booking-id">{% if event.reservation_id %}{{ event.reservation_id[-8:] }}{% else %}{{ name(event.asset_id) }}{% endif %}</span>
         </li>
         {% endfor %}
       </ul>
@@ -220,6 +256,48 @@
       <p class="empty">You have no bookings. Reserve equipment first, and it appears here.</p>
     </section>
     {% endfor %}
+
+    {% if returns %}
+    <div class="title-row">
+      <div><h1>My returns</h1><p class="subtitle">Return an item you have on loan through the locker.</p></div>
+    </div>
+    {% for item in returns %}
+    <section class="panel return" aria-labelledby="return-{{ loop.index }}">
+      <div class="pickup-main">
+        <h2 id="return-{{ loop.index }}">{{ name(item.asset_id) }}</h2>
+        <p class="meta">On loan, due back by {{ hhmm(item.due_at) }}.</p>
+
+        {% if item.step == "can_return" %}
+          <p class="next">Ready to return this item? Reserve a locker compartment and get a one-time code.</p>
+          <button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/return-request">Return this item</button>
+        {% elif item.step == "enter_code" %}
+          <div class="code-block">
+            <p class="code-label">Your one-time return code</p>
+            <p class="code">{{ item.code }}</p>
+            <p class="meta">Simulated delivery: shown here because the prototype sends no messages. Works once, until {{ hhmm(item.code_closes_at) }}.</p>
+          </div>
+          <form class="code-form" data-unlock="/assets/{{ item.asset_id }}/return-unlock">
+            <div class="field">
+              <label for="return-code-{{ loop.index }}">Enter code at compartment {{ item.compartment | upper }}</label>
+              <input id="return-code-{{ loop.index }}" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="12" required>
+            </div>
+            <button class="button button--primary" type="submit">Unlock compartment</button>
+          </form>
+        {% elif item.step == "confirm_drop" %}
+          <p class="next">Compartment {{ item.compartment | upper }} is open. Place the item inside, then confirm the drop-off.</p>
+          <button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/return-drop">Confirm drop-off</button>
+        {% elif item.step == "awaiting_check" %}
+          <p class="next">Dropped off in compartment {{ item.compartment | upper }}. Waiting for staff to check it in.</p>
+        {% elif item.step == "code_blocked" %}
+          <p class="notice notice--error">This return code is blocked after too many wrong tries. Please speak to the loan desk staff.</p>
+        {% elif item.step == "code_expired" %}
+          <p class="next">That return code expired. You can request a new one.</p>
+          <button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/return-request">Request a new code</button>
+        {% endif %}
+      </div>
+    </section>
+    {% endfor %}
+    {% endif %}
     {% endif %}
   </main>
 </body>

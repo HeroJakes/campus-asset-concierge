@@ -159,6 +159,11 @@
             "return_failed": "failed the return check",
             "return_code_wrong": "entered a wrong return code",
             "return_code_wrong_user": "tried a return code for another borrower's item",
+            "overdue_marked": "marked a loan overdue",
+            "reminder_queued": "queued a simulated reminder",
+            "booking_at_risk": "flagged a booking as at risk",
+            "substitute_proposed": "recorded a substitute proposal",
+            "escalation_created": "created a staff-owned escalation",
           }.get(event.action, event.action) }}</span>
           <span class="booking-id">{% if event.reservation_id %}{{ event.reservation_id[-8:] }}{% else %}{{ name(event.asset_id) }}{% endif %}</span>
         </li>
@@ -166,6 +171,26 @@
       </ul>
       {% else %}
       <p class="empty">Nothing yet. Loading and pickup actions are recorded here.</p>
+      {% endif %}
+    </section>
+
+    <section class="panel" aria-labelledby="recovery-title">
+      <h2 id="recovery-title">Overdue recovery <span class="meta">Simulated actions</span></h2>
+      {% if recovery.overdue_loans or recovery.at_risk_reservations or recovery.escalations %}
+        {% for loan in recovery.overdue_loans %}
+        <p class="notice notice--error">{{ name(loan.asset_id) }} loan is overdue. The original loan remains open for staff follow-up.</p>
+        {% endfor %}
+        {% for reminder in recovery.reminders %}
+        <p class="next">Simulated reminder queued for {{ name(reminder.reservation_id) }}.</p>
+        {% endfor %}
+        {% for proposal in recovery.substitution_proposals %}
+        <p class="next"><strong>Verified substitute proposal:</strong> {{ name(proposal.substitute_asset_id) }} for {{ name(proposal.reservation_id) }}. Awaiting staff approval. The original booking remains confirmed.</p>
+        {% endfor %}
+        {% for escalation in recovery.escalations %}
+        <p class="notice notice--error"><strong>Staff-owned escalation:</strong> {{ name(escalation.reservation_id) }}. Owner: {{ name(escalation.owner) }}.</p>
+        {% endfor %}
+      {% else %}
+        <p class="empty">No overdue recovery actions yet. Advance the local test clock past a loan due time.</p>
       {% endif %}
     </section>
 

@@ -13,6 +13,9 @@ A confirmed booking for an asset unit and a time window. A reservation can exist
 **Reservation offer**
 An available asset unit, pickup location, and time window shown to a borrower for confirmation. The offer does not hold the unit. Availability is checked again when the borrower confirms.
 
+**One-time code**
+A code that lets one borrower unlock the locker compartment holding their reserved asset. It works once, from the pickup time until 30 minutes later.
+
 **Loan**
 The record of an asset in a borrower's custody. It starts when pickup is confirmed and stays open until the return is verified and processed.
 

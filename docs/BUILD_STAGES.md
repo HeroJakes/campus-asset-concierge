@@ -103,6 +103,8 @@ See the [Stage 1.1 implementation doc](STAGE_1_1_IMPLEMENTATION.md) for the agre
 
 ### Stage 1.2 — Load and collect equipment
 
+See the [Stage 1.2 implementation doc](STAGE_1_2_IMPLEMENTATION.md) for the agreed pickup rules and acceptance checks.
+
 **Depends on** · 1.0, then 1.1 for integration
 
 **Done when** · Staff confirm loading before access is issued. A valid one-time code unlocks the virtual locker, and separate pickup confirmation starts the loan. Wrong-user, expired, and replayed codes are rejected.

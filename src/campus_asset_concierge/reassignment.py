@@ -68,6 +68,8 @@ class Reassignment:
                     "applied_at": now,
                 }
             )
+            # The booking is resolved onto the substitute, so it is no longer at risk.
+            state.get("at_risk_reservations", {}).pop(reservation_id, None)
             event = _audit(
                 state,
                 now,

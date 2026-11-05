@@ -47,7 +47,7 @@ After 1.0, all four leads can start with agreed local test data and connect thei
 | [1.4](#stage-14--recover-an-at-risk-booking) | Recover an at-risk booking | Done locally · PR #7 merged | 1.0, then 1.1 and 1.2 for integration |
 | [1.5](#stage-15--gemini-enterprise-access-check) | Gemini Enterprise access check | Blocked by licence delay. MCP connector built (PR #9); waiting on the licence to register it in Gemini Enterprise. | 1.1 inventory lookup, event app access, and Agent Runtime permissions |
 | [1.6](#stage-16--rehearsal-and-submission) | Rehearsal and submission | Planned | 1.1–1.4 and an outcome for 1.5 |
-| [2.1](#stage-21--approve-and-apply-a-reassignment) | Apply a reassignment | Deferred · P1 | P0 sign-off and approval to start P1 |
+| [2.1](#stage-21--approve-and-apply-a-reassignment) | Apply a reassignment | Done locally · review pending | P0 sign-off and approval to start P1 |
 | [2.2](#stage-22--expand-booking-choices) | Expand booking choices | Deferred · P1 | P0 sign-off and approval to start P1 |
 | [2.3](#stage-23--run-automation-on-a-schedule) | Schedule overdue checks | Deferred · P1 | P0 sign-off and approval to start P1 |
 | [2.4](#stage-24--improve-staff-visibility) | Improve staff visibility | Deferred · P1 | P0 sign-off. Add outcomes as 2.1 and 2.3 land. |
@@ -158,6 +158,8 @@ Start only after P0 is accepted and the team approves more work.
 The four leads can start their features in parallel after sign-off.
 
 ### Stage 2.1 — Approve and apply a reassignment
+
+See the [Stage 2.1 implementation doc](STAGE_2_1_IMPLEMENTATION.md) for the approval contract, transaction rules, and acceptance checks.
 
 Start with one substitution proposal. Let authorized staff approve it and share the audit event with staff reporting. Recheck stock and policy before moving the booking in one transaction, then verify the result.
 

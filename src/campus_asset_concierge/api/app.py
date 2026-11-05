@@ -21,6 +21,7 @@ from campus_asset_concierge.domain.reservations import (
 )
 from campus_asset_concierge.domain.scenarios import BORROWER_A, BORROWER_B, TestScenario
 from campus_asset_concierge.pickups import Pickups
+from campus_asset_concierge.reassignment import Reassignment
 from campus_asset_concierge.recovery import Recovery
 from campus_asset_concierge.reservations import Reservations
 from campus_asset_concierge.returns import Returns
@@ -91,6 +92,7 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     pickups = Pickups(local_store)
     returns = Returns(local_store)
     recovery = Recovery(local_store)
+    reassignment = Reassignment(local_store)
     app = FastAPI(title="Campus Asset Concierge · Local Development")
     app.mount("/static", StaticFiles(directory=PACKAGE_DIR / "static"), name="static")
     templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
@@ -141,6 +143,11 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     def recovery_status(actor: Actor) -> dict:
         require_role(actor, Role.STAFF)
         return recovery.staff_page()
+
+    @app.post("/recovery/substitution-proposals/{reservation_id}/approve")
+    def approve_substitution(reservation_id: str, actor: Actor) -> dict:
+        require_role(actor, Role.STAFF)
+        return reassignment.approve(actor.username, reservation_id)
 
     @app.post("/reservations/{reservation_id}/unlock")
     def unlock_compartment(reservation_id: str, request: UnlockRequest, actor: Actor) -> dict:

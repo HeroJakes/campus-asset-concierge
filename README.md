@@ -8,7 +8,7 @@ The organizers reported a delay in Gemini Enterprise licences with no confirmed 
 
 Gemini Enterprise is the planned chat interface. Our prototype will have a separate virtual locker page for staff loading, one-time code entry, and pickup confirmation.
 
-See the [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the full roadmap.
+See the [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the full roadmap, and [Target architecture](docs/ARCHITECTURE.md) for how this prototype connects to Gemini Enterprise.
 
 ## Local setup
 

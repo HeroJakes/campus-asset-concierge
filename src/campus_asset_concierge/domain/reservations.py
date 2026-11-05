@@ -5,6 +5,8 @@ from typing import Annotated
 from pydantic import BaseModel, ConfigDict, Field
 
 MALAYSIA_TIME = timezone(timedelta(hours=8), "MYT")
+# A return code is usable from the moment it is issued until this long after.
+RETURN_CODE_WINDOW = timedelta(minutes=30)
 
 
 class EquipmentCategory(StrEnum):
@@ -68,7 +70,8 @@ def eligible_unit(
     for loan in state["loans"].values():
         if loan["asset_id"] != asset_id:
             continue
-        if loan["status"] == "overdue":
+        # A dropped-but-unchecked return holds the unit until staff verify it.
+        if loan["status"] in {"overdue", "awaiting_check"}:
             return False
         if loan["status"] == "active" and (loan["due_at"] < now or pickup < loan["due_at"]):
             return False
@@ -81,6 +84,13 @@ def eligible_unit(
             and pickup < access["due_at"]
         ):
             return False
+
+    # A return in progress (code issued, not yet verified) holds the unit entirely.
+    access = state.get("return_access", {}).get(asset_id)
+    if access is not None and access["checked_at"] is None and (
+        access["dropped_at"] is not None or now <= access["issued_at"] + RETURN_CODE_WINDOW
+    ):
+        return False
 
     return not any(
         booking["asset_id"] == asset_id

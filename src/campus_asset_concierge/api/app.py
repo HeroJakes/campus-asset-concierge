@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 from secrets import compare_digest
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -22,6 +22,7 @@ from campus_asset_concierge.domain.reservations import (
 from campus_asset_concierge.domain.scenarios import BORROWER_A, BORROWER_B, TestScenario
 from campus_asset_concierge.pickups import Pickups
 from campus_asset_concierge.reservations import Reservations
+from campus_asset_concierge.returns import Returns
 from campus_asset_concierge.storage.local_state import LocalStateStore
 
 PACKAGE_DIR = Path(__file__).resolve().parent.parent
@@ -79,10 +80,15 @@ class UnlockRequest(BaseModel):
     code: Annotated[str, Field(min_length=1, max_length=12)]
 
 
+class VerifyRequest(BaseModel):
+    result: Literal["pass", "fail"]
+
+
 def create_app(store: LocalStateStore | None = None) -> FastAPI:
     local_store = store if store is not None else LocalStateStore()
     reservations = Reservations(local_store)
     pickups = Pickups(local_store)
+    returns = Returns(local_store)
     app = FastAPI(title="Campus Asset Concierge · Local Development")
     app.mount("/static", StaticFiles(directory=PACKAGE_DIR / "static"), name="static")
     templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
@@ -139,6 +145,31 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
         require_role(actor, Role.BORROWER)
         return pickups.confirm(actor.username, reservation_id)
 
+    @app.post("/assets/{asset_id}/return-request")
+    def request_return(asset_id: str, actor: Actor) -> dict:
+        require_role(actor, Role.BORROWER)
+        return returns.request(actor.username, asset_id)
+
+    @app.post("/assets/{asset_id}/return-unlock")
+    def unlock_return(asset_id: str, request: UnlockRequest, actor: Actor) -> dict:
+        require_role(actor, Role.BORROWER)
+        return returns.unlock(actor.username, asset_id, request.code)
+
+    @app.post("/assets/{asset_id}/return-drop")
+    def drop_return(asset_id: str, actor: Actor) -> dict:
+        require_role(actor, Role.BORROWER)
+        return returns.drop(actor.username, asset_id)
+
+    @app.post("/assets/{asset_id}/verify-return")
+    def verify_return(asset_id: str, request: VerifyRequest, actor: Actor) -> dict:
+        require_role(actor, Role.STAFF)
+        return returns.verify(actor.username, asset_id, request.result)
+
+    @app.get("/returns")
+    def my_returns(actor: Actor) -> list[dict]:
+        require_role(actor, Role.BORROWER)
+        return returns.borrower_page(actor.username)
+
     @app.get("/locker", response_class=HTMLResponse)
     def locker_page(request: Request, actor: Actor) -> HTMLResponse:
         if actor.role == Role.OPERATOR:
@@ -147,11 +178,14 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
             "username": actor.username,
             "current_time": pickups.current_time(),
             "is_staff": actor.role == Role.STAFF,
+            "returns": [],
         }
         if actor.role == Role.STAFF:
             context |= pickups.staff_page()
+            context["returns"] = returns.staff_returns()
         else:
             context["pickups"] = pickups.borrower_page(actor.username)
+            context["returns"] = returns.borrower_page(actor.username)
         return templates.TemplateResponse(request, "locker.html", context)
 
     @app.post("/local-test/reset", status_code=204)

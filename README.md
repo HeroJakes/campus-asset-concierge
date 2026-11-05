@@ -2,13 +2,13 @@
 
 When shared equipment comes back late, the next borrower can lose their booking. Campus Asset Concierge aims to flag that conflict and help staff find an available substitute or escalate the case.
 
-**Current status** — Borrowers can find and confirm a reservation through the local API. Staff can load it into a virtual locker, and the borrower can unlock it with a one-time code and confirm pickup on the local locker page. The shared foundation provides sign-in, a local test clock, and two resettable scenarios. Returns and overdue recovery are planned.
+**Current status** — Borrowers can find and confirm a reservation through the local API. Staff can load it into a virtual locker, and the borrower can unlock it with a one-time code and confirm pickup on the local locker page. The borrower can also return an item through the locker, and staff verify its condition to close the loan. The shared foundation provides sign-in, a local test clock, and two resettable scenarios. Overdue recovery is planned.
 
 The organizers reported a delay in Gemini Enterprise licences with no confirmed date. Cloud credit details are still pending. The lending features and locker page can be built locally while the in-app integration waits for access.
 
 Gemini Enterprise is the planned chat interface. Our prototype will have a separate virtual locker page for staff loading, one-time code entry, and pickup confirmation.
 
-See the [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the full roadmap.
+See the [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the full roadmap, and [Target architecture](docs/ARCHITECTURE.md) for how this prototype connects to Gemini Enterprise.
 
 ## Local setup
 
@@ -54,7 +54,9 @@ Review the unit and Malaysia-time window. Use the returned ID in `POST /reservat
 
 To try pickup, book with `"pickup_at":"2026-11-07T10:30"` instead, then open the [locker page](http://127.0.0.1:8000/locker). Sign in as `equipment-staff` and select **Confirm loading**. In a private browser window, open the same page as `borrower-a` to see the code. Use `POST /local-test/clock/advance` with `{"minutes":30}` to reach the pickup time, refresh the page, enter the code, and confirm pickup.
 
-Run `uv run --locked pytest` in a shell with `FIRESTORE_EMULATOR_HOST` set to test sign-in, resets, booking, and pickup, including two borrowers competing for the last unit.
+To try a return, use `borrower-a`, who starts each reset with Projector A on loan. On the borrower locker page, select **Return this item** to get a return code and compartment, enter the code to unlock it, and confirm the drop-off. Then sign in as `equipment-staff` and select **Pass** or **Fail** under "Returns to check". A pass frees the unit; a fail puts it on hold.
+
+Run `uv run --locked pytest` in a shell with `FIRESTORE_EMULATOR_HOST` set to test sign-in, resets, booking, pickup, and return, including two borrowers competing for the last unit.
 
 GitHub Actions runs the same tests with the Firestore emulator on pull requests into `main`.
 

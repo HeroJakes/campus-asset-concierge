@@ -10,11 +10,13 @@ from campus_asset_concierge.domain.reservations import (
 )
 from campus_asset_concierge.pickups import Pickups
 from campus_asset_concierge.reservations import Reservations
+from campus_asset_concierge.returns import Returns
 
 
 def create_reservation_agent(reservations: Reservations, borrower_id: str, model: str) -> Agent:
     """Bind a server-authenticated borrower to this agent before running a chat."""
     pickups = Pickups(reservations.store)
+    returns = Returns(reservations.store)
 
     def find_equipment(
         category: str,
@@ -66,6 +68,13 @@ def create_reservation_agent(reservations: Reservations, borrower_id: str, model
         except ReservationError as error:
             return {"error": str(error)}
 
+    def check_return_status() -> dict:
+        """Show the signed-in borrower's open loans and return progress. Never returns a code."""
+        try:
+            return {"returns": returns.status(borrower_id)}
+        except ReservationError as error:
+            return {"error": str(error)}
+
     def booking_instructions(_: ReadonlyContext) -> str:
         now = reservations.current_time()
         reference = (
@@ -80,13 +89,14 @@ def create_reservation_agent(reservations: Reservations, borrower_id: str, model
             "asset, location, pickup time, and return time before asking for confirmation. "
             "Only call confirm_reservation after the borrower explicitly agrees to that offer. "
             "If availability changed, offer to check again and show any new offer for review. "
-            "Use check_pickup_status for questions about pickup. The borrower sees their code, "
-            "enters it, and confirms pickup on the locker page, not in this chat."
+            "Use check_pickup_status for questions about pickup and check_return_status for "
+            "questions about returning an item. The borrower sees their code, enters it, and "
+            "confirms pickup or drop-off on the locker page, not in this chat."
         )
 
     return Agent(
         name="campus_asset_concierge",
         model=model,
         instruction=booking_instructions,
-        tools=[find_equipment, confirm_reservation, check_pickup_status],
+        tools=[find_equipment, confirm_reservation, check_pickup_status, check_return_status],
     )

@@ -59,7 +59,7 @@ p { text-wrap: pretty; }
 .icon-button:hover { background: #eeebfa; }
 .refresh-button svg { transition: transform 220ms ease; }
 .refresh-button:hover svg { transform: rotate(40deg); }
-.locker-dashboard { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); grid-template-areas: 'loading returns' 'compartments recovery' 'bookings bookings' 'activity activity'; align-items: start; gap: 24px; }
+.locker-dashboard { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); grid-template-areas: 'loading returns' 'compartments recovery' 'bookings bookings' 'activity activity'; align-items: stretch; gap: 24px; }
 .loading-hero { grid-area: loading; }
 .returns-panel { grid-area: returns; }
 .compartment-panel { grid-area: compartments; }

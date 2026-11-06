@@ -46,6 +46,6 @@ In both scenarios, Borrower A's loan stays overdue and Borrower B's reservation 
 
 ## Foundation setup
 
-See the [README](../README.md#run-the-local-prototype) for local setup and API checks. The four feature leads can use the `spare_available` and `spare_unavailable` scenarios. Both start at 10:00 MYT. The active loan is due at 11:00 MYT, and the next pickup is at 12:00 MYT.
+See the [README](../README.md#run-it-locally) for local setup and the [local walkthrough](LOCAL_WALKTHROUGH.md) for reset scenarios and API checks. The four feature leads can use the `spare_available` and `spare_unavailable` scenarios. Both start at 10:00 MYT. The active loan is due at 11:00 MYT, and the next pickup is at 12:00 MYT.
 
 The foundation checks local credentials and protects clock and reset actions with the local operator role. Borrowers can read their own seeded reservations. The feature leads add and test the lending and recovery actions in their own stages.

@@ -33,8 +33,6 @@ We are a team of four. Each person led one feature end to end — its rules, scr
 - **Jordan** — equipment returns and staff condition checks.
 - **Yew Shan** — overdue recovery and substitute reassignment; coordinated the rehearsal and demo.
 
-Every stage ran on its own feature branch with a pull request and a teammate review — see [Build Stages](docs/BUILD_STAGES.md).
-
 ## Impact
 
 - **Target: resolve 80% of overdue-driven booking conflicts automatically.** The workflow hands staff a ready-to-approve substitute instead of a manual scramble, and escalates only the cases where no spare exists.

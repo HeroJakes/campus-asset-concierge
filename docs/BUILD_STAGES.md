@@ -45,7 +45,7 @@ After 1.0, all four leads can start with agreed local test data and connect thei
 | [1.2](#stage-12--load-and-collect-equipment) | Load and collect equipment | Done locally · PR #5 merged | 1.0, then 1.1 for integration |
 | [1.3](#stage-13--return-equipment) | Return equipment | Done locally · PR #6 merged | 1.0, then 1.2 for integration |
 | [1.4](#stage-14--recover-an-at-risk-booking) | Recover an at-risk booking | Done locally · PR #7 merged | 1.0, then 1.1 and 1.2 for integration |
-| [1.5](#stage-15--gemini-enterprise-access-check) | Gemini Enterprise access check | Blocked by licence delay. MCP connector built (PR #9) and container-ready (PR #13); waiting on the licence to register it in Gemini Enterprise. | 1.1 inventory lookup, event app access, and Agent Runtime permissions |
+| [1.5](#stage-15--gemini-enterprise-access-check) | Gemini Enterprise access check | Blocked by licence delay. MCP connector built (PR #9), container-ready (PR #13), with the Gemini build sheet and demo script ready (PR #14); waiting on the licence to register it in Gemini Enterprise. | 1.1 inventory lookup, event app access, and Agent Runtime permissions |
 | [1.6](#stage-16--rehearsal-and-submission) | Rehearsal and submission | Planned | 1.1–1.4 and an outcome for 1.5 |
 | [2.1](#stage-21--approve-and-apply-a-reassignment) | Apply a reassignment | Done locally · PR #10 merged | P0 sign-off and approval to start P1 |
 | [2.2](#stage-22--expand-booking-choices) | Expand booking choices | Done locally · richer matching only; PR #12 merged | P0 sign-off and approval to start P1 |
@@ -140,6 +140,7 @@ The [MCP readiness plan](MCP_CLOUD_RUN_IMPLEMENTATION.md) separates local prepar
 **Tasks**
 
 - Locker page UI polish. Owner: B (locker page owner). Do one coordinated visual pass on the shared locker page and `locker.css` after 1.4 lands, so the pickup, return, and at-risk screens look consistent for the demo. Keep it CSS-level; avoid markup or logic changes that collide with feature work.
+- Done: the staff Locker overview was refreshed and a staff Bookings workspace (`/locker/bookings`) added in PR #15.
 
 ### P0 stop line
 

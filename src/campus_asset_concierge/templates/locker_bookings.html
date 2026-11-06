@@ -29,7 +29,7 @@
         <label class="sr-only" for="booking-search">Search by item, borrower, requirements, or booking ID</label>
         <div class="search-field">{{ icon('search', 19) }}<input id="booking-search" name="q" type="search" value="{{ booking_query }}" placeholder="Search by item, borrower, or ID…"></div>
         <label class="sr-only" for="booking-status">Filter by status</label>
-        <select id="booking-status" name="status">{% for key, label in [('all', 'All statuses'), ('to_load', 'To load'), ('active', 'Active'), ('completed', 'Completed')] %}<option value="{{ key }}"{% if booking_filter == key %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+        <div class="booking-filter-control"><select id="booking-status" name="status">{% for key, label in [('all', 'All statuses'), ('to_load', 'To load'), ('active', 'Active'), ('completed', 'Completed')] %}<option value="{{ key }}"{% if booking_filter == key %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>{{ icon('chevron', 18) }}</div>
         <button class="button button--secondary" type="submit">Search / filter</button>
       </form>
     </div>

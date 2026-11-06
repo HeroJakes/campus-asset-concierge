@@ -105,7 +105,7 @@
     {% for proposal in recovery.substitution_proposals if proposal.status == 'applied' %}<p class="applied-summary">{{ icon('check', 18) }} <span><strong>Reassignment applied:</strong> {{ name(proposal.substitute_asset_id) }} for {{ name(proposal.reservation_id) }}. Approved by {{ name(proposal.approved_by) }}.</span></p>{% endfor %}
     {% if not pending and not recovery.escalations and not recovery.overdue_loans %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('check', 21) }}</span><div><strong>No bookings at risk</strong><p>Recovery actions will appear here.</p></div></div>{% endif %}
     {% if recovery.overdue_loans or recovery.reminders %}
-    <details class="recovery-details"><summary>Recovery details <span>{{ recovery.overdue_loans | length }} overdue · {{ recovery.reminders | length }} simulated reminder{{ 's' if recovery.reminders | length != 1 }}</span></summary>
+    <details class="recovery-details"><summary class="disclosure-summary"><span class="disclosure-icon">{{ icon('chevron', 20) }}</span>Recovery details <span class="summary-meta">{{ recovery.overdue_loans | length }} overdue · {{ recovery.reminders | length }} simulated reminder{{ 's' if recovery.reminders | length != 1 }}</span></summary>
       {% if recovery.overdue_loans %}<div class="overdue-note">{% for loan in recovery.overdue_loans %}<p>{{ name(loan.asset_id) }} loan is overdue. The original loan remains open for staff follow-up.</p>{% endfor %}</div>{% endif %}
       {% for reminder in recovery.reminders %}<p class="panel-meta">Simulated reminder queued for {{ name(reminder.reservation_id) }}. No message was sent.</p>{% endfor %}
     </details>
@@ -117,7 +117,7 @@
   <section class="panel activity-panel" id="activity" aria-labelledby="activity-title">
     <div class="panel-heading"><h2 id="activity-title"><span class="activity-symbol">{{ icon('activity') }}</span> Activity</h2><span class="panel-meta">Latest updates</span></div>
     {% if audit_events %}<ul class="staff-activity">{% for event in audit_events[:3] %}{{ activity_entry(event) }}{% endfor %}</ul>
-      {% if audit_events | length > 3 %}<details class="activity-history"><summary>View all activity <span>{{ audit_events | length }} events</span></summary><ul class="staff-activity">{% for event in audit_events[3:] %}{{ activity_entry(event) }}{% endfor %}</ul></details>{% endif %}
+      {% if audit_events | length > 3 %}<details class="activity-history"><summary class="disclosure-summary"><span class="disclosure-icon">{{ icon('chevron', 20) }}</span>View all activity <span class="summary-meta">{{ audit_events | length }} events</span></summary><ul class="staff-activity">{% for event in audit_events[3:] %}{{ activity_entry(event) }}{% endfor %}</ul></details>{% endif %}
     {% else %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('activity', 21) }}</span><div><strong>A fresh start</strong><p>Loading, pickups, and returns appear here.</p></div></div>{% endif %}
   </section>
 

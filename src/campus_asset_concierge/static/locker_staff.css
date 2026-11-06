@@ -133,7 +133,12 @@ p { text-wrap: pretty; }
 .event-asset { color: #756781; font-size: 11px; }
 .activity-history { margin-top: 16px; border-top: 1px solid var(--rule); padding-top: 10px; }
 summary { color: #6849bb; font-size: 12px; cursor: pointer; min-height: 40px; padding-block: 9px; }
-.activity-history summary span { float: right; color: var(--muted); font-size: 11px; }
+.disclosure-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; list-style: none; }
+.disclosure-summary::-webkit-details-marker { display: none; }
+.disclosure-icon { display: inline-flex; flex: none; color: var(--accent); transform: rotate(180deg); transition: transform 160ms ease; }
+.disclosure-icon svg { flex: none; }
+details[open] > .disclosure-summary .disclosure-icon { transform: rotate(270deg); }
+.disclosure-summary .summary-meta { margin-left: auto; color: var(--muted); font-size: 11px; }
 .activity-history .staff-activity { margin-top: 14px; max-height: 220px; overflow-y: auto; }
 .activity-panel > .staff-activity { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 .activity-panel > .staff-activity .activity-event { padding-bottom: 0; }
@@ -158,10 +163,6 @@ summary { color: #6849bb; font-size: 12px; cursor: pointer; min-height: 40px; pa
 .overdue-note { border-top: 1px solid var(--rule); padding-top: 12px; margin-top: 14px; font-size: 12px; color: #8a6350; }
 .overdue-note p + p { margin-top: 6px; }
 .recovery-details { margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 6px; }
-.recovery-details summary { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; align-items: center; }
-.recovery-details summary::before { content: '▸'; }
-.recovery-details[open] summary::before { content: '▾'; }
-.recovery-details summary span { margin-left: auto; font-size: 11px; color: #77667d; }
 .recovery-details .panel-meta { margin-top: 10px; }
 .applied-summary { display: flex; gap: 8px; align-items: flex-start; color: #4c725f; font-size: 12px; }
 .applied-summary svg { flex: none; }

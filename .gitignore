@@ -9,6 +9,11 @@ dist/
 *.egg-info/
 .env
 .env.*
+# Never commit service-account / admin-SDK keys
+*firebase-adminsdk*.json
+*service-account*.json
+serviceAccount*.json
+*-credentials.json
 .adk/
 .firebase/
 firebase-debug.log*

@@ -91,7 +91,7 @@ def build_tools(store: LocalStateStore) -> list[Callable]:
     return [find_equipment, confirm_booking, check_pickup_status, check_return_status, run_overdue_recovery]
 
 
-def _allowed_values(name: str, default: str, *, origins: bool = False) -> list[str]:
+def _allowed_addresses(name: str, default: str, *, origins: bool = False) -> list[str]:
     values = [value.strip() for value in os.environ.get(name, default).split(",")]
     for value in values:
         try:
@@ -118,8 +118,8 @@ def create_mcp_server(store: LocalStateStore | None = None) -> FastMCP:
         "campus-asset-concierge", host="0.0.0.0", port=port, stateless_http=True,
         transport_security=TransportSecuritySettings(
             enable_dns_rebinding_protection=True,
-            allowed_hosts=_allowed_values("MCP_ALLOWED_HOSTS", "127.0.0.1:*,localhost:*"),
-            allowed_origins=_allowed_values(
+            allowed_hosts=_allowed_addresses("MCP_ALLOWED_HOSTS", "127.0.0.1:*,localhost:*"),
+            allowed_origins=_allowed_addresses(
                 "MCP_ALLOWED_ORIGINS", "http://127.0.0.1:*,http://localhost:*", origins=True,
             ),
         ),

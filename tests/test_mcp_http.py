@@ -1,5 +1,4 @@
 import asyncio
-import json
 import multiprocessing
 import os
 import sys
@@ -11,7 +10,6 @@ import time
 import httpx
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
-from mcp.client.streamable_http import streamable_http_client
 import pytest
 import uvicorn
 
@@ -20,7 +18,7 @@ from campus_asset_concierge.domain.scenarios import TestScenario as Scenario
 from campus_asset_concierge.domain.reservations import ReservationError
 from campus_asset_concierge.reservations import Reservations
 from campus_asset_concierge.storage.local_state import LocalStateStore
-from mcp_http_smoke import check
+from mcp_http_smoke import call, check, connected_session
 
 
 @contextmanager
@@ -55,33 +53,17 @@ def test_http_protocol_preserves_booking_and_rejects_untrusted_hosts(booking_app
         assert httpx.get(url.replace("/mcp", "/locker")).status_code == 404
 
         async def exercise():
-            async with streamable_http_client(url) as (read, write, session_id):
-                async with ClientSession(read, write) as session:
-                    await session.initialize()
-                    assert session_id() is None
-                    tools = await session.list_tools()
-                    assert {tool.name for tool in tools.tools} == {
-                        "find_equipment", "confirm_booking", "check_pickup_status",
-                        "check_return_status", "run_overdue_recovery",
-                    }
-                    result = await session.call_tool("find_equipment", {
-                        "borrower_id": "borrower-a", "category": "projector",
-                        "pickup_at": "2026-11-07T13:00", "duration_minutes": 60,
-                        "require_built_in_speakers": True,
-                    })
-                    assert not result.isError, result.content
-                    offer = json.loads(result.content[0].text)
-                    assert offer["asset_id"] == "projector-a"
-                    booking = await session.call_tool("confirm_booking", {
-                        "borrower_id": "borrower-a", "offer_id": offer["id"],
-                    })
-                    assert json.loads(booking.content[0].text)["require_built_in_speakers"] is True
-                    again = await session.call_tool("confirm_booking", {
-                        "borrower_id": "borrower-a", "offer_id": offer["id"],
-                    })
-                    assert json.loads(again.content[0].text) == json.loads(booking.content[0].text)
-                    status = await session.call_tool("check_pickup_status", {"borrower_id": "borrower-a"})
-                    assert all("code" not in item for item in json.loads(status.content[0].text)["pickups"])
+            async with connected_session(url) as session:
+                offer = await call(session, "find_equipment", {
+                    "borrower_id": "borrower-a", "category": "projector",
+                    "pickup_at": "2026-11-07T13:00", "duration_minutes": 60,
+                    "require_built_in_speakers": True,
+                })
+                assert offer["asset_id"] == "projector-a"
+                booking = await call(session, "confirm_booking", {
+                    "borrower_id": "borrower-a", "offer_id": offer["id"],
+                })
+                assert booking["require_built_in_speakers"] is True
 
         asyncio.run(exercise())
 
@@ -107,11 +89,9 @@ def test_http_startup_does_not_create_missing_demo_state(local_app, monkeypatch)
     _, store = local_app
 
     async def exercise(url):
-        async with streamable_http_client(url) as (read, write, _):
-            async with ClientSession(read, write) as session:
-                await session.initialize()
-                result = await session.call_tool("run_overdue_recovery", {})
-                assert "Load a local test scenario first" in json.loads(result.content[0].text)["error"]
+        async with connected_session(url) as session:
+            result = await call(session, "run_overdue_recovery", {})
+            assert "Load a local test scenario first" in result["error"]
 
     with running_server(store, monkeypatch) as url:
         asyncio.run(exercise(url))

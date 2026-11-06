@@ -1,6 +1,6 @@
 # MCP connector — Cloud Run readiness plan
 
-**Status:** Items 1, 3, and 4 are implemented locally; review and final validation are in progress. Items 2 and 5 remain **on hold**. See the [local container guide](MCP_LOCAL_CONTAINER.md) for tested commands.
+**Status:** Items 1, 3, and 4 are implemented and validated locally, awaiting user review. Items 2 and 5 remain **on hold**. See the [local container guide](MCP_LOCAL_CONTAINER.md) for tested commands.
 
 ## Database and container-host decisions (block items 2 and 5)
 
@@ -135,6 +135,8 @@ After approval: enable required APIs, create or verify the dedicated database an
 Test missing data and missing Firestore permissions as explicit failures. Reseeding is never a recovery action for a permission error. Record cleanup steps and how to remove service access and demo resources after the event.
 
 ## Acceptance and remaining limits
+
+Local verification on 2026-11-06: all 142 pytest tests passed, including stdio, MCP HTTP, both recovery scenarios, explicit seeding, and cross-process transaction contention. Python compilation, Git whitespace checks, and 22 local Markdown file links passed. The image built with locked runtime dependencies; container checks verified non-root execution, package assets, no startup seed, both recovery outcomes, and data surviving restart and image replacement. Standards review found repeated test assertions and an unclear parser name; both were corrected. Spec review found no missing requirements or scope creep. No static type checker is configured.
 
 Local readiness is complete when the container and protocol tests pass, existing tests remain green, seeding is explicit and repeat-safe, defaults cannot write to cloud by accident, and deployment instructions list all remaining target values and prerequisites.
 

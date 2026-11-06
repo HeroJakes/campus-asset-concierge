@@ -20,8 +20,17 @@ npx -y firebase-tools@latest deploy --only firestore:rules --project campus-asse
 npx -y firebase-tools@latest deploy --only firestore:rules --project campus-asset-concierge --non-interactive
 ```
 
+## Connecting the backend
+
+`LocalStateStore` now uses the **emulator** when `FIRESTORE_EMULATOR_HOST` is set (local dev, tests, CI) and **hosted Firestore** when it is not. For hosted mode, set:
+
+- `GOOGLE_CLOUD_PROJECT=campus-asset-concierge`
+- `GOOGLE_APPLICATION_CREDENTIALS=<path to the service-account key JSON>` — kept out of Git, set as a host secret.
+
+Do **not** set these for local tests or `reset` commands; those stay on the emulator so they never touch the hosted database. The hosted database still needs a deliberate one-time seed of fictional data.
+
 ## What still needs work
 
-`LocalStateStore` currently requires a loopback emulator and anonymous credentials. Connecting the backend needs explicit cloud configuration, Google credentials outside Git, and a deliberate seed of fictional data. Do not point local tests or reset commands at the hosted database.
+Backend hosting (Render or similar), the one-time hosted seed, and the Gemini integration are still pending.
 
 Firebase Authentication, web app registration, Storage, and backend hosting are not set up. The Python backend does not need a Firebase browser SDK configuration. Cloud Run requires billing and is outside this free-plan setup. See [Firebase pricing plans](https://firebase.google.com/docs/projects/billing/firebase-pricing-plans).

@@ -41,7 +41,7 @@ We keep our **FastAPI + Firestore** backend (Stages 1.1–1.3) and connect it to
 | --- | --- | --- |
 | Chat interface + borrower agent | Gemini Enterprise (no-code) | To build — needs the licence |
 | Maximizing overdue workflow | Gemini Enterprise (no-code) | To build — local recovery logic is ready; needs the licence |
-| MCP connector (thin wrapper over the backend) | Our FastAPI, Python MCP SDK | Built locally (PR #9); hosted integration pending |
+| MCP connector (thin wrapper over the backend) | Our FastAPI, Python MCP SDK | Built locally with stdio, HTTP, seeding, and a container; hosted integration pending |
 | Backend logic and data | FastAPI + Firestore | Built locally through Stage 1.4 and Stage 2.1 (PR #10) |
 | Staff locker page | Our web UI (`/locker`) | Built |
 | Hosting | Cloud Run + Cloud Firestore | Google credits expected to cover it |

@@ -125,7 +125,7 @@ See the [Stage 1.4 implementation doc](STAGE_1_4_IMPLEMENTATION.md) for the reco
 
 ### Stage 1.5 — Gemini Enterprise access check
 
-Cloud Run preparation can proceed independently of licence access once the [MCP readiness plan](MCP_CLOUD_RUN_IMPLEMENTATION.md) is approved. The plan is proposed; implementation and cloud validation have not started. This preparation does not complete the Gemini Enterprise access check.
+The [MCP readiness plan](MCP_CLOUD_RUN_IMPLEMENTATION.md) separates local preparation from hosted work. HTTP transport, safe seeding, and the container work locally; see the [local container guide](MCP_LOCAL_CONTAINER.md). Cloud persistence and service configuration remain on hold pending separate database and container-host decisions. No cloud validation has started, and this preparation does not complete the Gemini Enterprise access check.
 
 **Depends on** · 1.1 inventory lookup, event app access, and Agent Runtime permissions.
 

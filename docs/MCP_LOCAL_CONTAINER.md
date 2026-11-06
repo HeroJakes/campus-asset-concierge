@@ -81,4 +81,15 @@ docker rm -f campus-mcp-emulator
 
 These commands remove only the named demo containers and their in-memory demo data. Keep the image for another local rehearsal.
 
+## Validation
+
+Verified end to end on 2026-11-06:
+
+- Docker build and shared-emulator networking.
+- Safe seeding and overwrite refusal.
+- Both recovery scenarios through HTTP.
+- Booking, confirmation, status, and repeated (idempotent) actions.
+- Persistence after an MCP container restart.
+- Host/origin rejection and invalid-port startup failure.
+
 Cloud persistence, host selection, service authentication, and deployment remain on hold. See the [readiness plan](MCP_CLOUD_RUN_IMPLEMENTATION.md).

@@ -1,6 +1,6 @@
 # MCP connector — Cloud Run readiness plan
 
-**Status:** Items 1, 3, and 4 are implemented and validated locally, awaiting user review. Items 2 and 5 remain **on hold**. See the [local container guide](MCP_LOCAL_CONTAINER.md) for tested commands.
+**Status:** Items 1, 3, and 4 are implemented, container-validated end to end (2026-11-06), and merged to `main` (PR #13). Items 2 and 5 remain **on hold** pending the host decision below. See the [local container guide](MCP_LOCAL_CONTAINER.md) for tested commands.
 
 ## Database and container-host decisions (block items 2 and 5)
 

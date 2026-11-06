@@ -11,7 +11,7 @@ Key constraint: judges assess the Gemini app from **2026-11-11 to 11-14**, so wh
 Keep the current design. Move it off GCP.
 
 - Host the MCP connector on a **free, no-card platform** (for example a Render free web service or Hugging Face Spaces). Both give a public HTTPS URL, which the Gemini Enterprise 3P connector needs.
-- **Keep Cloud Firestore as the data store on the free Spark tier** (no card, no credits). Our backend already uses Firestore, so this is **zero code change**.
+- **Keep Cloud Firestore as the data store on the free Spark tier** (no card, no credits). Our backend already uses Firestore, so the lending rules and transactions can stay. The store still needs explicit cloud configuration and credentials; see [Firebase setup](FIREBASE_SETUP.md).
   - Supabase free tier is the organizer-approved fallback, but it is **Postgres**: moving to it means rewriting our transactional storage layer. Use it only if the Firestore free tier is somehow unavailable.
 
 **Upside:** reuses all our coded logic (reservations, overdue recovery, substitution) through the MCP connector **and** keeps the storage layer untouched. This is the work we already planned, just pointed at a free host instead of Cloud Run.

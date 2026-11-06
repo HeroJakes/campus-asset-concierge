@@ -2,9 +2,11 @@
 
 **Status:** Items 1, 3, and 4 are implemented, container-validated end to end (2026-11-06), and merged to `main` (PR #13). Items 2 and 5 remain **on hold** pending the host decision below. See the [local container guide](MCP_LOCAL_CONTAINER.md) for tested commands.
 
+**Firebase update (2026-11-06):** The user approved a new free Spark project and a Singapore Firestore database. See [Firebase setup](FIREBASE_SETUP.md). These resources are provisioned, but cloud client support, hosted seeding, and backend deployment remain pending. Firestore on Spark does not require a billing-enabled project; Cloud Run does.
+
 ## Database and container-host decisions (block items 2 and 5)
 
-The [backup plan](BACKUP_PLAN.md) keeps a non-GCP option open because GCP credits are uncertain. Items 2 (Firestore cloud mode) and 5 (Cloud Run service and IAM) commit us to GCP, so they wait until we know a billing-enabled GCP project is available. A Gemini Enterprise licence alone does not provide one.
+The [backup plan](BACKUP_PLAN.md) keeps a non-GCP container host open because GCP credits are uncertain. The database decision is now Firestore on Spark. Item 2 (Firestore cloud mode) is the next backend change. Item 5 (Cloud Run service and IAM) still needs a host decision and a billing-enabled project. A Gemini Enterprise licence alone does not provide one.
 
 Items 1, 3, and 4 (HTTP entry point, seeding, container) are needed on any host — Cloud Run, Render, or Hugging Face Spaces — so we build them now.
 

@@ -19,13 +19,28 @@ class LocalStateStore:
 
     def __init__(self, document_id: str = "current") -> None:
         emulator = os.environ.get("FIRESTORE_EMULATOR_HOST", "")
-        host, separator, port = emulator.partition(":")
-        if host not in {"127.0.0.1", "localhost"} or not separator or not port.isdecimal():
-            raise RuntimeError("Set FIRESTORE_EMULATOR_HOST to a local emulator address.")
-        self.client = firestore.Client(
-            project="demo-campus-asset-concierge",
-            credentials=AnonymousCredentials(),
-        )
+        if emulator:
+            host, separator, port = emulator.partition(":")
+            if host not in {"127.0.0.1", "localhost"} or not separator or not port.isdecimal():
+                raise RuntimeError(
+                    "FIRESTORE_EMULATOR_HOST must be a local address like 127.0.0.1:8080."
+                )
+            # Local emulator (dev, tests, CI): anonymous credentials, fixed demo project.
+            self.client = firestore.Client(
+                project="demo-campus-asset-concierge",
+                credentials=AnonymousCredentials(),
+            )
+        else:
+            # Hosted Firestore: project from GOOGLE_CLOUD_PROJECT, credentials from
+            # Application Default Credentials (GOOGLE_APPLICATION_CREDENTIALS key file).
+            project = os.environ.get("GOOGLE_CLOUD_PROJECT")
+            if not project:
+                raise RuntimeError(
+                    "Set FIRESTORE_EMULATOR_HOST for local development, or GOOGLE_CLOUD_PROJECT "
+                    "(with GOOGLE_APPLICATION_CREDENTIALS pointing at a service-account key) "
+                    "to use hosted Firestore."
+                )
+            self.client = firestore.Client(project=project)
         self.document = self.client.collection("demo").document(document_id)
 
     def reset(self, scenario: TestScenario) -> None:

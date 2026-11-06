@@ -126,11 +126,7 @@
           <p class="next">Ready to return this item? Reserve a locker compartment and get a one-time code.</p>
           <button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/return-request">Return this item</button>
         {% elif item.step == "enter_code" %}
-          <div class="code-block">
-            <p class="code-label">Your one-time return code</p>
-            <p class="code">{{ item.code }}</p>
-            <p class="meta">Simulated delivery: shown here because the prototype sends no messages. Works once, until {{ hhmm(item.code_closes_at) }}.</p>
-          </div>
+          <p class="next">Enter the one-time return code from your email to open compartment {{ item.compartment | upper }}.</p>
           <form class="code-form" data-unlock="/assets/{{ item.asset_id }}/return-unlock">
             <div class="field">
               <label for="return-code-{{ loop.index }}">Enter code at compartment {{ item.compartment | upper }}</label>

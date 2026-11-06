@@ -45,7 +45,7 @@ This is the `booking_instructions` text from `agent/reservations.py`, with the t
 
 ### Pickup code delivery (Gmail)
 
-When staff load an item, the borrower's one-time pickup code is emailed to them through the **Gmail 1P connector** — it is never returned to the chat agent. The borrower enters that code on the locker screen to open the compartment.
+When staff load an item, the borrower's one-time pickup code is emailed to them through the **Gmail 1P connector** — it is never returned to the chat agent. The borrower enters that code on the locker screen to open the compartment. The one-time **return** code is delivered the same way when the borrower requests a return.
 
 - **To:** the borrower's email.
 - **Subject:** `Your pickup code for {asset_name}`

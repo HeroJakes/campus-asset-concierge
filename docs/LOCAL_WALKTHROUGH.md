@@ -26,7 +26,7 @@ Book with `"pickup_at":"2026-11-07T10:30"` instead, then open the [locker page](
 
 ## Return
 
-Use `borrower-a`, who starts each reset with Projector A on loan. On the borrower locker page, select **Return this item** to get a return code and compartment, enter the code to unlock it, and confirm the drop-off. Then sign in as `equipment-staff` and select **Pass** or **Fail** under "Returns to check". A pass frees the unit; a fail puts it on hold.
+Use `borrower-a`, who starts each reset with Projector A on loan. On the borrower locker page, select **Return this item** to reserve a compartment. Like the pickup code, the one-time return code is emailed in production and is **not shown on the screen**; locally, read it from `GET /returns` signed in as `borrower-a`. Enter the code to unlock the compartment, confirm the drop-off, then sign in as `equipment-staff` and select **Pass** or **Fail** under "Returns to check". A pass frees the unit; a fail puts it on hold.
 
 ## Overdue recovery
 

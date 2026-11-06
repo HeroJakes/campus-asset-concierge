@@ -93,4 +93,4 @@ tests/        pytest and Node test suites
 
 ## Status and roadmap
 
-See [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the roadmap. Hosted deployment (Cloud Run, managed Firestore, Agent Runtime) is on hold pending the licence and the host decision; the [readiness plan](docs/MCP_CLOUD_RUN_IMPLEMENTATION.md) tracks it. No cloud deployment has started.
+See [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the roadmap. The Firebase Spark project and an empty Firestore database in Singapore are set up; see [Firebase setup](docs/FIREBASE_SETUP.md). The backend still uses the local emulator. Backend hosting and Gemini integration remain pending; the [readiness plan](docs/MCP_CLOUD_RUN_IMPLEMENTATION.md) tracks them.

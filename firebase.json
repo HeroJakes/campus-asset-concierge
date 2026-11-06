@@ -1,4 +1,9 @@
 {
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-southeast1",
+    "rules": "firestore.rules"
+  },
   "emulators": {
     "firestore": {
       "host": "127.0.0.1",

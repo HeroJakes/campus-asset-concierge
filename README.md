@@ -10,6 +10,8 @@ The organizers reported a delay in Gemini Enterprise licences with no confirmed 
 
 Gemini Enterprise is the planned chat interface. Our prototype will have a separate virtual locker page for staff loading, one-time code entry, and pickup confirmation.
 
+**MCP connector and Gemini build:** the same backend also runs as an MCP connector in a local HTTP container — see [Run the MCP container](docs/MCP_LOCAL_CONTAINER.md). The Gemini Enterprise chat agent and recovery workflow are specified in the [build sheet](docs/GEMINI_BUILD_SHEET.md), with a [demo script](docs/DEMO_SCRIPT.md). Both are ready to build when the licence arrives.
+
 See the [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the full roadmap, and [Target architecture](docs/ARCHITECTURE.md) for how this prototype connects to Gemini Enterprise.
 
 ## Local setup

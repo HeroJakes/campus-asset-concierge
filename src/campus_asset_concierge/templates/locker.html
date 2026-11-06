@@ -4,7 +4,7 @@
 {%- macro door(compartment, state, label) %}
 <div class="door door--{{ state }}">
   <span class="door-name">Compartment {{ compartment | upper }}</span>
-  <span class="door-state">{{ {"empty": "Empty", "loaded": "Loaded, locked", "unlocked": "Open", "return_reserved": "Return, locked", "returned": "Returned, awaiting check"}.get(state, state) }}</span>
+  <span class="door-state">{{ {"empty": "Empty", "loaded": "Loaded & locked", "unlocked": "Open", "return_reserved": "Return, locked", "returned": "Returned, awaiting check"}.get(state, state) }}</span>
   {% if label %}<span class="door-label">{{ label }}</span>{% endif %}
 </div>
 {% endmacro -%}

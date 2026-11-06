@@ -1,0 +1,18 @@
+<a class="skip-link" href="#main-content">Skip to locker content</a>
+<aside class="staff-sidebar" id="staff-sidebar" aria-label="Staff navigation">
+  <a class="staff-brand" href="/locker" aria-label="Campus Asset Concierge locker">
+    <span class="brand-symbol">{{ icon('cube', 34) }}</span>
+    <span class="sidebar-label">Campus Asset<br>Concierge</span>
+  </a>
+  <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-controls="staff-navigation" aria-expanded="true" aria-label="Collapse sidebar" title="Collapse sidebar">{{ icon('collapse', 19) }}</button>
+  <nav id="staff-navigation" aria-label="Locker sections">
+    {% for target, label, symbol in [('locker', 'Locker', 'home'), ('bookings', 'Bookings', 'calendar'), ('returns', 'Returns to check', 'cube'), ('activity', 'Activity', 'activity'), ('recovery', 'Overdue & recovery', 'alert')] %}
+    <a class="sidebar-link{% if target == 'locker' %} is-current{% endif %}" href="#{{ target }}" aria-label="{{ label }}" title="{{ label }}"{% if target == 'locker' %} aria-current="location"{% endif %}>{{ icon(symbol) }}<span class="sidebar-label">{{ label }}</span></a>
+    {% endfor %}
+  </nav>
+  <div class="sidebar-account" aria-label="Signed in as {{ name(username) }}">
+    <span class="account-avatar">{{ icon('user', 21) }}</span>
+    <div class="sidebar-label"><strong>Staff</strong><span>{{ name(username) }}</span></div>
+    <span class="account-indicator" title="Signed in"></span>
+  </div>
+</aside>

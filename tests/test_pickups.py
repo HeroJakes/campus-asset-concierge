@@ -460,6 +460,22 @@ def test_locker_page_needs_a_staff_or_borrower_sign_in(booking_app):
     assert client.get("/static/locker.js").status_code == 200
 
 
+def test_locker_overview_has_real_compartments_and_staff_only_navigation(booking_app):
+    client, _ = booking_app
+    staff_page = client.get("/locker", auth=STAFF).text
+    assert 'id="sidebar-toggle"' in staff_page
+    assert 'aria-controls="staff-navigation"' in staff_page
+    assert staff_page.count('data-compartment="') == 2
+    assert 'href="#bookings"' in staff_page
+    assert 'id="returns"' in staff_page
+    assert 'id="recovery"' in staff_page
+    assert 'data-dialog-error' not in staff_page  # No review actions exist in the fresh scenario.
+    assert "Nothing waiting for a check" in staff_page
+    assert "/static/locker_staff.css" in staff_page
+    assert "/static/locker_staff.css" not in client.get("/locker", auth=BORROWER_A).text
+    assert client.get("/static/locker_staff.css").status_code == 200
+
+
 def test_chat_tool_shows_status_without_the_code(booking_app):
     client, store = booking_app
     reservation_id, code = loaded_and_open(client)

@@ -18,9 +18,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/locker.css">
+  {% if is_staff %}<link rel="stylesheet" href="/static/locker_staff.css">{% endif %}
   <script src="/static/locker.js" defer></script>
 </head>
-<body>
+<body{% if is_staff %} class="staff-shell"{% endif %}>
+  {% from "locker_icons.html" import icon, equipment %}
+  {% if is_staff %}
+    {% include "locker_sidebar.html" %}
+  {% else %}
   <header class="bar">
     <div class="brand">
       <svg class="mark" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
@@ -36,171 +41,14 @@
       <a class="button button--quiet" href="/locker">Refresh</a>
     </div>
   </header>
+  {% endif %}
 
-  <main class="canvas">
+  <main class="canvas{% if is_staff %} staff-canvas{% endif %}" id="main-content">
     <noscript><p class="notice">The locker actions need JavaScript. You can still read this page.</p></noscript>
     <p class="notice notice--error" id="action-error" role="alert" hidden></p>
 
     {% if is_staff %}
-    {% set to_load = reservations | selectattr("step", "equalto", "waiting_for_loading") | rejectattr("load_blocker") | list %}
-    {% set waiting = reservations | selectattr("step", "equalto", "waiting_for_loading") | list %}
-    <div class="title-row">
-      <div>
-        <h1>Locker A</h1>
-        <p class="subtitle">
-          {% if to_load %}{{ name(to_load[0].asset_id) }} for {{ name(to_load[0].borrower_id) }} is next to load, for pickup at {{ hhmm(to_load[0].pickup_at) }}.
-          {% elif waiting %}{{ waiting | length }} waiting {{ "booking" if waiting | length == 1 else "bookings" }}, none ready to load yet.
-          {% else %}No bookings are waiting to be loaded.{% endif %}
-        </p>
-      </div>
-      <p class="clock">Test clock <strong>{{ hhmm(current_time) }}</strong> <span>{{ current_time[:10] }}</span></p>
-    </div>
-
-    <section class="panel" aria-labelledby="compartments-title">
-      <h2 id="compartments-title">Compartments</h2>
-      <div class="doors">
-        {% for compartment, state in compartments | dictsort %}
-          {% set held = reservations | selectattr("compartment", "equalto", compartment) | rejectattr("status", "equalto", "collected") | first %}
-          {% set back = returns | selectattr("compartment", "equalto", compartment) | first %}
-          {% set who = held or back %}
-          {{ door(compartment, state, (name(who.asset_id) ~ " for " ~ name(who.borrower_id)) if who else "") }}
-        {% endfor %}
-      </div>
-    </section>
-
-    <section class="panel" aria-labelledby="bookings-title">
-      <h2 id="bookings-title">Bookings</h2>
-      {% if reservations %}
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr><th>Item</th><th>Borrower</th><th>Pickup</th><th>Return</th><th>Compartment</th><th>Where it stands</th><th><span class="sr-only">Action</span></th></tr>
-          </thead>
-          <tbody>
-            {% for booking in reservations %}
-            <tr>
-              <td class="identity">{{ name(booking.asset_id) }}<br>{{ requirements(booking) }}</td>
-              <td>{{ name(booking.borrower_id) }}</td>
-              <td class="figure">{{ hhmm(booking.pickup_at) }}</td>
-              <td class="figure">{{ hhmm(booking.due_at) }}</td>
-              <td>{% if booking.compartment %}{{ booking.compartment | upper }}{% else %}<span class="dash">–</span>{% endif %}</td>
-              <td>{{ {
-                "waiting_for_loading": "Waiting to be loaded",
-                "pickup_missed": "Pickup window closed, not loaded",
-                "code_not_open": "Loaded, pickup not open yet",
-                "enter_code": "Loaded, waiting for borrower",
-                "code_blocked": "Code blocked after wrong tries",
-                "code_expired": "Code expired, not collected",
-                "confirm_pickup": "Open, waiting for pickup confirmation",
-                "collected": "Collected, loan started",
-              }[booking.step] }}</td>
-              <td class="action">
-                {% if booking.step == "waiting_for_loading" %}
-                  {% if booking.load_blocker %}
-                    <span class="blocker">{{ booking.load_blocker }}</span>
-                  {% else %}
-                    <button class="button {{ 'button--primary' if booking.id == to_load[0].id else 'button--secondary' }}" type="button" data-post="/reservations/{{ booking.id }}/load">Confirm loading</button>
-                  {% endif %}
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% else %}
-      <p class="empty">No bookings yet. New bookings appear here once a borrower confirms one.</p>
-      {% endif %}
-    </section>
-
-    {% set to_check = returns | selectattr("step", "equalto", "awaiting_check") | list %}
-    {% if to_check %}
-    <section class="panel" aria-labelledby="returns-title">
-      <h2 id="returns-title">Returns to check</h2>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr><th>Item</th><th>Borrower</th><th>Compartment</th><th><span class="sr-only">Action</span></th></tr>
-          </thead>
-          <tbody>
-            {% for item in to_check %}
-            <tr>
-              <td class="identity">{{ name(item.asset_id) }}</td>
-              <td>{{ name(item.borrower_id) }}</td>
-              <td>{{ item.compartment | upper }}</td>
-              <td class="action">
-                <button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/verify-return" data-body='{"result":"pass"}'>Pass</button>
-                <button class="button button--secondary" type="button" data-post="/assets/{{ item.asset_id }}/verify-return" data-body='{"result":"fail"}'>Fail</button>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </section>
-    {% endif %}
-
-    <section class="panel" aria-labelledby="activity-title">
-      <h2 id="activity-title">Activity</h2>
-      {% if audit_events %}
-      <ul class="activity">
-        {% for event in audit_events[:8] %}
-        <li>
-          <span class="figure time">{{ hhmm(event.at) }}</span>
-          <span>{{ name(event.actor) }} {{ {
-            "loaded": "confirmed loading",
-            "unlocked": "unlocked the compartment",
-            "picked_up": "confirmed pickup",
-            "code_wrong": "entered a wrong code",
-            "code_wrong_user": "tried a code for another borrower's booking",
-            "return_requested": "requested a return",
-            "return_unlocked": "unlocked the return compartment",
-            "returned_dropped": "dropped the item off",
-            "return_passed": "passed the return check",
-            "return_failed": "failed the return check",
-            "return_code_wrong": "entered a wrong return code",
-            "return_code_wrong_user": "tried a return code for another borrower's item",
-            "overdue_marked": "marked a loan overdue",
-            "reminder_queued": "queued a simulated reminder",
-            "booking_at_risk": "flagged a booking as at risk",
-            "substitute_proposed": "recorded a substitute proposal",
-            "substitution_applied": "approved and applied a substitute",
-            "substitute_rechecked": "checked substitutes again",
-            "escalation_created": "created a staff-owned escalation",
-          }.get(event.action, event.action) }}</span>
-          <span class="booking-id">{% if event.reservation_id %}{{ event.reservation_id[-8:] }}{% else %}{{ name(event.asset_id) }}{% endif %}</span>
-        </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p class="empty">Nothing yet. Loading and pickup actions are recorded here.</p>
-      {% endif %}
-    </section>
-
-    <section class="panel" aria-labelledby="recovery-title">
-      <h2 id="recovery-title">Overdue recovery <span class="meta">Simulated actions</span></h2>
-      {% if recovery.overdue_loans or recovery.at_risk_reservations or recovery.escalations %}
-        {% for loan in recovery.overdue_loans %}
-        <p class="notice notice--error">{{ name(loan.asset_id) }} loan is overdue. The original loan remains open for staff follow-up.</p>
-        {% endfor %}
-        {% for reminder in recovery.reminders %}
-        <p class="next">Simulated reminder queued for {{ name(reminder.reservation_id) }}.</p>
-        {% endfor %}
-        {% for proposal in recovery.substitution_proposals %}
-        {% if proposal.status == "applied" %}
-        <p class="next"><strong>Reassignment applied:</strong> {{ name(proposal.substitute_asset_id) }} is assigned to {{ name(proposal.reservation_id) }}. Approved by {{ name(proposal.approved_by) }}. {{ requirements(proposal) }}</p>
-        {% else %}
-        <p class="next"><strong>Verified substitute proposal:</strong> {{ name(proposal.substitute_asset_id) }} for {{ name(proposal.reservation_id) }}. {{ requirements(proposal) }} Awaiting staff approval. <button class="button button--primary" type="button" data-post="/recovery/substitution-proposals/{{ proposal.reservation_id }}/approve" data-body='{{ {"proposal_id": proposal.id} | tojson }}'>Approve and apply</button> <button class="button button--secondary" type="button" data-post="/recovery/substitution-proposals/{{ proposal.reservation_id }}/recheck">Check substitutes again</button> The original booking remains assigned to {{ name(proposal.original_asset_id) }} until approval.</p>
-        {% endif %}
-        {% endfor %}
-        {% for escalation in recovery.escalations %}
-        <p class="notice notice--error"><strong>Staff-owned escalation:</strong> {{ name(escalation.reservation_id) }}. Owner: {{ name(escalation.owner) }}. {{ requirements(escalation) }}</p>
-        {% endfor %}
-      {% else %}
-        <p class="empty">No overdue recovery actions yet. Advance the local test clock past a loan due time.</p>
-      {% endif %}
-    </section>
-
+      {% include "locker_staff.html" %}
     {% else %}
     {% set active = pickups | rejectattr("step", "equalto", "collected") | list %}
     <div class="title-row">

@@ -41,6 +41,8 @@ p { text-wrap: pretty; }
 .sidebar-collapsed .sidebar-label, .sidebar-collapsed .account-indicator { display: none; }
 .sidebar-collapsed .staff-brand { padding: 0; justify-content: center; }
 .sidebar-collapsed .sidebar-account { padding: 8px; border-color: transparent; }
+.sidebar-logout { margin-top: 8px; color: var(--muted); }
+.sidebar-logout:hover { color: var(--text); }
 .sidebar-collapsed .sidebar-link { padding-inline: 12px; justify-content: center; }
 .sidebar-collapsed .sidebar-toggle { align-self: center; }
 .staff-canvas { display: block; max-width: 1800px; margin-left: var(--sidebar-width); margin-right: 0; padding: 34px clamp(20px, 2.6vw, 42px) 44px; transition: margin-left 220ms ease; }

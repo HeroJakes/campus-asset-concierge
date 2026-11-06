@@ -22,7 +22,7 @@ For projectors, add `"require_hdmi":true` and/or `"require_built_in_speakers":tr
 
 ## Pickup
 
-Book with `"pickup_at":"2026-11-07T10:30"` instead, then open the [locker page](http://127.0.0.1:8000/locker). Sign in as `equipment-staff` and select **Confirm loading**. In a private browser window, open the same page as `borrower-a` to see the code. Use `POST /local-test/clock/advance` with `{"minutes":30}` to reach the pickup time, refresh the page, enter the code, and confirm pickup.
+Book with `"pickup_at":"2026-11-07T10:30"` instead, then open the [locker page](http://127.0.0.1:8000/locker). Sign in as `equipment-staff` and select **Confirm loading**. The borrower's one-time code is emailed in production and is **not shown on the locker screen**; locally, read it from `GET /pickups` signed in as `borrower-a`. In a private browser window, open the page as `borrower-a`, use `POST /local-test/clock/advance` with `{"minutes":30}` to reach the pickup time, enter the code, and confirm pickup.
 
 ## Return
 

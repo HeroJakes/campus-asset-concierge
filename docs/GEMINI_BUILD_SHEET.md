@@ -43,6 +43,16 @@ This is the `booking_instructions` text from `agent/reservations.py`, with the t
 
 **Identity note:** the MCP tools take `borrower_id` as their first argument. Mapping the trusted Gemini session identity to a `borrower_id` is Stage 1.5. Until then, a fixed fictional id (for example `borrower-a`) is passed for the demo.
 
+### Pickup code delivery (Gmail)
+
+When staff load an item, the borrower's one-time pickup code is emailed to them through the **Gmail 1P connector** — it is never returned to the chat agent. The borrower enters that code on the locker screen to open the compartment.
+
+- **To:** the borrower's email.
+- **Subject:** `Your pickup code for {asset_name}`
+- **Body:** the code, the compartment, and the valid-from time.
+
+Open item: the chat-safe `check_pickup_status` tool hides the code by design, so delivering it needs a **staff/workflow-scoped** code lookup (a small added MCP tool, or a step in the load action). Until that exists, read the code locally from the borrower's `/pickups` status (it would be emailed in production). See the student flow in [DEMO_SCRIPT.md](DEMO_SCRIPT.md).
+
 ## 3. Maximizing workflow
 
 **Name:** `overdue-recovery`

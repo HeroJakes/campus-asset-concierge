@@ -41,6 +41,7 @@
     <div class="session">
       <span>Signed in as {{ name(username) }}</span>
       <a class="button button--quiet" href="/locker">Refresh</a>
+      <a class="button button--quiet" href="/logout">Log out</a>
     </div>
   </header>
   {% endif %}
@@ -74,12 +75,8 @@
         {% if pickup.step == "waiting_for_loading" %}
           <p class="next">Staff haven't loaded this item yet. Your code appears here once they do.</p>
         {% elif pickup.step in ["code_not_open", "enter_code"] %}
-          <div class="code-block">
-            <p class="code-label">Your one-time code</p>
-            <p class="code">{{ pickup.code }}</p>
-            <p class="meta">Simulated delivery: shown here because the prototype sends no messages. Works once, {{ hhmm(pickup.pickup_at) }} to {{ hhmm(pickup.code_closes_at) }}.</p>
-          </div>
           {% if pickup.step == "enter_code" %}
+          <p class="next">Enter the one-time code from your email to open compartment {{ pickup.compartment | upper }}.</p>
           <form class="code-form" data-unlock="/reservations/{{ pickup.id }}/unlock">
             <div class="field">
               <label for="code-{{ loop.index }}">Enter code at the locker</label>
@@ -88,7 +85,7 @@
             <button class="button button--primary" type="submit">Unlock compartment</button>
           </form>
           {% else %}
-          <p class="next">The locker accepts this code from {{ hhmm(pickup.pickup_at) }}.</p>
+          <p class="next">Your one-time code was emailed to you. The locker accepts it from {{ hhmm(pickup.pickup_at) }}.</p>
           {% endif %}
         {% elif pickup.step == "confirm_pickup" %}
           <p class="next">Compartment {{ pickup.compartment | upper }} is open. Take the item, then confirm. Your loan starts when you do.</p>

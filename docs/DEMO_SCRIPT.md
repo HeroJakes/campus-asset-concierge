@@ -29,7 +29,11 @@ Shows natural-language booking with requirement matching.
 2. It offers **Projector B** and shows the asset, location (Campus Loan Desk), pickup 14:00, return 15:00, and **Requirements: HDMI**.
 3. The borrower agrees; the agent calls `confirm_booking`. The booking is confirmed with its requirement saved.
 
-Talking point: the borrower never sees locker codes in chat — pickup and drop-off happen on the locker page.
+### Pickup at the locker
+
+Staff load the item on the locker screen (staff view, **Confirm loading**). The moment it is loaded, the one-time pickup code is **emailed to the borrower through the Gmail connector** — it is never shown in chat. The borrower walks to the locker, enters the code on the locker's own screen (the borrower view *is* that screen, not a personal app), the compartment opens, and they tap **Confirm pickup**, which starts the loan.
+
+Talking point: three clean surfaces — **chat to book, email to get the code, the locker screen to collect**. The code is never shown on the locker screen. Locally there is no real inbox, so read the code from `GET /pickups` (the borrower's own status) to stand in for the email.
 
 ## Act 2 — Equipment runs late (maximizing workflow)
 

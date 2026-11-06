@@ -225,6 +225,20 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
             context["returns"] = returns.borrower_page(actor.username)
         return templates.TemplateResponse(request, "locker.html", context)
 
+    @app.get("/logout", response_class=HTMLResponse)
+    def logout() -> HTMLResponse:
+        # HTTP Basic has no real logout; a 401 makes the browser re-prompt so the
+        # demo can switch between the staff and borrower accounts.
+        body = (
+            "<!doctype html><meta charset=utf-8><title>Signed out</title>"
+            "<p style=\"font-family:system-ui;margin:2rem\">Signed out. "
+            "<a href=\"/locker\">Sign in to the locker</a> with another account.</p>"
+        )
+        return HTMLResponse(
+            body, status_code=401,
+            headers={"WWW-Authenticate": 'Basic realm="Campus Asset Concierge"'},
+        )
+
     @app.post("/local-test/reset", status_code=204)
     def reset(request: ResetRequest, actor: Actor) -> Response:
         require_role(actor, Role.OPERATOR)

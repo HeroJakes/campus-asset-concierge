@@ -125,6 +125,8 @@ See the [Stage 1.4 implementation doc](STAGE_1_4_IMPLEMENTATION.md) for the reco
 
 ### Stage 1.5 — Gemini Enterprise access check
 
+Cloud Run preparation can proceed independently of licence access once the [MCP readiness plan](MCP_CLOUD_RUN_IMPLEMENTATION.md) is approved. The plan is proposed; implementation and cloud validation have not started. This preparation does not complete the Gemini Enterprise access check.
+
 **Depends on** · 1.1 inventory lookup, event app access, and Agent Runtime permissions.
 
 **Done when** · A read-only tool works inside Gemini Enterprise before the rest of the chat flow is connected. If access is blocked, document the blocker and check whether local ADK is accepted for submission.

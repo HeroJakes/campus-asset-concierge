@@ -85,4 +85,6 @@ tests/        pytest test suite location
 
 ## Hosting later
 
+The [MCP Cloud Run readiness plan](docs/MCP_CLOUD_RUN_IMPLEMENTATION.md) is proposed for review. It covers HTTP transport, a container, explicit hosted Firestore access, demo seeding, and a private-service configuration. Implementation and cloud deployment have not started.
+
 Local development is the current target. The intended hosted setup is Cloud Run for FastAPI, Cloud Firestore for shared persistence, and Agent Runtime for the ADK agent registered in Gemini Enterprise. The hosted integration depends on the event account's permissions and quota.

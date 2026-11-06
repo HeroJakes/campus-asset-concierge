@@ -13,8 +13,8 @@ def advance_minutes(value: str) -> int:
         minutes = int(value)
     except ValueError as error:
         raise argparse.ArgumentTypeError("Use a whole number of minutes.") from error
-    if not 1 <= minutes <= 1440:
-        raise argparse.ArgumentTypeError("Advance minutes must be between 1 and 1440.")
+    if not 0 <= minutes <= 1440:
+        raise argparse.ArgumentTypeError("Advance minutes must be between 0 and 1440.")
     return minutes
 
 

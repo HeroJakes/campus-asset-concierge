@@ -103,14 +103,19 @@ def _allowed_addresses(name: str, default: str, *, origins: bool = False) -> lis
                     or parsed.port == 0):
                 raise ValueError
         except ValueError as error:
-            raise ValueError(f"{name} must contain explicit {'HTTP origins' if origins else 'hosts'}, not wildcards or paths.") from error
+            raise ValueError(f"{name} must contain explicit {'HTTP origins' if origins else 'hosts'} with valid ports, not wildcards or paths.") from error
     return values
 
 
-def create_mcp_server(store: LocalStateStore | None = None) -> FastMCP:
+def _resolve_transport() -> str:
     transport = os.environ.get("MCP_TRANSPORT", "stdio")
     if transport not in {"stdio", "streamable-http"}:
         raise ValueError("MCP_TRANSPORT must be stdio or streamable-http.")
+    return transport
+
+
+def create_mcp_server(store: LocalStateStore | None = None, *, transport: str | None = None) -> FastMCP:
+    transport = transport if transport is not None else _resolve_transport()
     port = int(os.environ.get("PORT", "8080")) if transport == "streamable-http" else 8080
     if not 1 <= port <= 65535:
         raise ValueError("PORT must be between 1 and 65535.")
@@ -130,8 +135,8 @@ def create_mcp_server(store: LocalStateStore | None = None) -> FastMCP:
 
 
 def main() -> None:
-    server = create_mcp_server()
-    server.run(transport=os.environ.get("MCP_TRANSPORT", "stdio"))
+    transport = _resolve_transport()
+    create_mcp_server(transport=transport).run(transport=transport)
 
 
 if __name__ == "__main__":

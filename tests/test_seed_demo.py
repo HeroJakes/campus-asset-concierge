@@ -22,7 +22,7 @@ def test_seed_refuses_overwrite_unless_replace_is_explicit(local_app, capsys):
     assert "demo-campus-asset-concierge" in output
 
 
-@pytest.mark.parametrize("args", [[], ["invalid"], ["spare_available", "--advance-minutes", "0"],
+@pytest.mark.parametrize("args", [[], ["invalid"], ["spare_available", "--advance-minutes", "-1"],
                                   ["spare_available", "--advance-minutes", "1441"]])
 def test_seed_rejects_invalid_arguments_without_writes(local_app, args):
     _, store = local_app

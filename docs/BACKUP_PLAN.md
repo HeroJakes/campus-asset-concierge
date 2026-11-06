@@ -2,7 +2,7 @@
 
 This plan covers one case: the organizers give us the **Gemini Enterprise licence** but **no GCP credits or project**.
 
-In that case the mandatory tool (Gemini Enterprise) is covered. The only thing at risk is where our connector and its data live, because Cloud Run and Firestore both need a billing-enabled GCP project. So both backups below remove the GCP dependency.
+In that case the mandatory tool (Gemini Enterprise) is covered. The only real gap is **where our connector runs**: Cloud Run needs a billing-enabled GCP project. The database does not force the issue — **Cloud Firestore has a free tier (Firebase Spark plan) that needs no billing and no card**, so our existing storage layer can stay as it is. The backups below keep our code and only swap the host.
 
 Key constraint: judges assess the Gemini app from **2026-11-11 to 11-14**, so whatever hosts the connector must stay up on its own through that window.
 
@@ -10,12 +10,13 @@ Key constraint: judges assess the Gemini app from **2026-11-11 to 11-14**, so wh
 
 Keep the current design. Move it off GCP.
 
-- Host the MCP connector on a **free, no-card platform** (for example Hugging Face Spaces or a Render free web service). Both give a public HTTPS URL, which the Gemini Enterprise 3P connector needs.
-- Move the data store to **Supabase free tier**. The organizers approved Supabase, it is free, and it needs no card.
+- Host the MCP connector on a **free, no-card platform** (for example a Render free web service or Hugging Face Spaces). Both give a public HTTPS URL, which the Gemini Enterprise 3P connector needs.
+- **Keep Cloud Firestore as the data store on the free Spark tier** (no card, no credits). Our backend already uses Firestore, so this is **zero code change**.
+  - Supabase free tier is the organizer-approved fallback, but it is **Postgres**: moving to it means rewriting our transactional storage layer. Use it only if the Firestore free tier is somehow unavailable.
 
-**Upside:** reuses all our coded logic (reservations, overdue recovery, substitution) through the MCP connector. This is the work we already planned, just pointed at a free host instead of Cloud Run.
+**Upside:** reuses all our coded logic (reservations, overdue recovery, substitution) through the MCP connector **and** keeps the storage layer untouched. This is the work we already planned, just pointed at a free host instead of Cloud Run.
 
-**Risk:** free hosts sleep and cold-start (about 30 seconds). Keep the service warm during the live demo and rehearse it.
+**Risk — cold starts, not capacity.** Free hosts sleep after about 15 minutes idle and take about a minute to wake. Because judges assess **unattended from 2026-11-11 to 11-14**, a sleeping connector could time out on a judge's first call. Keep it warm across that window: either ping it every ~10 minutes (one service fits inside Render's 750 free instance-hours/month) or pay about $7 for an always-on instance for those few days and cancel after. Warm it manually before the live demo too. Capacity itself (bandwidth, number of services) is far more than this demo needs.
 
 ## Plan B — pure no-code, zero infrastructure (safety net)
 

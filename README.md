@@ -4,18 +4,18 @@ A Gemini Enterprise assistant that stops late equipment returns from costing the
 
 ## Problem
 
-Universities lend shared equipment — projectors, Raspberry Pi kits, cameras. When an item comes back late, the next person who booked it loses their slot. Today staff usually notice the clash only when the borrower turns up, then scramble to find a spare or apologise by hand. Nothing spots the conflict early or offers a fix.
+Universities lend shared equipment — projectors, Raspberry Pi kits, cameras, and more. When an item comes back late, the next person who booked it loses their slot. Today staff usually notice the clash only when the borrower turns up, then scramble to find a spare or apologise by hand. Nothing spots the conflict early or offers a fix.
 
 ## Solution
 
-Campus Asset Concierge is built inside **Gemini Enterprise** (the hackathon's required platform), with no application code at its core:
+Campus Asset Concierge is built inside **Gemini Enterprise**, with no application code at its core:
 
 - **Borrower chat agent** — a student books in plain language ("a projector with HDMI, 2–3pm today"). The agent matches the requirements, offers a unit, and confirms the booking.
 - **Overdue-recovery workflow (the "maximizing" pattern)** — runs on a daily schedule. It finds loans that are overdue *and* threaten an upcoming booking, then either proposes a **verified substitute** or **escalates to staff by email**, each behind an approval step. Read a source, take action, keep a human in the loop, run 24/7 — exactly the pattern the judges asked for.
 - **Connectors** — our lending backend is exposed as an **MCP connector** (third-party) that the agent and workflow call; **Gmail** is the first-party connector used to draft recovery emails.
 - **Virtual locker page** — a small web page where staff load items and borrowers pick up and return them with a one-time code.
 
-All demo data is fictional.
+The same booking-and-recovery flow extends to other shared campus assets — rooms, lab kits, sports gear — by adding a category rather than rebuilding the agent.
 
 ## How we built it (and what we researched)
 
@@ -26,14 +26,14 @@ All demo data is fictional.
 
 ## Teamwork
 
-We are a team of `<N>` (`<fill in names>`). We split the work by surface and reviewed each other's pull requests before merging:
+We are a team of four. Each person led one feature end to end — its rules, screens or tools, tests, and demo evidence — and reviewed the others' pull requests before merging:
 
-- **`<Person A — leader>`**: architecture pivot, staff and borrower locker web UI, MCP connector hardening, and docs.
-- **`<Person B>`**: core lending rules — reservations, pickups, returns, and overdue recovery.
-- **`<Person C>`**: Gemini Enterprise agent and workflow build, and the connectors.
-- **`<Person D>`**: demo, video, and pitch deck.
+- **Ivan Lee (lead)** — find-and-reserve booking flow and richer requirement matching (HDMI, speakers); coordinated the Gemini Enterprise connector work.
+- **Bing Hang** — load-and-collect pickup flow and the virtual locker web page.
+- **Jordan** — equipment returns and staff condition checks.
+- **Yew Shan** — overdue recovery and substitute reassignment; coordinated the rehearsal and demo.
 
-> Fill in the real names and adjust the split before submitting. Every stage ran on a feature branch with a pull request and a teammate review — see [Build Stages](docs/BUILD_STAGES.md).
+Every stage ran on its own feature branch with a pull request and a teammate review — see [Build Stages](docs/BUILD_STAGES.md).
 
 ## Impact
 

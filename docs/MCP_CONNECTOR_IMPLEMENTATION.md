@@ -49,7 +49,7 @@ Stage 2.2 adds strict boolean projector requirements. True means required; false
 ## Running it
 
 - Local test with the MCP Inspector (stdio): `uv run python -m campus_asset_concierge.mcp_server`.
-- HTTP for Gemini (later): run FastMCP's HTTP transport on a port and host it (Cloud Run) when wiring Gemini. Hosting is out of scope for this stage.
+- Local HTTP: set `MCP_TRANSPORT=streamable-http` and follow the [container and seeding guide](MCP_LOCAL_CONTAINER.md). The server uses stateless HTTP at `/mcp` with host/origin checks. Hosting and trusted caller identity remain pending.
 - Add the official `mcp` package to `pyproject.toml` dependencies.
 
 ## Testing

@@ -1,14 +1,14 @@
 # MCP connector — Cloud Run readiness plan
 
-**Status:** Reviewed. Items 1, 3, and 4 are approved to build now because they are host-agnostic. Items 2 and 5 are **on hold** until we decide the connector's host (see the host decision below).
+**Status:** Items 1, 3, and 4 are implemented and validated locally, awaiting user review. Items 2 and 5 remain **on hold**. See the [local container guide](MCP_LOCAL_CONTAINER.md) for tested commands.
 
-## Host decision (blocks items 2 and 5)
+## Database and container-host decisions (block items 2 and 5)
 
 The [backup plan](BACKUP_PLAN.md) keeps a non-GCP option open because GCP credits are uncertain. Items 2 (Firestore cloud mode) and 5 (Cloud Run service and IAM) commit us to GCP, so they wait until we know a billing-enabled GCP project is available. A Gemini Enterprise licence alone does not provide one.
 
 Items 1, 3, and 4 (HTTP entry point, seeding, container) are needed on any host — Cloud Run, Render, or Hugging Face Spaces — so we build them now.
 
-Note: Supabase is not a drop-in for item 2. It is Postgres and does not share Firestore's `@firestore.transactional` path, so pointing "cloud mode" at it is a real change to the store's transaction model, not a config flag. Cloud mode therefore forks by host.
+Decide two separate things: the persistence backend (Firestore cloud or Supabase/Postgres) and the container host (Cloud Run or another HTTP host). Supabase answers the database question, not where the MCP container runs. It is not a drop-in for item 2: Postgres does not share Firestore's `@firestore.transactional` path, so replacing Firestore requires a separate persistence plan rather than a config flag.
 
 ## Goal and stop line
 
@@ -61,7 +61,7 @@ Reuse Firestore transactions for all changes. The Python lock covers one process
 
 Add `python -m campus_asset_concierge.seed_demo` with a required scenario argument: `spare_available` or `spare_unavailable`. Use the same store configuration and `starting_state()` fixtures as the app.
 
-Create an absent demo document atomically. If it already exists, refuse to overwrite it unless `--replace` is supplied. Use the existing transaction path for an explicit replacement. Display the project, database, document, and selected scenario before the write; do not print credentials or locker codes.
+Use Firestore's atomic `create()` to seed an absent demo document. If it already exists, refuse to overwrite it unless `--replace` is supplied. `change()` cannot create missing state. Explicit replacement uses the existing reset operation's atomic whole-document overwrite path, shared through `LocalStateStore.seed()`. Display the project, database, document, and selected scenario before the write; do not print credentials or locker codes.
 
 Never seed or reset on container startup. A restart or new revision must preserve reservations, audit events, and the demo clock. The seed command is an operator operation, not an MCP tool or public HTTP route.
 
@@ -92,12 +92,13 @@ Do not claim the manifest alone establishes IAM policy: document and verify the 
 | Area | Planned work |
 | --- | --- |
 | `mcp_server.py` | Transport, bind address, port, stateless HTTP, allowed hosts |
-| `storage/local_state.py` | Explicit emulator/cloud client selection and validated target |
+| `storage/local_state.py` — build now | Atomic seed creation/replacement; retryable conflicts when transaction attempts are exhausted |
+| `storage/local_state.py` — on hold | Explicit emulator/cloud client selection and validated target |
 | `seed_demo.py` (new) | Explicit create/replace seeding using existing fictional fixtures |
 | `Dockerfile`, `.dockerignore` (new) | Locked runtime container and clean build context |
-| `deploy/cloud-run.yaml` (new) | Private-service template and runtime settings |
-| Existing store callers | Keep constructors compatible; verify API, tools, and domain services share configuration |
-| `tests/conftest.py` | Force isolated emulator mode and test document IDs |
+| `deploy/cloud-run.yaml` — on hold | Private-service template and runtime settings |
+| Existing store callers — build now | Preserve constructors and existing emulator checks |
+| `tests/conftest.py` — on hold | Force isolated emulator mode when cloud mode is introduced |
 | Tests | Extend MCP tests; add focused configuration and seeding tests |
 | README and connector/architecture docs | Local commands, hosted prerequisites, security boundary, planned versus verified status |
 | Build stages | Track readiness as preparation under Stage 1.5; do not mark Gemini access complete |
@@ -110,7 +111,7 @@ No new runtime dependency is expected. Do not add an OAuth server, scheduler, re
 
 1. Add HTTP startup and MCP client tests (item 1). Initialize, list exactly five tools, find and confirm an offer, read status without codes, and process both recovery outcomes. Preserve stdio compatibility and strict Stage 2.2 inputs.
 2. Add create-only seeding and explicit replacement tests against the emulator (item 3). Cover both scenarios, invalid offsets, repeated create attempts, and preserving existing state when replacement is absent.
-3. Build the container locally (item 4). Use a Docker-networked emulator with the application still seeing an allowed loopback emulator address, or another documented setup that preserves the store's loopback-only check. Do not broaden emulator host validation just for Docker networking.
+3. Build the container locally (item 4). Share the emulator container's network namespace with `--network container:campus-mcp-emulator`. Firestore listens on port 8080 and MCP on 8081; publish both ports on the emulator container to host loopback only. Keep the store's loopback-only check untouched.
 4. Test through the container's HTTP endpoint with the MCP client. Use the configured hostname; check invalid hosts and malformed input. Verify configuration errors fail startup and repeated recovery/confirmation stay safe.
 5. Restart the container and confirm persisted data survives. Start two app processes against the emulator with competing last-unit confirmations to exercise transactions beyond the per-process lock.
 6. Run the full pytest suite, Python compilation, and documentation link checks. Review the Docker build context for secrets and local files. Do not mark container validation passed if Docker is unavailable or tests were skipped.
@@ -120,7 +121,7 @@ This milestone runs entirely on the local emulator and a local container. It nee
 
 ### On hold until the host decision (items 2, 5 — GCP-specific)
 
-8. Add explicit Firestore cloud mode and its configuration tests (item 2). Prove defaults remain local and conflicting/missing hosted settings fail. Test cloud client construction with a stub so normal CI makes no cloud calls. If the host is Supabase instead of GCP, replan this step for Postgres rather than extending the Firestore client.
+8. Add explicit Firestore cloud mode and its configuration tests (item 2). Prove defaults remain local and conflicting/missing hosted settings fail. Test cloud client construction with a stub so normal CI makes no cloud calls. If the persistence backend is Supabase, replan this step for Postgres rather than extending the Firestore client. Choose the container host separately.
 9. Add the Cloud Run service manifest and IAM instructions (item 5). Then proceed to the separately approved cloud validation below.
 
 No type checker is currently configured. Continue the existing checks rather than adding unrelated tooling.
@@ -134,6 +135,8 @@ After approval: enable required APIs, create or verify the dedicated database an
 Test missing data and missing Firestore permissions as explicit failures. Reseeding is never a recovery action for a permission error. Record cleanup steps and how to remove service access and demo resources after the event.
 
 ## Acceptance and remaining limits
+
+Local verification on 2026-11-06: all 142 pytest tests passed, including stdio, MCP HTTP, both recovery scenarios, explicit seeding, and cross-process transaction contention. Python compilation, Git whitespace checks, and 22 local Markdown file links passed. The image built with locked runtime dependencies; container checks verified non-root execution, package assets, no startup seed, both recovery outcomes, and data surviving restart and image replacement. Standards review found repeated test assertions and an unclear parser name; both were corrected. Spec review found no missing requirements or scope creep. No static type checker is configured.
 
 Local readiness is complete when the container and protocol tests pass, existing tests remain green, seeding is explicit and repeat-safe, defaults cannot write to cloud by accident, and deployment instructions list all remaining target values and prerequisites.
 

@@ -3,9 +3,11 @@ from collections.abc import Callable
 from threading import Lock
 
 from google.auth.credentials import AnonymousCredentials
+from google.api_core.exceptions import Aborted
 from google.cloud import firestore
 
 from campus_asset_concierge.domain.scenarios import TestScenario, starting_state
+from campus_asset_concierge.domain.reservations import ReservationError
 
 
 # shortcut: this lock covers one process, revisit emulator contention for multi-process runs.
@@ -27,8 +29,19 @@ class LocalStateStore:
         self.document = self.client.collection("demo").document(document_id)
 
     def reset(self, scenario: TestScenario) -> None:
+        self.seed(scenario, replace=True)
+
+    def seed(self, scenario: TestScenario, *, replace: bool = False, advance_minutes: int = 0) -> None:
+        """Create fictional state, replacing it only when explicitly requested."""
+        if not 0 <= advance_minutes <= 1440:
+            raise ValueError("Advance minutes must be between 0 and 1440.")
+        state = starting_state(scenario)
+        state["elapsed_minutes"] = advance_minutes
         with _local_write_lock:
-            self.document.set(starting_state(scenario))
+            if replace:
+                self.document.set(state)
+            else:
+                self.document.create(state)
 
     def load(self) -> dict | None:
         return self.document.get().to_dict()
@@ -47,4 +60,9 @@ class LocalStateStore:
             return result
 
         with _local_write_lock:
-            return update(self.client.transaction())
+            try:
+                return update(self.client.transaction())
+            except (Aborted, ValueError) as error:
+                if isinstance(error, Aborted) or isinstance(error.__cause__, Aborted):
+                    raise ReservationError(409, "State changed during this action. Please try again.") from error
+                raise

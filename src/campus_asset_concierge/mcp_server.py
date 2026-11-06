@@ -5,8 +5,11 @@ docs/MCP_CONNECTOR_IMPLEMENTATION.md.
 """
 
 from collections.abc import Callable
+import os
+from urllib.parse import urlsplit
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 from pydantic import StrictBool, ValidationError
 
 from campus_asset_concierge.domain.reservations import ReservationError, ReservationRequest
@@ -88,15 +91,52 @@ def build_tools(store: LocalStateStore) -> list[Callable]:
     return [find_equipment, confirm_booking, check_pickup_status, check_return_status, run_overdue_recovery]
 
 
-def create_mcp_server(store: LocalStateStore | None = None) -> FastMCP:
-    mcp = FastMCP("campus-asset-concierge")
+def _allowed_addresses(name: str, default: str, *, origins: bool = False) -> list[str]:
+    values = [value.strip() for value in os.environ.get(name, default).split(",")]
+    for value in values:
+        try:
+            address = value.removesuffix(":*") + (":1" if value.endswith(":*") else "")
+            parsed = urlsplit(address if origins else f"//{address}")
+            if (not parsed.hostname or "*" in address or parsed.username is not None
+                    or parsed.path or parsed.query or parsed.fragment
+                    or parsed.scheme not in ({"http", "https"} if origins else {""})
+                    or parsed.port == 0):
+                raise ValueError
+        except ValueError as error:
+            raise ValueError(f"{name} must contain explicit {'HTTP origins' if origins else 'hosts'} with valid ports, not wildcards or paths.") from error
+    return values
+
+
+def _resolve_transport() -> str:
+    transport = os.environ.get("MCP_TRANSPORT", "stdio")
+    if transport not in {"stdio", "streamable-http"}:
+        raise ValueError("MCP_TRANSPORT must be stdio or streamable-http.")
+    return transport
+
+
+def create_mcp_server(store: LocalStateStore | None = None, *, transport: str | None = None) -> FastMCP:
+    transport = transport if transport is not None else _resolve_transport()
+    port = int(os.environ.get("PORT", "8080")) if transport == "streamable-http" else 8080
+    if not 1 <= port <= 65535:
+        raise ValueError("PORT must be between 1 and 65535.")
+    mcp = FastMCP(
+        "campus-asset-concierge", host="0.0.0.0", port=port, stateless_http=True,
+        transport_security=TransportSecuritySettings(
+            enable_dns_rebinding_protection=True,
+            allowed_hosts=_allowed_addresses("MCP_ALLOWED_HOSTS", "127.0.0.1:*,localhost:*"),
+            allowed_origins=_allowed_addresses(
+                "MCP_ALLOWED_ORIGINS", "http://127.0.0.1:*,http://localhost:*", origins=True,
+            ),
+        ),
+    )
     for tool in build_tools(store if store is not None else LocalStateStore()):
         mcp.tool()(tool)
     return mcp
 
 
 def main() -> None:
-    create_mcp_server().run()
+    transport = _resolve_transport()
+    create_mcp_server(transport=transport).run(transport=transport)
 
 
 if __name__ == "__main__":

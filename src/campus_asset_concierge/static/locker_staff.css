@@ -16,6 +16,7 @@ p { text-wrap: pretty; }
 .button--primary:hover { background: linear-gradient(135deg, #6642dc, #4d2bbd); }
 .button--secondary { color: #5030b6; background: #eeebfc; }
 .button:disabled { box-shadow: none; }
+.button svg { flex: none; }
 .meta { font-size: 12px; line-height: 1.5; }
 .panel { padding: 24px; box-shadow: 0 4px 18px #30225e05, 0 1px 2px #30225e03; }
 .skip-link { position: fixed; top: 12px; left: 12px; z-index: 20; padding: 12px 18px; background: white; border-radius: 10px; transform: translateY(-180%); color: #5030b6; }
@@ -58,9 +59,13 @@ p { text-wrap: pretty; }
 .icon-button:hover { background: #eeebfa; }
 .refresh-button svg { transition: transform 220ms ease; }
 .refresh-button:hover svg { transform: rotate(40deg); }
-.locker-dashboard { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); align-items: start; gap: 24px; }
-.dashboard-primary, .dashboard-secondary { display: grid; gap: 24px; min-width: 0; }
-.locker-dashboard > .booking-summary { grid-column: 1 / -1; }
+.locker-dashboard { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); grid-template-areas: 'loading returns' 'compartments recovery' 'bookings bookings' 'activity activity'; align-items: start; gap: 24px; }
+.loading-hero { grid-area: loading; }
+.returns-panel { grid-area: returns; }
+.compartment-panel { grid-area: compartments; }
+.recovery-panel { grid-area: recovery; }
+.booking-summary { grid-area: bookings; }
+.activity-panel { grid-area: activity; }
 .locker-dashboard section { scroll-margin-top: 24px; animation: panel-enter 420ms both; }
 .locker-dashboard .compartment-panel { animation-delay: 50ms; }
 .locker-dashboard .activity-panel { animation-delay: 80ms; }
@@ -125,11 +130,14 @@ p { text-wrap: pretty; }
 .activity-event:not(:last-child)::after { position: absolute; content: ""; top: 15px; left: 2px; bottom: 3px; width: 1px; background: #eee8f5; }
 .activity-event--attention::before { background: #c77964; box-shadow: 0 0 0 3px #faeee8; }
 .event-time { color: #756884; }
-.event-asset { display: block; margin-top: 2px; color: #756781; font-size: 11px; }
+.event-asset { color: #756781; font-size: 11px; }
 .activity-history { margin-top: 16px; border-top: 1px solid var(--rule); padding-top: 10px; }
 summary { color: #6849bb; font-size: 12px; cursor: pointer; min-height: 40px; padding-block: 9px; }
 .activity-history summary span { float: right; color: var(--muted); font-size: 11px; }
-.activity-history .staff-activity { margin-top: 14px; }
+.activity-history .staff-activity { margin-top: 14px; max-height: 220px; overflow-y: auto; }
+.activity-panel > .staff-activity { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.activity-panel > .staff-activity .activity-event { padding-bottom: 0; }
+.activity-panel > .staff-activity .activity-event::after { display: none; }
 .panel-heading .activity-symbol svg { color: #8654df; }
 .panel-heading .recovery-symbol svg, .recovery-symbol { color: #ac711e; }
 .recovery-summary { border: 1px solid #f1e5d5; border-radius: 14px; background: linear-gradient(140deg, #fffcf7, #fcf7f1); padding: 16px; }
@@ -140,7 +148,7 @@ summary { color: #6849bb; font-size: 12px; cursor: pointer; min-height: 40px; pa
 .substitute-label { display: inline-block; padding: 1px 5px; background: #eee6fc; color: #6844b6; border-radius: 5px; font-size: 11px; }
 .recovery-booking { margin-top: 12px; font-size: 12px; color: #7e6c7b; }
 .recovery-requirements { margin-block: 8px; }
-.recovery-summary .button { width: 100%; justify-content: space-between; margin-top: 14px; font-size: 12px; }
+.recovery-summary .button { width: 100%; justify-content: space-between; margin-top: 14px; font-size: 12px; white-space: normal; text-align: left; }
 .recovery-summary + .recovery-summary { margin-top: 12px; }
 .escalation-summary { display: flex; align-items: flex-start; gap: 12px; padding: 15px; border: 1px solid #f0dfd4; border-radius: 13px; background: #fff9f4; }
 .escalation-summary > span { flex: none; }
@@ -149,8 +157,12 @@ summary { color: #6849bb; font-size: 12px; cursor: pointer; min-height: 40px; pa
 .escalation-summary + .escalation-summary { margin-top: 12px; }
 .overdue-note { border-top: 1px solid var(--rule); padding-top: 12px; margin-top: 14px; font-size: 12px; color: #8a6350; }
 .overdue-note p + p { margin-top: 6px; }
-.reminder-details { margin-top: 10px; }
-.reminder-details summary { font-size: 11px; color: #77667d; }
+.recovery-details { margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 6px; }
+.recovery-details summary { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; align-items: center; }
+.recovery-details summary::before { content: '▸'; }
+.recovery-details[open] summary::before { content: '▾'; }
+.recovery-details summary span { margin-left: auto; font-size: 11px; color: #77667d; }
+.recovery-details .panel-meta { margin-top: 10px; }
 .applied-summary { display: flex; gap: 8px; align-items: flex-start; color: #4c725f; font-size: 12px; }
 .applied-summary svg { flex: none; }
 .booking-summary table { min-width: 800px; font-size: 13px; }
@@ -158,10 +170,11 @@ summary { color: #6849bb; font-size: 12px; cursor: pointer; min-height: 40px; pa
 .booking-summary th:first-child { border-radius: 9px 0 0 9px; }
 .booking-summary th:last-child { border-radius: 0 9px 9px 0; }
 .booking-summary td { padding: 14px 12px; }
+.booking-summary th:last-child, .booking-summary td.action { width: 190px; min-width: 190px; text-align: left; }
 .booking-summary tr:first-child td { border-top: 0; }
 .booking-summary .button { font-size: 12px; min-height: 40px; padding: 8px 12px; }
 .booking-summary .meta { display: inline-block; max-width: 180px; white-space: normal; font-size: 11px; margin-top: 4px; }
-.booking-summary .blocker { max-width: 160px; display: inline-block; white-space: normal; font-size: 12px; }
+.booking-summary .blocker { display: block; min-width: 160px; white-space: normal; font-size: 12px; text-align: left; line-height: 1.5; }
 .review-dialog { width: min(500px, calc(100% - 32px)); padding: 30px; color: var(--text); border: 1px solid #e7dff5; border-radius: 22px; background: #fff; box-shadow: 0 24px 80px #24144536; }
 .review-dialog::backdrop { background: #1f163b66; backdrop-filter: blur(4px); }
 .review-dialog[open] { animation: panel-enter 200ms ease-out; }
@@ -180,7 +193,6 @@ summary { color: #6849bb; font-size: 12px; cursor: pointer; min-height: 40px; pa
   .sidebar-collapsed { --sidebar-width: 76px; }
   .staff-canvas { padding: 26px 22px; }
   .locker-dashboard { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; }
-  .dashboard-primary, .dashboard-secondary { gap: 18px; }
   .panel { padding: 18px; }
   .loading-hero { padding: 24px; }
   .hero-location { display: none; }
@@ -217,14 +229,14 @@ summary { color: #6849bb; font-size: 12px; cursor: pointer; min-height: 40px; pa
   .header-controls { justify-content: space-between; }
   .staff-clock { padding: 9px 14px; }
   .locker-dashboard { display: flex; flex-direction: column; gap: 18px; }
-  .dashboard-primary, .dashboard-secondary { display: contents; }
   .locker-dashboard section { width: 100%; scroll-margin-top: 90px; }
   .loading-hero { order: 0; padding: 24px; min-height: 220px; }
   .compartment-panel { order: 1; }
   .returns-panel { order: 2; }
-  .activity-panel { order: 3; }
-  .recovery-panel { order: 4; }
-  .booking-summary { order: 5; }
+  .recovery-panel { order: 3; }
+  .booking-summary { order: 4; }
+  .activity-panel { order: 5; }
+  .activity-panel > .staff-activity { grid-template-columns: 1fr; gap: 16px; }
   .panel { padding: 20px; }
   .loading-content h2 { font-size: 25px; }
   .loading-content { max-width: 90%; }
@@ -238,8 +250,7 @@ summary { color: #6849bb; font-size: 12px; cursor: pointer; min-height: 40px; pa
   .booking-summary tbody { display: table-row-group; }
   .booking-summary tr { display: table-row; }
   .booking-summary td { display: table-cell; width: auto; }
-  .booking-summary td:last-child { text-align: right; }
-  .booking-summary .action { width: 1%; }
+  .booking-summary td:last-child { text-align: left; }
   .booking-summary .action .button { width: auto; margin-top: 0; }
   .dialog-actions { flex-direction: column; }
 }

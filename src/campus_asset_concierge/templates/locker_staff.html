@@ -17,7 +17,7 @@
 {% macro activity_entry(event) -%}
 <li class="activity-event{% if 'wrong' in event.action or 'overdue' in event.action %} activity-event--attention{% endif %}">
   <time class="event-time" datetime="{{ event.at }}">{{ hhmm(event.at) }}</time>
-  <div><span>{{ name(event.actor) }} {{ action_labels.get(event.action, event.action | replace('_', ' ')) }}</span><span class="event-asset">{{ name(event.asset_id) }}</span></div>
+  <div><span>{{ name(event.actor) }} {{ action_labels.get(event.action, event.action | replace('_', ' ')) }}</span> <span class="event-asset">— {{ name(event.asset_id) }}</span></div>
 </li>
 {%- endmacro %}
 {% macro dialog_close() -%}
@@ -34,7 +34,6 @@
 </header>
 
 <div class="locker-dashboard">
-  <div class="dashboard-primary">
   <section class="loading-hero" aria-labelledby="next-to-load-title">
     <div class="loading-content">
       <p class="eyebrow" id="next-to-load-title">Next to load</p>
@@ -72,8 +71,6 @@
     <p class="section-footnote">{{ icon('cube', 14) }} Virtual locker · Status follows confirmed staff and borrower actions.</p>
   </section>
 
-  </div>
-  <div class="dashboard-secondary">
   <section class="panel returns-panel" id="returns" aria-labelledby="returns-title">
     <div class="panel-heading"><h2 id="returns-title">{{ icon('cube') }} Returns to check <span class="count-badge">{{ to_check | length }}</span></h2></div>
     {% for item in to_check %}
@@ -85,13 +82,6 @@
         <div class="dialog-actions"><button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/verify-return" data-body='{"result":"pass"}'>{{ icon('check', 18) }} Pass</button><button class="button button--secondary" type="button" data-post="/assets/{{ item.asset_id }}/verify-return" data-body='{"result":"fail"}'>Fail</button></div>
       </dialog>
     {% else %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('check', 21) }}</span><div><strong>Nothing waiting for a check</strong><p>Returned items will appear here.</p></div></div>{% endfor %}
-  </section>
-
-  <section class="panel activity-panel" id="activity" aria-labelledby="activity-title">
-    <div class="panel-heading"><h2 id="activity-title"><span class="activity-symbol">{{ icon('activity') }}</span> Activity</h2><span class="panel-meta">Latest updates</span></div>
-    {% if audit_events %}<ul class="staff-activity">{% for event in audit_events[:4] %}{{ activity_entry(event) }}{% endfor %}</ul>
-      {% if audit_events | length > 4 %}<details class="activity-history"><summary>View all activity <span>{{ audit_events | length }} events</span></summary><ul class="staff-activity">{% for event in audit_events[4:] %}{{ activity_entry(event) }}{% endfor %}</ul></details>{% endif %}
-    {% else %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('activity', 21) }}</span><div><strong>A fresh start</strong><p>Loading, pickups, and returns appear here.</p></div></div>{% endif %}
   </section>
 
   <section class="panel recovery-panel" id="recovery" aria-labelledby="recovery-title">
@@ -114,10 +104,21 @@
     {% for escalation in recovery.escalations %}<article class="escalation-summary"><span class="recovery-symbol">{{ icon('alert', 20) }}</span><div><h3>Staff-owned escalation</h3><p>No eligible substitute for {{ name(escalation.reservation_id) }}.</p><p class="panel-meta">Owner: {{ name(escalation.owner) }}</p><p>{{ requirements(escalation) }}</p></div></article>{% endfor %}
     {% for proposal in recovery.substitution_proposals if proposal.status == 'applied' %}<p class="applied-summary">{{ icon('check', 18) }} <span><strong>Reassignment applied:</strong> {{ name(proposal.substitute_asset_id) }} for {{ name(proposal.reservation_id) }}. Approved by {{ name(proposal.approved_by) }}.</span></p>{% endfor %}
     {% if not pending and not recovery.escalations and not recovery.overdue_loans %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('check', 21) }}</span><div><strong>No bookings at risk</strong><p>Recovery actions will appear here.</p></div></div>{% endif %}
-    {% if recovery.overdue_loans %}<div class="overdue-note">{% for loan in recovery.overdue_loans %}<p>{{ name(loan.asset_id) }} loan is overdue. The original loan remains open for staff follow-up.</p>{% endfor %}</div>{% endif %}
-    {% if recovery.reminders %}<details class="reminder-details"><summary>{{ recovery.reminders | length }} simulated reminder{{ 's' if recovery.reminders | length != 1 }} queued</summary>{% for reminder in recovery.reminders %}<p class="panel-meta">Simulated reminder queued for {{ name(reminder.reservation_id) }}. No message was sent.</p>{% endfor %}</details>{% endif %}
+    {% if recovery.overdue_loans or recovery.reminders %}
+    <details class="recovery-details"><summary>Recovery details <span>{{ recovery.overdue_loans | length }} overdue · {{ recovery.reminders | length }} simulated reminder{{ 's' if recovery.reminders | length != 1 }}</span></summary>
+      {% if recovery.overdue_loans %}<div class="overdue-note">{% for loan in recovery.overdue_loans %}<p>{{ name(loan.asset_id) }} loan is overdue. The original loan remains open for staff follow-up.</p>{% endfor %}</div>{% endif %}
+      {% for reminder in recovery.reminders %}<p class="panel-meta">Simulated reminder queued for {{ name(reminder.reservation_id) }}. No message was sent.</p>{% endfor %}
+    </details>
+    {% endif %}
   </section>
 
-  </div>
   {% include 'locker_bookings_summary.html' %}
+
+  <section class="panel activity-panel" id="activity" aria-labelledby="activity-title">
+    <div class="panel-heading"><h2 id="activity-title"><span class="activity-symbol">{{ icon('activity') }}</span> Activity</h2><span class="panel-meta">Latest updates</span></div>
+    {% if audit_events %}<ul class="staff-activity">{% for event in audit_events[:3] %}{{ activity_entry(event) }}{% endfor %}</ul>
+      {% if audit_events | length > 3 %}<details class="activity-history"><summary>View all activity <span>{{ audit_events | length }} events</span></summary><ul class="staff-activity">{% for event in audit_events[3:] %}{{ activity_entry(event) }}{% endfor %}</ul></details>{% endif %}
+    {% else %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('activity', 21) }}</span><div><strong>A fresh start</strong><p>Loading, pickups, and returns appear here.</p></div></div>{% endif %}
+  </section>
+
 </div>

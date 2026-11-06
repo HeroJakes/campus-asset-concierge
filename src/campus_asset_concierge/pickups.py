@@ -144,7 +144,10 @@ class Pickups:
             "compartments": state["locker"]["compartments"],
             "reservations": [
                 _view(state, reservation_id, reservation, now)
-                | {"load_blocker": _load_blocker(state, reservation_id, reservation, now)}
+                | {
+                    "load_blocker": _load_blocker(state, reservation_id, reservation, now),
+                    "loan_status": state["loans"].get(f"loan-{reservation_id}", {}).get("status"),
+                }
                 for reservation_id, reservation in _by_pickup_time(state)
             ],
             "audit_events": [

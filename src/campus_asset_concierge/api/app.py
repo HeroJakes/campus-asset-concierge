@@ -13,6 +13,7 @@ from fastapi.templating import Jinja2Templates
 from google.api_core.exceptions import NotFound
 from pydantic import BaseModel, Field
 
+from campus_asset_concierge.api.booking_view import booking_overview
 from campus_asset_concierge.domain.reservations import (
     ReservationError,
     ReservationRequest,
@@ -195,8 +196,15 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
         require_role(actor, Role.BORROWER)
         return returns.borrower_page(actor.username)
 
+    @app.get("/locker/bookings", response_class=HTMLResponse)
     @app.get("/locker", response_class=HTMLResponse)
-    def locker_page(request: Request, actor: Actor) -> HTMLResponse:
+    def locker_page(
+        request: Request, actor: Actor, q: str = "",
+        status: Literal["all", "to_load", "active", "completed"] = "all",
+    ) -> HTMLResponse:
+        bookings_page = request.url.path == "/locker/bookings"
+        if bookings_page:
+            require_role(actor, Role.STAFF)
         if actor.role == Role.OPERATOR:
             raise HTTPException(403, "Sign in as staff or a borrower to use the locker page.")
         context = {
@@ -204,11 +212,14 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
             "current_time": pickups.current_time(),
             "is_staff": actor.role == Role.STAFF,
             "returns": [],
+            "bookings_page": bookings_page,
         }
         if actor.role == Role.STAFF:
             context |= pickups.staff_page()
             context["returns"] = returns.staff_returns()
             context["recovery"] = recovery.staff_page()
+            if bookings_page:
+                context |= booking_overview(context["reservations"], q, status)
         else:
             context["pickups"] = pickups.borrower_page(actor.username)
             context["returns"] = returns.borrower_page(actor.username)

@@ -1,0 +1,30 @@
+{% macro icon(kind, size=22) -%}
+<svg width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+{% if kind == 'home' %}<path d="m3 10 9-7 9 7v10H15v-6H9v6H3Z"/>
+{% elif kind == 'calendar' %}<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4m8-4v4M4 11h16m-11 4h2"/>
+{% elif kind == 'activity' %}<path d="M2 12h5l3-8 4 16 3-8h5"/>
+{% elif kind == 'alert' %}<path d="m10 4-8 15a1 1 0 0 0 1 2h18a1 1 0 0 0 1-2L14 4a2 2 0 0 0-4 0Z"/><path d="M12 9v4m0 4h.01"/>
+{% elif kind == 'clock' %}<circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/>
+{% elif kind == 'refresh' %}<path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 6a8 8 0 0 1 13 3M5 15a8 8 0 0 0 13 3"/>
+{% elif kind == 'arrow' %}<path d="M4 12h16m-6-6 6 6-6 6"/>
+{% elif kind == 'chevron' %}<path d="m14 6-6 6 6 6"/>
+{% elif kind == 'close' %}<path d="m6 6 12 12M6 18 18 6"/>
+{% elif kind == 'search' %}<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>
+{% elif kind == 'user' %}<circle cx="12" cy="8" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+{% elif kind == 'check' %}<path d="m5 12 4 4L19 6"/>
+{% elif kind == 'lock' or kind == 'open' %}<rect x="5" y="10" width="14" height="11" rx="2"/>{% if kind == 'open' %}<path d="M9 10V6a4 4 0 0 1 8 0"/>{% else %}<path d="M8 10V6a4 4 0 0 1 8 0v4"/>{% endif %}<path d="M12 15v2"/>
+{% else %}<path d="m12 2 9 5v10l-9 5-9-5V7Z"/><path d="m3 7 9 5 9-5m-9 5v10M7.5 4.5l9 5"/>
+{% endif %}
+</svg>
+{%- endmacro %}
+
+{% macro equipment(asset_id) -%}
+{# shortcut: demo asset IDs identify illustrations; use category metadata when more equipment types are added. #}
+<svg class="equipment-art" width="76" height="54" viewBox="0 0 100 68" fill="none" aria-hidden="true" focusable="false">
+{% if 'raspberry' in asset_id %}
+<path d="m13 23 57-12 18 30-57 15Z" fill="#25845e" stroke="#176043" stroke-width="2"/><path d="m31 56 57-15v5L31 62l-18-33v-6Z" fill="#146142"/><path d="m37 28 22-5 11 16-23 6Z" fill="#263334" stroke="#bac6bd" stroke-width="2"/><path d="m19 27 9-2 7 13-9 3Z" fill="#c5d3cd"/><path d="m69 14 11-2 9 16-12 3Z" fill="#cbd2d5"/><path d="m57 16 8-2m-5 6 8-2m-3 6 8-2" stroke="#e9c872" stroke-width="3"/><circle cx="35" cy="20" r="2" fill="#f0da8f"/><circle cx="78" cy="37" r="2" fill="#f0da8f"/>
+{% else %}
+<ellipse cx="50" cy="56" rx="35" ry="5" fill="#27213c" opacity=".09"/><path d="m11 26 52-12 27 11-52 15Z" fill="#f9fafc" stroke="#c7c6d4"/><path d="m11 26 27 14v16L11 42Z" fill="#d9dbe4" stroke="#c7c6d4"/><path d="m38 40 52-15v18L38 56Z" fill="#ebedf3" stroke="#bfc1d0"/><ellipse cx="72" cy="37" rx="11" ry="10" fill="#383b4d"/><ellipse cx="72" cy="37" rx="7" ry="7" fill="#1e253a" stroke="#9eacc6" stroke-width="2"/><ellipse cx="70" cy="35" rx="2" ry="2" fill="#b7d1ee"/><path d="m45 43 11-3m-11 7 11-3" stroke="#989dab" stroke-width="2"/><path d="m43 25 14-3" stroke="#b2b4c4" stroke-width="2"/>
+{% endif %}
+</svg>
+{%- endmacro %}

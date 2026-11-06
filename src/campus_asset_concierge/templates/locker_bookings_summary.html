@@ -1,0 +1,44 @@
+    <section class="panel booking-summary" id="bookings" aria-labelledby="bookings-title">
+      <div class="panel-heading"><h2 id="bookings-title">Bookings</h2><a href="/locker/bookings">View all bookings {{ icon("arrow", 16) }}</a></div>
+      {% if reservations %}
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Item</th><th>Borrower</th><th>Pickup</th><th>Return</th><th>Compartment</th><th>Where it stands</th><th><span class="sr-only">Action</span></th></tr>
+          </thead>
+          <tbody>
+            {% for booking in reservations %}
+            <tr>
+              <td class="identity">{{ name(booking.asset_id) }}<br>{{ requirements(booking) }}</td>
+              <td>{{ name(booking.borrower_id) }}</td>
+              <td class="figure">{{ hhmm(booking.pickup_at) }}</td>
+              <td class="figure">{{ hhmm(booking.due_at) }}</td>
+              <td>{% if booking.compartment %}{{ booking.compartment | upper }}{% else %}<span class="dash">–</span>{% endif %}</td>
+              <td>{{ {
+                "waiting_for_loading": "Waiting to be loaded",
+                "pickup_missed": "Pickup window closed, not loaded",
+                "code_not_open": "Loaded, pickup not open yet",
+                "enter_code": "Loaded, waiting for borrower",
+                "code_blocked": "Code blocked after wrong tries",
+                "code_expired": "Code expired, not collected",
+                "confirm_pickup": "Open, waiting for pickup confirmation",
+                "collected": "Collected, loan started",
+              }[booking.step] }}</td>
+              <td class="action">
+                {% if booking.step == "waiting_for_loading" %}
+                  {% if booking.load_blocker %}
+                    <span class="blocker">{{ booking.load_blocker }}</span>
+                  {% else %}
+                    <button class="button {{ 'button--primary' if booking.id == to_load[0].id else 'button--secondary' }}" type="button" data-post="/reservations/{{ booking.id }}/load">Confirm loading</button>
+                  {% endif %}
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="empty">No bookings yet. New bookings appear here once a borrower confirms one.</p>
+      {% endif %}
+    </section>

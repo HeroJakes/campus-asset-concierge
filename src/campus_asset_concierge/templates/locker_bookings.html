@@ -1,0 +1,61 @@
+<div class="bookings-page">
+  <section class="panel booking-workload" aria-label="Booking summary">
+    <nav class="booking-stats" aria-label="Filter bookings">
+      {% for key, label, symbol in [('all', 'All bookings', 'calendar'), ('to_load', 'To load', 'cube'), ('active', 'Active', 'activity'), ('completed', 'Completed', 'check')] %}
+      <a class="booking-stat booking-stat--{{ key }}{% if booking_filter == key %} is-selected{% endif %}" href="/locker/bookings?{{ {'status': key, 'q': booking_query} | urlencode }}"{% if booking_filter == key %} aria-current="true"{% endif %}>
+        <span class="stat-icon">{{ icon(symbol, 24) }}</span><span>{{ label }}<strong>{{ booking_counts[key] }}</strong></span>
+      </a>
+      {% endfor %}
+    </nav>
+    <p class="booking-definitions">To load: awaiting staff loading. Active: pickup or loan in progress, including missed pickups. Completed: returned and checked.</p>
+    {% for proposal in pending %}
+      {% set affected = reservations | selectattr('id', 'equalto', proposal.reservation_id) | first %}
+      <article class="booking-recovery">
+        <span class="recovery-symbol">{{ icon('alert', 28) }}</span>
+        <div><h2>Overdue recovery <small>(simulated)</small></h2><p>Substitute proposal awaiting staff review.</p></div>
+        <div class="booking-recovery-item">{{ equipment(proposal.original_asset_id) }}<div><strong>{{ name(proposal.original_asset_id) }}{% if affected %} · {{ name(affected.borrower_id) }}{% endif %}</strong><p>Proposed substitute: {{ name(proposal.substitute_asset_id) }}</p></div></div>
+        <div class="booking-recovery-actions"><button type="button" class="button button--primary" data-open-dialog="proposal-{{ proposal.id }}">Review proposal</button><button type="button" class="button button--secondary" data-post="/recovery/substitution-proposals/{{ proposal.reservation_id }}/recheck">Check again</button></div>
+      </article>
+      {% include 'locker_proposal_dialog.html' %}
+    {% endfor %}
+    {% if recovery.escalations %}<a class="booking-recovery booking-recovery-link" href="/locker#recovery">{{ icon('alert', 24) }} <span><strong>{{ recovery.escalations | length }} staff escalation{{ 's' if recovery.escalations | length != 1 }}</strong><br>No eligible substitute. Review overdue recovery.</span>{{ icon('arrow', 20) }}</a>
+    {% elif recovery.overdue_loans and not pending %}<a class="booking-recovery booking-recovery-link" href="/locker#recovery">{{ icon('alert', 24) }}<span>{{ recovery.overdue_loans | length }} overdue loan{{ 's' if recovery.overdue_loans | length != 1 }}. View recovery details.</span>{{ icon('arrow', 20) }}</a>{% endif %}
+  </section>
+
+  <section aria-labelledby="booking-list-title">
+    <div class="panel booking-toolbar">
+      <h2 id="booking-list-title">{{ {'all': 'All bookings', 'to_load': 'To load', 'active': 'Active bookings', 'completed': 'Completed bookings'}[booking_filter] }} <span>({{ bookings | length }})</span></h2>
+      <form action="/locker/bookings" method="get" class="booking-search" role="search">
+        <label class="sr-only" for="booking-search">Search by item, borrower, requirements, or booking ID</label>
+        <div class="search-field">{{ icon('search', 19) }}<input id="booking-search" name="q" type="search" value="{{ booking_query }}" placeholder="Search by item, borrower, or ID…"></div>
+        <label class="sr-only" for="booking-status">Filter by status</label>
+        <div class="booking-filter-control"><select id="booking-status" name="status">{% for key, label in [('all', 'All statuses'), ('to_load', 'To load'), ('active', 'Active'), ('completed', 'Completed')] %}<option value="{{ key }}"{% if booking_filter == key %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>{{ icon('chevron', 18) }}</div>
+        <button class="button button--secondary" type="submit">Search / filter</button>
+      </form>
+    </div>
+    <p id="booking-search-feedback" class="sr-only" role="status"></p>
+    <div id="booking-results">
+    <ul class="booking-list">
+      {% for booking in bookings %}
+      <li class="booking-row" data-booking-id="{{ booking.id }}">
+        <div class="booking-item">{{ equipment(booking.asset_id) }}<div><h3>{{ name(booking.asset_id) }}</h3><span class="booking-id">#{{ booking.id }}</span></div></div>
+        <div class="booking-requirements"><span>{{ requirements_text(booking) }}</span></div>
+        <div class="booking-borrower">{{ icon('user', 20) }}<span>{{ name(booking.borrower_id) }}</span></div>
+        <div class="booking-times"><p>{{ icon('calendar', 16) }} <span>Pickup: <time datetime="{{ booking.pickup_at }}">{{ 'Today' if booking.pickup_at[:10] == current_time[:10] else booking.pickup_at[:10] }}, {{ hhmm(booking.pickup_at) }}</time></span></p><p>{{ icon('calendar', 16) }} <span>Return: <time datetime="{{ booking.due_at }}">{{ 'Today' if booking.due_at[:10] == current_time[:10] else booking.due_at[:10] }}, {{ hhmm(booking.due_at) }}</time></span></p><span class="sr-only">Malaysia time</span></div>
+        <div class="booking-compartment">{{ icon('cube', 18) }}<span><span class="sr-only">Pickup compartment: </span>{{ booking.compartment | upper if booking.compartment else 'Unassigned' }}</span></div>
+        <div class="booking-state"><span class="booking-status booking-status--{{ booking.tone }}">{{ icon('check' if booking.group == 'completed' else 'alert' if booking.tone == 'blocked' else 'open' if booking.tone == 'open' else 'cube', 14) }}{{ booking.label }}</span><p>{{ booking.description }}</p></div>
+        <div class="booking-row-action">{% if booking.step == 'waiting_for_loading' and not booking.load_blocker %}<button class="button button--primary" type="button" data-post="/reservations/{{ booking.id }}/load">Confirm loading</button>{% else %}<button class="button button--secondary" type="button" data-open-dialog="booking-{{ booking.id }}" aria-label="View booking {{ booking.id }}">View</button>{% endif %}</div>
+      </li>
+      {% else %}<li class="panel booking-no-results"><h3>{{ 'No bookings match your search' if booking_query or booking_filter != 'all' else 'No bookings yet' }}</h3><p>{{ 'Try another search or status.' if booking_query or booking_filter != 'all' else 'Confirmed bookings will appear here.' }}</p>{% if booking_query or booking_filter != 'all' %}<a href="/locker/bookings">Clear filters</a>{% endif %}</li>{% endfor %}
+    </ul>
+    <p class="section-footnote">{{ icon('clock', 14) }} Pickup and return times use Malaysia time (MYT).</p>
+  {% for booking in bookings %}
+  <dialog class="review-dialog booking-detail" id="booking-{{ booking.id }}" aria-labelledby="booking-title-{{ booking.id }}">
+    {{ dialog_close() }}<span class="dialog-symbol">{{ icon('calendar', 28) }}</span><p class="eyebrow">Booking details</p><h2 id="booking-title-{{ booking.id }}">{{ name(booking.asset_id) }}</h2><p class="booking-id">#{{ booking.id }}</p>
+    <dl><dt>Borrower</dt><dd>{{ name(booking.borrower_id) }}</dd><dt>Requirements</dt><dd>{{ requirements_text(booking) }}</dd><dt>Pickup</dt><dd>{{ booking.pickup_at[:10] }} · {{ hhmm(booking.pickup_at) }} MYT</dd><dt>Return</dt><dd>{{ booking.due_at[:10] }} · {{ hhmm(booking.due_at) }} MYT</dd><dt>Pickup compartment</dt><dd>{{ booking.compartment | upper if booking.compartment else 'Unassigned' }}</dd><dt>Status</dt><dd>{{ booking.label }}</dd></dl>
+    <p class="review-explanation">{{ booking.description }}</p>
+  </dialog>
+  {% endfor %}
+    </div>
+  </section>
+</div>

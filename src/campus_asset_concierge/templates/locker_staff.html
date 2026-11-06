@@ -1,0 +1,121 @@
+{% set to_load = reservations | selectattr('step', 'equalto', 'waiting_for_loading') | rejectattr('load_blocker') | list %}
+{% set waiting = reservations | selectattr('step', 'equalto', 'waiting_for_loading') | list %}
+{% set to_check = returns | selectattr('step', 'equalto', 'awaiting_check') | list %}
+{% set pending = recovery.substitution_proposals | selectattr('status', 'equalto', 'pending_staff_approval') | list %}
+{% set action_labels = {
+  'loaded': 'confirmed loading', 'unlocked': 'unlocked the compartment', 'picked_up': 'confirmed pickup',
+  'code_wrong': 'entered a wrong code', 'code_wrong_user': "tried a code for another borrower's booking",
+  'return_requested': 'requested a return', 'return_unlocked': 'unlocked the return compartment',
+  'returned_dropped': 'dropped the item off', 'return_passed': 'passed the return check',
+  'return_failed': 'failed the return check', 'return_code_wrong': 'entered a wrong return code',
+  'return_code_wrong_user': "tried a return code for another borrower's item",
+  'overdue_marked': 'marked a loan overdue', 'reminder_queued': 'queued a simulated reminder',
+  'booking_at_risk': 'flagged a booking as at risk', 'substitute_proposed': 'recorded a substitute proposal',
+  'substitution_applied': 'approved and applied a substitute', 'substitute_rechecked': 'checked substitutes again',
+  'escalation_created': 'created a staff-owned escalation'
+} %}
+{% macro activity_entry(event) -%}
+<li class="activity-event{% if 'wrong' in event.action or 'overdue' in event.action %} activity-event--attention{% endif %}">
+  <time class="event-time" datetime="{{ event.at }}">{{ hhmm(event.at) }}</time>
+  <div><span>{{ name(event.actor) }} {{ action_labels.get(event.action, event.action | replace('_', ' ')) }}</span> <span class="event-asset">— {{ name(event.asset_id) }}</span></div>
+</li>
+{%- endmacro %}
+{% from "locker_reviews.html" import dialog_close with context %}
+
+<header class="staff-page-header" id="locker">
+  <div><p class="eyebrow page-eyebrow">Your workspace</p><h1>{{ "Bookings" if bookings_page else "Locker A" }}</h1><p class="subtitle">{{ "Manage bookings, pickups, and returns at Locker A." if bookings_page else "Load items, manage bookings, and process returns." }}</p></div>
+  <div class="header-controls">
+    <div class="staff-clock">{{ icon('clock', 24) }}<div><span>Test clock <span class="clock-simulation">(simulated)</span></span><time datetime="{{ current_time }}">{{ current_time[:10] }} <span class="clock-divider">·</span> {{ hhmm(current_time) }} <small>MYT</small></time></div></div>
+    <a class="icon-button refresh-button" href="{{ request.url }}" aria-label="Refresh page" title="Refresh page">{{ icon('refresh', 23) }}</a>
+  </div>
+</header>
+
+{% if bookings_page %}
+  {% include "locker_bookings.html" %}
+{% else %}
+<div class="locker-dashboard">
+  <section class="loading-hero" aria-labelledby="next-to-load-title">
+    <div class="loading-content">
+      <p class="eyebrow" id="next-to-load-title">Next to load</p>
+      {% if to_load %}
+        <h2>{{ name(to_load[0].asset_id) }} <span>for {{ name(to_load[0].borrower_id) }}</span></h2>
+        <p>Pickup at <strong>{{ hhmm(to_load[0].pickup_at) }}</strong> <span class="hero-location">· Campus Loan Desk</span></p>
+        <button class="button button--primary hero-button" type="button" data-post="/reservations/{{ to_load[0].id }}/load">Confirm loading {{ icon('arrow', 20) }}</button>
+      {% elif waiting %}
+        <h2>Waiting on {{ name(waiting[0].asset_id) }}</h2>
+        <p class="hero-blocker">{{ waiting[0].load_blocker }}</p>
+        <a class="button button--secondary hero-button" href="#bookings">View booking details {{ icon('arrow', 18) }}</a>
+      {% else %}
+        <h2>You're all caught up</h2><p>No bookings are waiting to be loaded.</p>
+        <span class="hero-complete">{{ icon('check', 18) }} Ready for the next booking</span>
+      {% endif %}
+    </div>
+    <div class="hero-cabinet" aria-hidden="true"><div class="cabinet-door">{{ icon('cube', 38) }}<span class="cabinet-handle"></span></div><div class="cabinet-door cabinet-door--back"><span class="cabinet-handle"></span></div></div>
+  </section>
+
+  <section class="panel compartment-panel" aria-labelledby="compartments-title">
+    <div class="panel-heading"><h2 id="compartments-title">Compartments</h2><span class="panel-meta">{{ compartments | length }} compartments</span></div>
+    <div class="staff-doors">
+      {% for compartment, state in compartments | dictsort %}
+        {% set held = reservations | selectattr('compartment', 'equalto', compartment) | rejectattr('status', 'equalto', 'collected') | first %}
+        {% set back = returns | selectattr('compartment', 'equalto', compartment) | rejectattr('step', 'equalto', 'returned') | first %}
+        {% set who = held or back %}
+        <article class="compartment-card compartment-card--{{ state }}" aria-label="Compartment {{ compartment | upper }}" data-compartment="{{ compartment }}">
+          <div class="compartment-state-icon">{{ icon('open' if state == 'unlocked' else 'lock', 25) }}</div>
+          <div><h3>{{ compartment | upper }}</h3><p class="compartment-state">{{ {'empty': 'Empty', 'loaded': 'Loaded & locked', 'unlocked': 'Open', 'return_reserved': 'Return, locked', 'returned': 'Returned, awaiting check'}.get(state, state) }}</p></div>
+          {% if who %}<div class="compartment-item">{{ equipment(who.asset_id) }}<div><strong>{{ name(who.asset_id) }}</strong><span>{{ name(who.borrower_id) }}</span></div></div>
+          {% else %}<p class="compartment-placeholder">Available for the next item</p>{% endif %}
+        </article>
+      {% endfor %}
+    </div>
+    <p class="section-footnote">{{ icon('cube', 14) }} Virtual locker · Status follows confirmed staff and borrower actions.</p>
+  </section>
+
+  <section class="panel returns-panel" id="returns" aria-labelledby="returns-title">
+    <div class="panel-heading"><h2 id="returns-title">{{ icon('cube') }} Returns to check <span class="count-badge">{{ to_check | length }}</span></h2></div>
+    {% for item in to_check %}
+      <div class="return-summary">{{ equipment(item.asset_id) }}<div><h3>{{ name(item.asset_id) }}</h3><p>{{ name(item.borrower_id) }} · {{ item.compartment | upper }}</p><span class="panel-meta">Awaiting condition check</span></div><button class="button button--secondary" type="button" data-open-dialog="return-{{ item.asset_id }}">Check return</button></div>
+      <dialog class="review-dialog" id="return-{{ item.asset_id }}" aria-labelledby="return-title-{{ item.asset_id }}">
+        {{ dialog_close() }}<span class="dialog-symbol">{{ icon('cube', 30) }}</span><p class="eyebrow">Return review</p><h2 id="return-title-{{ item.asset_id }}">{{ name(item.asset_id) }}</h2>
+        <p class="dialog-description">{{ name(item.borrower_id) }} dropped this item in compartment {{ item.compartment | upper }}. Check its condition before closing the loan.</p>
+        <p class="review-explanation">A pass makes the unit available again. A failed check closes the loan and places the unit on hold.</p>
+        <div class="dialog-actions"><button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/verify-return" data-body='{"result":"pass"}'>{{ icon('check', 18) }} Pass</button><button class="button button--secondary" type="button" data-post="/assets/{{ item.asset_id }}/verify-return" data-body='{"result":"fail"}'>Fail</button></div>
+      </dialog>
+    {% else %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('check', 21) }}</span><div><strong>Nothing waiting for a check</strong><p>Returned items will appear here.</p></div></div>{% endfor %}
+  </section>
+
+  <section class="panel recovery-panel" id="recovery" aria-labelledby="recovery-title">
+    <div class="panel-heading"><h2 id="recovery-title"><span class="recovery-symbol">{{ icon('alert') }}</span> Overdue recovery</h2></div>
+    {% for proposal in pending %}
+      {% set affected = reservations | selectattr('id', 'equalto', proposal.reservation_id) | first %}
+      <article class="recovery-summary">
+        <div class="recovery-item">{{ equipment(proposal.original_asset_id) }}<div><h3>{{ name(proposal.original_asset_id) }}</h3><p><span class="substitute-label">Substitute</span> {{ name(proposal.substitute_asset_id) }}</p></div></div>
+        {% if affected %}<p class="recovery-booking">{{ name(affected.borrower_id) }} · Pickup {{ hhmm(affected.pickup_at) }}</p>{% endif %}
+        <p class="recovery-requirements">{{ requirements(proposal) }}</p><p class="panel-meta">Verified substitute proposal · Awaiting staff approval</p>
+        <button class="button button--primary" type="button" data-open-dialog="proposal-{{ proposal.id }}">Review substitute proposal {{ icon('arrow', 18) }}</button>
+      </article>
+      {% include 'locker_proposal_dialog.html' %}
+    {% endfor %}
+    {% for escalation in recovery.escalations %}<article class="escalation-summary"><span class="recovery-symbol">{{ icon('alert', 20) }}</span><div><h3>Staff-owned escalation</h3><p>No eligible substitute for {{ name(escalation.reservation_id) }}.</p><p class="panel-meta">Owner: {{ name(escalation.owner) }}</p><p>{{ requirements(escalation) }}</p></div></article>{% endfor %}
+    {% for proposal in recovery.substitution_proposals if proposal.status == 'applied' %}<p class="applied-summary">{{ icon('check', 18) }} <span><strong>Reassignment applied:</strong> {{ name(proposal.substitute_asset_id) }} for {{ name(proposal.reservation_id) }}. Approved by {{ name(proposal.approved_by) }}.</span></p>{% endfor %}
+    {% if not pending and not recovery.escalations and not recovery.overdue_loans %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('check', 21) }}</span><div><strong>No bookings at risk</strong><p>Recovery actions will appear here.</p></div></div>{% endif %}
+    {% if recovery.overdue_loans or recovery.reminders %}
+    <details class="recovery-details"><summary class="disclosure-summary"><span class="disclosure-icon">{{ icon('chevron', 20) }}</span>Recovery details <span class="summary-meta">{{ recovery.overdue_loans | length }} overdue · {{ recovery.reminders | length }} simulated reminder{{ 's' if recovery.reminders | length != 1 }}</span></summary>
+      {% if recovery.overdue_loans %}<div class="overdue-note">{% for loan in recovery.overdue_loans %}<p>{{ name(loan.asset_id) }} loan is overdue. The original loan remains open for staff follow-up.</p>{% endfor %}</div>{% endif %}
+      {% for reminder in recovery.reminders %}<p class="panel-meta">Simulated reminder queued for {{ name(reminder.reservation_id) }}. No message was sent.</p>{% endfor %}
+    </details>
+    {% endif %}
+  </section>
+
+  {% include 'locker_bookings_summary.html' %}
+
+  <section class="panel activity-panel" id="activity" aria-labelledby="activity-title">
+    <div class="panel-heading"><h2 id="activity-title"><span class="activity-symbol">{{ icon('activity') }}</span> Activity</h2><span class="panel-meta">Latest updates</span></div>
+    {% if audit_events %}<ul class="staff-activity">{% for event in audit_events[:3] %}{{ activity_entry(event) }}{% endfor %}</ul>
+      {% if audit_events | length > 3 %}<details class="activity-history"><summary class="disclosure-summary"><span class="disclosure-icon">{{ icon('chevron', 20) }}</span>View all activity <span class="summary-meta">{{ audit_events | length }} events</span></summary><ul class="staff-activity">{% for event in audit_events[3:] %}{{ activity_entry(event) }}{% endfor %}</ul></details>{% endif %}
+    {% else %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('activity', 21) }}</span><div><strong>A fresh start</strong><p>Loading, pickups, and returns appear here.</p></div></div>{% endif %}
+  </section>
+
+</div>
+
+{% endif %}

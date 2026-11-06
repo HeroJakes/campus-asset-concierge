@@ -331,3 +331,8 @@ def test_staff_page_renders_with_a_return_audit_event(booking_app):
     page = client.get("/locker", auth=STAFF)
     assert page.status_code == 200
     assert "Returns to check" in page.text  # the awaiting-check item is shown to staff
+    assert 'data-open-dialog="return-projector-a"' in page.text
+    assert '<dialog class="review-dialog" id="return-projector-a"' in page.text
+    assert '/assets/projector-a/verify-return' in page.text
+    assert 'data-body=\'{"result":"pass"}\'' in page.text
+    assert 'data-body=\'{"result":"fail"}\'' in page.text

@@ -10,7 +10,7 @@ The organizers reported a delay in Gemini Enterprise licences with no confirmed 
 
 Gemini Enterprise is the planned chat interface. Our prototype will have a separate virtual locker page for staff loading, one-time code entry, and pickup confirmation.
 
-The staff Locker overview has a purple palette, a collapsible sidebar, live compartment cards, and return/substitute review dialogs. Loading and compartments sit beside returns and recovery, with recent activity below the bookings summary. The staff Bookings page at `/locker/bookings` has status counts, search and filters, booking details, and substitute review actions. Completed means the return check has closed the loan. Other sidebar links jump to the Locker overview sections. The borrower layout stays the same.
+The staff Locker overview has a purple palette, a collapsible sidebar, live compartment cards, and return/substitute review dialogs. Loading and compartments sit beside returns and recovery, with recent activity below the bookings summary. The staff Bookings page at `/locker/bookings` has status counts, live search and filters, booking details, and substitute review actions. Search updates as you type; changing the status filter also updates the list. Completed means the return check has closed the loan. Other sidebar links jump to the Locker overview sections. The borrower layout stays the same.
 
 **MCP connector and Gemini build:** the same backend also runs as an MCP connector in a local HTTP container — see [Run the MCP container](docs/MCP_LOCAL_CONTAINER.md). The Gemini Enterprise chat agent and recovery workflow are specified in the [build sheet](docs/GEMINI_BUILD_SHEET.md), with a [demo script](docs/DEMO_SCRIPT.md). Both are ready to build when the licence arrives.
 
@@ -72,7 +72,9 @@ Staff can select **Check substitutes again** on a pending proposal. Unchanged st
 
 Run `uv run --locked pytest` in a shell with `FIRESTORE_EMULATOR_HOST` set to test sign-in, resets, booking, pickup, return, overdue recovery, and reassignment, including two borrowers competing for the last unit.
 
-GitHub Actions runs the same tests with the Firestore emulator on pull requests into `main`.
+Run `node --test tests/booking_search.test.cjs` with Node.js 22 to check live search, stale responses, and booking actions after search updates.
+
+GitHub Actions runs both checks, with the Firestore emulator for Python tests, on pull requests into `main`.
 
 ## Project layout
 

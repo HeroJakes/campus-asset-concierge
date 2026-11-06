@@ -32,10 +32,11 @@ function showError(message) {
   target.scrollIntoView({ block: "nearest" });
 }
 
-document.querySelectorAll("[data-post]").forEach((button) => {
-  button.addEventListener("click", () =>
-    send(button.dataset.post, button.dataset.body ? JSON.parse(button.dataset.body) : null, button),
-  );
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-post]");
+  if (button && !button.disabled) {
+    send(button.dataset.post, button.dataset.body ? JSON.parse(button.dataset.body) : null, button);
+  }
 });
 
 document.querySelectorAll("[data-unlock]").forEach((form) => {
@@ -45,12 +46,13 @@ document.querySelectorAll("[data-unlock]").forEach((form) => {
   });
 });
 
-document.querySelectorAll("[data-open-dialog]").forEach((button) => {
-  button.addEventListener("click", () => {
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-open-dialog]");
+  if (button) {
     const dialog = document.getElementById(button.dataset.openDialog);
     dialog.querySelector("[data-dialog-error]").hidden = true;
     dialog.showModal();
-  });
+  }
 });
 
 const sidebarToggle = document.getElementById("sidebar-toggle");

@@ -21,6 +21,7 @@
   {% if is_staff %}<link rel="stylesheet" href="/static/locker_staff.css">{% endif %}
   {% if bookings_page %}<link rel="stylesheet" href="/static/locker_bookings.css">{% endif %}
   <script src="/static/locker.js" defer></script>
+  {% if bookings_page %}<script src="/static/locker_bookings.js" defer></script>{% endif %}
 </head>
 <body{% if is_staff %} class="staff-shell"{% endif %}>
   {% from "locker_icons.html" import icon, equipment %}

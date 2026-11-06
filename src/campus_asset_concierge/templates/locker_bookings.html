@@ -33,6 +33,8 @@
         <button class="button button--secondary" type="submit">Search / filter</button>
       </form>
     </div>
+    <p id="booking-search-feedback" class="sr-only" role="status"></p>
+    <div id="booking-results">
     <ul class="booking-list">
       {% for booking in bookings %}
       <li class="booking-row" data-booking-id="{{ booking.id }}">
@@ -47,7 +49,6 @@
       {% else %}<li class="panel booking-no-results"><h3>{{ 'No bookings match your search' if booking_query or booking_filter != 'all' else 'No bookings yet' }}</h3><p>{{ 'Try another search or status.' if booking_query or booking_filter != 'all' else 'Confirmed bookings will appear here.' }}</p>{% if booking_query or booking_filter != 'all' %}<a href="/locker/bookings">Clear filters</a>{% endif %}</li>{% endfor %}
     </ul>
     <p class="section-footnote">{{ icon('clock', 14) }} Pickup and return times use Malaysia time (MYT).</p>
-  </section>
   {% for booking in bookings %}
   <dialog class="review-dialog booking-detail" id="booking-{{ booking.id }}" aria-labelledby="booking-title-{{ booking.id }}">
     {{ dialog_close() }}<span class="dialog-symbol">{{ icon('calendar', 28) }}</span><p class="eyebrow">Booking details</p><h2 id="booking-title-{{ booking.id }}">{{ name(booking.asset_id) }}</h2><p class="booking-id">#{{ booking.id }}</p>
@@ -55,4 +56,6 @@
     <p class="review-explanation">{{ booking.description }}</p>
   </dialog>
   {% endfor %}
+    </div>
+  </section>
 </div>

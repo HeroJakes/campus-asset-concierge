@@ -20,19 +20,19 @@
   <div><span>{{ name(event.actor) }} {{ action_labels.get(event.action, event.action | replace('_', ' ')) }}</span> <span class="event-asset">— {{ name(event.asset_id) }}</span></div>
 </li>
 {%- endmacro %}
-{% macro dialog_close() -%}
-<form method="dialog" class="dialog-close-form"><button class="icon-button" aria-label="Close review" title="Close review">{{ icon('close') }}</button></form>
-<p class="notice notice--error" role="alert" data-dialog-error hidden></p>
-{%- endmacro %}
+{% from "locker_reviews.html" import dialog_close with context %}
 
 <header class="staff-page-header" id="locker">
-  <div><p class="eyebrow page-eyebrow">Your workspace</p><h1>Locker A</h1><p class="subtitle">Load items, manage bookings, and process returns.</p></div>
+  <div><p class="eyebrow page-eyebrow">Your workspace</p><h1>{{ "Bookings" if bookings_page else "Locker A" }}</h1><p class="subtitle">{{ "Manage bookings, pickups, and returns at Locker A." if bookings_page else "Load items, manage bookings, and process returns." }}</p></div>
   <div class="header-controls">
     <div class="staff-clock">{{ icon('clock', 24) }}<div><span>Test clock <span class="clock-simulation">(simulated)</span></span><time datetime="{{ current_time }}">{{ current_time[:10] }} <span class="clock-divider">·</span> {{ hhmm(current_time) }} <small>MYT</small></time></div></div>
-    <a class="icon-button refresh-button" href="/locker" aria-label="Refresh locker" title="Refresh locker">{{ icon('refresh', 23) }}</a>
+    <a class="icon-button refresh-button" href="{{ request.url }}" aria-label="Refresh page" title="Refresh page">{{ icon('refresh', 23) }}</a>
   </div>
 </header>
 
+{% if bookings_page %}
+  {% include "locker_bookings.html" %}
+{% else %}
 <div class="locker-dashboard">
   <section class="loading-hero" aria-labelledby="next-to-load-title">
     <div class="loading-content">
@@ -94,12 +94,7 @@
         <p class="recovery-requirements">{{ requirements(proposal) }}</p><p class="panel-meta">Verified substitute proposal · Awaiting staff approval</p>
         <button class="button button--primary" type="button" data-open-dialog="proposal-{{ proposal.id }}">Review substitute proposal {{ icon('arrow', 18) }}</button>
       </article>
-      <dialog class="review-dialog" id="proposal-{{ proposal.id }}" aria-labelledby="proposal-title-{{ proposal.id }}">
-        {{ dialog_close() }}<span class="dialog-symbol">{{ icon('cube', 30) }}</span><p class="eyebrow">Substitute review</p><h2 id="proposal-title-{{ proposal.id }}">{{ name(proposal.original_asset_id) }} → {{ name(proposal.substitute_asset_id) }}</h2>
-        {% if affected %}<p class="dialog-description">{{ name(affected.borrower_id) }} · {{ affected.pickup_at[:10] }} · {{ hhmm(affected.pickup_at) }}–{{ hhmm(affected.due_at) }} MYT</p>{% endif %}
-        <p>{{ requirements(proposal) }}</p><p class="review-explanation">The original booking remains assigned to {{ name(proposal.original_asset_id) }} until approval. Availability and requirements are checked again before applying the substitute.</p>
-        <div class="dialog-actions"><button class="button button--primary" type="button" data-post="/recovery/substitution-proposals/{{ proposal.reservation_id }}/approve" data-body='{{ {"proposal_id": proposal.id} | tojson }}'>Approve and apply {{ icon('arrow', 18) }}</button><button class="button button--secondary" type="button" data-post="/recovery/substitution-proposals/{{ proposal.reservation_id }}/recheck">Check substitutes again</button></div>
-      </dialog>
+      {% include 'locker_proposal_dialog.html' %}
     {% endfor %}
     {% for escalation in recovery.escalations %}<article class="escalation-summary"><span class="recovery-symbol">{{ icon('alert', 20) }}</span><div><h3>Staff-owned escalation</h3><p>No eligible substitute for {{ name(escalation.reservation_id) }}.</p><p class="panel-meta">Owner: {{ name(escalation.owner) }}</p><p>{{ requirements(escalation) }}</p></div></article>{% endfor %}
     {% for proposal in recovery.substitution_proposals if proposal.status == 'applied' %}<p class="applied-summary">{{ icon('check', 18) }} <span><strong>Reassignment applied:</strong> {{ name(proposal.substitute_asset_id) }} for {{ name(proposal.reservation_id) }}. Approved by {{ name(proposal.approved_by) }}.</span></p>{% endfor %}
@@ -122,3 +117,5 @@
   </section>
 
 </div>
+
+{% endif %}

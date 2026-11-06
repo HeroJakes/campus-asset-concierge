@@ -1,0 +1,6 @@
+      <dialog class="review-dialog" id="proposal-{{ proposal.id }}" aria-labelledby="proposal-title-{{ proposal.id }}">
+        {{ dialog_close() }}<span class="dialog-symbol">{{ icon('cube', 30) }}</span><p class="eyebrow">Substitute review</p><h2 id="proposal-title-{{ proposal.id }}">{{ name(proposal.original_asset_id) }} → {{ name(proposal.substitute_asset_id) }}</h2>
+        {% if affected %}<p class="dialog-description">{{ name(affected.borrower_id) }} · {{ affected.pickup_at[:10] }} · {{ hhmm(affected.pickup_at) }}–{{ hhmm(affected.due_at) }} MYT</p>{% endif %}
+        <p>{{ requirements(proposal) }}</p><p class="review-explanation">The original booking remains assigned to {{ name(proposal.original_asset_id) }} until approval. Availability and requirements are checked again before applying the substitute.</p>
+        <div class="dialog-actions"><button class="button button--primary" type="button" data-post="/recovery/substitution-proposals/{{ proposal.reservation_id }}/approve" data-body='{{ {"proposal_id": proposal.id} | tojson }}'>Approve and apply {{ icon('arrow', 18) }}</button><button class="button button--secondary" type="button" data-post="/recovery/substitution-proposals/{{ proposal.reservation_id }}/recheck">Check substitutes again</button></div>
+      </dialog>

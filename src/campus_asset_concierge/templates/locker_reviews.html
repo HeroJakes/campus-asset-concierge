@@ -1,0 +1,4 @@
+{% macro dialog_close() -%}
+<form method="dialog" class="dialog-close-form"><button class="icon-button" aria-label="Close review" title="Close review">{{ icon('close') }}</button></form>
+<p class="notice notice--error" role="alert" data-dialog-error hidden></p>
+{%- endmacro %}

@@ -7,7 +7,8 @@
   <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-controls="staff-navigation" aria-expanded="true" aria-label="Collapse sidebar" title="Collapse sidebar">{{ icon('chevron', 22) }}</button>
   <nav id="staff-navigation" aria-label="Locker sections">
     {% for target, label, symbol in [('locker', 'Locker', 'home'), ('bookings', 'Bookings', 'calendar'), ('returns', 'Returns to check', 'cube'), ('activity', 'Activity', 'activity'), ('recovery', 'Overdue & recovery', 'alert')] %}
-    <a class="sidebar-link{% if target == 'locker' %} is-current{% endif %}" href="#{{ target }}" aria-label="{{ label }}" title="{{ label }}"{% if target == 'locker' %} aria-current="location"{% endif %}>{{ icon(symbol) }}<span class="sidebar-label">{{ label }}</span></a>
+    {% set selected = (target == 'bookings' and bookings_page) or (target == 'locker' and not bookings_page) %}
+    <a class="sidebar-link{% if selected %} is-current{% endif %}" href="{{ '/locker/bookings' if target == 'bookings' else '/locker' if target == 'locker' else '/locker#' ~ target }}" aria-label="{{ label }}" title="{{ label }}"{% if selected %} aria-current="location"{% endif %}>{{ icon(symbol) }}<span class="sidebar-label">{{ label }}</span></a>
     {% endfor %}
   </nav>
   <div class="sidebar-account" aria-label="Signed in as {{ name(username) }}">

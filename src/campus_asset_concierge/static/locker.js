@@ -78,7 +78,7 @@ if (sidebarToggle) {
     if (window.matchMedia("(max-width: 760px)").matches) setSidebar(true);
   }));
   function updateNavigation() {
-    const current = window.location.hash || "#locker";
+    const current = window.location.pathname + (window.location.hash || "");
     links.forEach((link) => {
       const selected = link.getAttribute("href") === current;
       link.classList.toggle("is-current", selected);

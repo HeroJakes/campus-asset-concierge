@@ -1,6 +1,14 @@
 # MCP connector — Cloud Run readiness plan
 
-**Status:** Proposed. Awaiting user review before implementation.
+**Status:** Reviewed. Items 1, 3, and 4 are approved to build now because they are host-agnostic. Items 2 and 5 are **on hold** until we decide the connector's host (see the host decision below).
+
+## Host decision (blocks items 2 and 5)
+
+The [backup plan](BACKUP_PLAN.md) keeps a non-GCP option open because GCP credits are uncertain. Items 2 (Firestore cloud mode) and 5 (Cloud Run service and IAM) commit us to GCP, so they wait until we know a billing-enabled GCP project is available. A Gemini Enterprise licence alone does not provide one.
+
+Items 1, 3, and 4 (HTTP entry point, seeding, container) are needed on any host — Cloud Run, Render, or Hugging Face Spaces — so we build them now.
+
+Note: Supabase is not a drop-in for item 2. It is Postgres and does not share Firestore's `@firestore.transactional` path, so pointing "cloud mode" at it is a real change to the store's transaction model, not a config flag. Cloud mode therefore forks by host.
 
 ## Goal and stop line
 
@@ -8,7 +16,7 @@ Prepare the existing MCP connector for a private Cloud Run service backed by a d
 
 This work does not need a Gemini Enterprise licence to build and test locally. Real cloud validation needs an approved Google Cloud project, billing, permissions, and resources. Gemini registration and borrower identity mapping still depend on event access.
 
-The first milestone is a tested container, service configuration, seed command, and deployment instructions. Stop there for review. Do not create resources, grant access, write hosted data, or deploy until the user approves the target project and cloud work.
+The first milestone (items 1, 3, 4) is a tested HTTP container and seed command running on the local emulator. Stop there for review. The GCP service configuration and deployment instructions (items 2, 5) wait for the host decision. Do not create resources, grant access, write hosted data, or deploy until the user approves the target project and cloud work.
 
 ## Current gaps
 
@@ -20,7 +28,7 @@ The first milestone is a tested container, service configuration, seed command, 
 
 ## Proposed scope
 
-### 1. HTTP entry point
+### 1. HTTP entry point — BUILD NOW (host-agnostic)
 
 Keep stdio as the default for existing local callers. Add an explicit `MCP_TRANSPORT=streamable-http` mode for the container. Reject unsupported transport values at startup.
 
@@ -30,7 +38,7 @@ Validate the port and configure the SDK's allowed HTTP host/origin settings for 
 
 Expose only MCP in this container. Do not mount the local FastAPI app, operator reset/clock routes, or locker page. The hosted locker remains a separate integration task. Keep the existing tool contracts and error behavior.
 
-### 2. Explicit Firestore modes
+### 2. Explicit Firestore modes — ON HOLD (GCP-specific, awaits host decision)
 
 Extend the existing store rather than introducing a second persistence implementation. Preserve its class name and transaction interface to avoid changing every domain caller.
 
@@ -49,7 +57,7 @@ Keep explicit `document_id` arguments for isolated local tests. Ensure every cal
 
 Reuse Firestore transactions for all changes. The Python lock covers one process only; hosted correctness must come from transactions. Keep the single-document state model for this small demo. Do not add a migration, repository abstraction, or production-scale schema.
 
-### 3. Explicit fictional-data seeding
+### 3. Explicit fictional-data seeding — BUILD NOW (host-agnostic)
 
 Add `python -m campus_asset_concierge.seed_demo` with a required scenario argument: `spare_available` or `spare_unavailable`. Use the same store configuration and `starting_state()` fixtures as the app.
 
@@ -59,7 +67,7 @@ Never seed or reset on container startup. A restart or new revision must preserv
 
 Retain the fixed test clock and label it clearly. To prepare an overdue hosted demo without exposing a clock endpoint, permit `--advance-minutes` with the existing local operator range, 1–1440, defaulting to no advance. Build that clock offset into the seeded state; do not process recovery during seeding. The first `run_overdue_recovery` call then demonstrates detection. Replacing a seeded document destroys that document's previous demo activity, so require the explicit replacement flag every time.
 
-### 4. Container packaging
+### 4. Container packaging — BUILD NOW (host-agnostic)
 
 Add a Python 3.12 Dockerfile and `.dockerignore`. Install runtime dependencies from `uv.lock` with locked dependency resolution; exclude development dependencies. Use a separate build stage if needed to keep uv/build tools out of the runtime image.
 
@@ -67,7 +75,7 @@ Run the existing module as a non-root user. Include package templates/static fil
 
 The container defaults to HTTP transport, while running the Python module outside the image still defaults to stdio. Do not bake a real project ID, service URL, or service-account name into the image. The image must start without writing demo data.
 
-### 5. Cloud Run service configuration and access
+### 5. Cloud Run service configuration and access — ON HOLD (GCP-specific, awaits host decision)
 
 Add `deploy/cloud-run.yaml` as the canonical service configuration template. Use placeholders for the image, project, service account, demo document, and allowed service host. Proposed initial settings: one CPU, 512 MiB memory, zero minimum instances, one maximum instance, concurrency one, port 8080, and a 300-second request timeout. These are demo defaults, not a reliability guarantee or hard spending cap.
 
@@ -98,14 +106,22 @@ No new runtime dependency is expected. Do not add an OAuth server, scheduler, re
 
 ## Implementation and validation order
 
-1. Add configuration tests and explicit Firestore modes. Prove defaults remain local and conflicting/missing hosted settings fail. Test cloud client construction with a stub so normal CI makes no cloud calls.
-2. Add create-only seeding and explicit replacement tests against the emulator. Cover both scenarios, invalid offsets, repeated create attempts, and preserving existing state when replacement is absent.
-3. Add HTTP startup and MCP client tests. Initialize, list exactly five tools, find and confirm an offer, read status without codes, and process both recovery outcomes. Preserve stdio compatibility and strict Stage 2.2 inputs.
-4. Build the container locally. Use a Docker-networked emulator with the application still seeing an allowed loopback emulator address, or another documented setup that preserves the store's loopback-only check. Do not broaden emulator host validation just for Docker networking.
-5. Test through the container's HTTP endpoint with the MCP client. Use the configured hostname; check invalid hosts and malformed input. Verify configuration errors fail startup and repeated recovery/confirmation stay safe.
-6. Restart the container and confirm persisted data survives. Start two app processes against the emulator with competing last-unit confirmations to exercise transactions beyond the per-process lock.
-7. Run the full pytest suite, Python compilation, manifest/configuration checks, and documentation link checks. Review the Docker build context for secrets and local files. Do not mark container validation passed if Docker is unavailable or tests were skipped.
-8. Update docs with exact tested commands and evidence. Review the change before approving any cloud operations.
+### Build now (items 1, 3, 4 — host-agnostic)
+
+1. Add HTTP startup and MCP client tests (item 1). Initialize, list exactly five tools, find and confirm an offer, read status without codes, and process both recovery outcomes. Preserve stdio compatibility and strict Stage 2.2 inputs.
+2. Add create-only seeding and explicit replacement tests against the emulator (item 3). Cover both scenarios, invalid offsets, repeated create attempts, and preserving existing state when replacement is absent.
+3. Build the container locally (item 4). Use a Docker-networked emulator with the application still seeing an allowed loopback emulator address, or another documented setup that preserves the store's loopback-only check. Do not broaden emulator host validation just for Docker networking.
+4. Test through the container's HTTP endpoint with the MCP client. Use the configured hostname; check invalid hosts and malformed input. Verify configuration errors fail startup and repeated recovery/confirmation stay safe.
+5. Restart the container and confirm persisted data survives. Start two app processes against the emulator with competing last-unit confirmations to exercise transactions beyond the per-process lock.
+6. Run the full pytest suite, Python compilation, and documentation link checks. Review the Docker build context for secrets and local files. Do not mark container validation passed if Docker is unavailable or tests were skipped.
+7. Update docs with exact tested commands and evidence.
+
+This milestone runs entirely on the local emulator and a local container. It needs no GCP project, credits, or Gemini licence.
+
+### On hold until the host decision (items 2, 5 — GCP-specific)
+
+8. Add explicit Firestore cloud mode and its configuration tests (item 2). Prove defaults remain local and conflicting/missing hosted settings fail. Test cloud client construction with a stub so normal CI makes no cloud calls. If the host is Supabase instead of GCP, replan this step for Postgres rather than extending the Firestore client.
+9. Add the Cloud Run service manifest and IAM instructions (item 5). Then proceed to the separately approved cloud validation below.
 
 No type checker is currently configured. Continue the existing checks rather than adding unrelated tooling.
 

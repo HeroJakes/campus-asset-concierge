@@ -47,11 +47,13 @@ We are a team of four. Each person led one feature end to end — its rules, scr
 - **Video (3–4 min):** _link._
 - **Architecture:** [Target architecture](docs/ARCHITECTURE.md) · [MCP connector](docs/MCP_LOCAL_CONTAINER.md)
 
-The stable Vercel demo entrypoint is prepared for review; it has not been deployed.
-It serves the locker with HTTP Basic and an unauthenticated MCP endpoint backed only
-by `demo/hackathon-20261111`. Operator reset restores the fictional overdue showcase;
-hosted clock controls and passwordless login are disabled. See the
-[deployment runbook](docs/DEPLOYMENT_PLAN.md) for configuration and release checks.
+The [live locker demo](https://campus-asset-concierge-demo.vercel.app/locker) uses
+HTTP Basic. The [MCP endpoint](https://campus-asset-concierge-demo.vercel.app/mcp)
+uses no authentication for this fictional demo. Both use only
+`demo/hackathon-20261111`. Operator reset restores the overdue showcase; hosted
+clock controls and passwordless login are disabled. HTTPS checks passed. Daily
+scheduling awaits cron-job.org account access. See the
+[deployment runbook](docs/DEPLOYMENT_PLAN.md) for the release evidence and settings.
 
 ## Run it locally
 

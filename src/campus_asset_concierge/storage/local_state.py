@@ -2,7 +2,7 @@ import os
 from collections.abc import Callable
 from threading import Lock
 
-from google.auth.credentials import AnonymousCredentials
+from google.auth.credentials import AnonymousCredentials, Credentials
 from google.api_core.exceptions import Aborted
 from google.cloud import firestore
 
@@ -17,7 +17,7 @@ _local_write_lock = Lock()
 class LocalStateStore:
     """Store the local test state as one document so a reset replaces all fixture data."""
 
-    def __init__(self, document_id: str = "current") -> None:
+    def __init__(self, document_id: str = "current", *, credentials: Credentials | None = None) -> None:
         emulator = os.environ.get("FIRESTORE_EMULATOR_HOST", "")
         if emulator:
             host, separator, port = emulator.partition(":")
@@ -40,7 +40,7 @@ class LocalStateStore:
                     "(with GOOGLE_APPLICATION_CREDENTIALS pointing at a service-account key) "
                     "to use hosted Firestore."
                 )
-            self.client = firestore.Client(project=project)
+            self.client = firestore.Client(project=project, credentials=credentials)
         self.document = self.client.collection("demo").document(document_id)
 
     def reset(self, scenario: TestScenario) -> None:

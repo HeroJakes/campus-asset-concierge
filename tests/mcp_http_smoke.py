@@ -5,6 +5,8 @@ import asyncio
 from contextlib import asynccontextmanager
 import json
 
+import httpx
+
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 
@@ -16,8 +18,8 @@ async def call(session, name, arguments):
 
 
 @asynccontextmanager
-async def connected_session(url: str):
-    async with streamable_http_client(url) as (read, write, session_id):
+async def connected_session(url: str, *, http_client: httpx.AsyncClient | None = None):
+    async with streamable_http_client(url, http_client=http_client) as (read, write, session_id):
         async with ClientSession(read, write) as session:
             await session.initialize()
             assert session_id() is None
@@ -29,8 +31,8 @@ async def connected_session(url: str):
             yield session
 
 
-async def check(url: str, scenario: str) -> None:
-    async with connected_session(url) as session:
+async def check(url: str, scenario: str, *, http_client: httpx.AsyncClient | None = None) -> None:
+    async with connected_session(url, http_client=http_client) as session:
         recovery = await call(session, "run_overdue_recovery", {})
         assert recovery["overdue_loans"][0]["id"] == "active-projector"
         if scenario == "spare_available":

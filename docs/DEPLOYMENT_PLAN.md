@@ -1,120 +1,148 @@
-# Deployment plan (do-it-yourself runbook)
+# Stable hackathon deployment
 
-Goal: take the working prototype from "local only" to "live on the internet on real Firestore," ready for the demo. Gemini Enterprise is added **last**, as a bonus, when the trial licence arrives.
+Stage 1.5. Vercel is the chosen host for the locker, REST API, and MCP endpoint.
+Judging runs November 11–14, 2026. This plan replaces the older Render runbook.
 
-Order: merge the Firebase branch → verify real Firestore → seed once → host the app → add a daily recovery trigger → (later) Gemini Enterprise.
+## Status
 
-## Firebase progress — 2026-11-06
+The entrypoint is implemented on `feat/run-recovery-endpoint` for teammate review.
+No stable deployment, hosted seed, sensitive environment settings, or scheduler
+has been created in this change. PR #20 is merged; PR #21 must be reviewed and
+merged before release. The teammate must review the entrypoint changes too.
 
-This session covers Firebase only. Hosting, scheduling, and Gemini steps below remain deferred.
-
-| Check | Result |
+| Target | Setting |
 | --- | --- |
-| Project and database | `campus-asset-concierge`, `(default)`, Standard / Native mode, Singapore (`asia-southeast1`) |
-| Free plan | Billing disabled; no billing account linked |
-| Backend connection | Verified with `LocalStateStore` and the local service-account key |
-| Initial seed | Created `demo/current` with `spare_available`, without `--replace` |
-| Read-back | Scenario verified; `elapsed_minutes` is `0`; recovery has not run |
-| Branch merge | Pending teammate review; cloud checks ran from `chore/firebase-spark-setup` |
+| Planned Vercel project | `campus-asset-concierge-demo`, in Ivan Lee's projects, Hobby |
+| Runtime | Python 3.12, FastAPI, Singapore (`sin1`), 60-second request cap |
+| Firebase | `campus-asset-concierge`, `(default)`, Singapore (`asia-southeast1`), Spark |
+| Live document after release | `demo/hackathon-20261111` only |
+| Locker | `/locker`, HTTP Basic |
+| MCP | `/mcp`, Streamable HTTP, no authentication for this fictional demo |
+| Health | `/health`, public, no database read or write |
+| Live URL | Pending review and deployment; do not use an experimental preview link |
 
-The Firebase connection and initial seed are complete. Do not seed again as a routine startup step. See [Firebase setup](FIREBASE_SETUP.md) for rules and local emulator details.
+`vercel_demo.py` requires the exact project and document. Startup never seeds or
+resets data. `vercel_preview.py` keeps its experimental token and document guards;
+the two wrappers share only MCP mounting and lifespan setup in `vercel_app.py`.
 
-## Before you start
+## Authentication and browser requests
 
-- Firebase project `campus-asset-concierge`, Firestore in Singapore. The fictional demo document is now seeded.
-- Your service-account key JSON is on your machine (in Downloads). Keep it secret; never commit it.
-- `FIRESTORE_EMULATOR_HOST` must be **unset** in any shell that talks to real Firestore. Run `Remove-Item Env:FIRESTORE_EMULATOR_HOST -ErrorAction SilentlyContinue` in that shell. Keep hosted credentials confined to that shell; local tests use the emulator.
+- REST and locker accounts use the existing Basic roles: `equipment-staff`,
+  `borrower-a`, `borrower-b`, and `local-operator`. Share credentials privately.
+- `/local-test/reset` requires the operator password. It checks the document again
+  before replacing state. It cannot reset `demo/current` or an arbitrary document.
+- Hosted clock routes and dev-login routes are removed. `DEV_LOGIN=1` stops startup.
+- Unsafe browser requests must have the correct Origin when one is supplied.
+  Cross-site Fetch Metadata is rejected too. Command-line clients and the scheduler
+  may omit Origin, but protected REST routes still require Basic credentials.
+- Hosted Basic authentication adds no session cookie. The existing local dev cookie
+  remains SameSite=Strict and is unavailable in the hosted app.
+- Responses are not cached. MCP accepts only the configured host and browser origin.
+  There is no blanket `x-preview-token` gate.
 
-## Step 1 — Merge the Firebase code branch
+Unauthenticated MCP is an explicit demo exception. Anyone with the URL can use all
+five tools, select either fictional borrower, and run recovery. MCP cannot reset or
+advance the clock. Add OAuth and caller roles later against the real Gemini
+Enterprise connector. In Gemini, choose **No authentication**; leave OAuth fields
+empty. Real connector verification waits for the licence.
 
-`chore/firebase-spark-setup` holds the code that lets the backend use real Firestore (and config, rules, docs).
+## Vercel environment
 
-1. Open a PR into `main` and get a teammate to review:
+Set these on the dedicated project's Production environment. Use a separate project
+from `campus-asset-concierge-vercel-test`. Verify the team and project before changing
+settings. Do not copy the local `.env`, where dev login may be enabled.
+
+| Variable | Value |
+| --- | --- |
+| `GOOGLE_CLOUD_PROJECT` | `campus-asset-concierge` |
+| `FIRESTORE_DOCUMENT_ID` | `hackathon-20261111` |
+| `GOOGLE_CREDENTIALS_JSON` | Service-account JSON, **sensitive** |
+| `DEV_LOGIN` | `0` |
+| `LOCAL_STAFF_PASSWORD` | Unique generated password, at least 32 characters, **sensitive** |
+| `LOCAL_BORROWER_A_PASSWORD` | Unique generated password, at least 32 characters, **sensitive** |
+| `LOCAL_BORROWER_B_PASSWORD` | Unique generated password, at least 32 characters, **sensitive** |
+| `LOCAL_OPERATOR_PASSWORD` | Unique generated password, at least 32 characters, **sensitive** |
+| `PUBLIC_BASE_URL` | The project's stable HTTPS origin, with no path |
+
+Do not set `FIRESTORE_EMULATOR_HOST`, `GOOGLE_APPLICATION_CREDENTIALS`,
+`VERCEL_TEST_DOCUMENT_ID`, `PREVIEW_ACCESS_TOKEN`, `MCP_GOOGLE_CLIENT_ID`, or
+`MCP_ALLOWED_EMAILS`. The app reads the JSON secret directly, without a key file.
+The stable production URL must be reachable without a Vercel account sign-in;
+application Basic authentication still protects the REST and locker routes.
+
+## Release order after review
+
+1. Get teammate review and merge PR #21 into `main`. Deploy only the reviewed commit.
+2. Record the full content and update timestamp of hosted `demo/current`, using a
+   read-only Firebase MCP call. Keep verification artifacts private.
+3. Configure the dedicated Vercel project and sensitive variables above.
+4. Seed only the fresh document. With the approved environment securely loaded in a
+   dedicated operator process, run:
+
    ```powershell
-   gh pr create --base main --head chore/firebase-spark-setup --fill
+   uv run --locked python -c "from campus_asset_concierge.vercel_demo import seed_demo; seed_demo()"
    ```
-2. Merge it on GitHub.
 
-## Step 2 — Verify the real connection (read-only, writes nothing)
+   `seed_demo()` uses Firestore's create-only operation. If the document exists,
+   stop and inspect it; never add a replace flag. It seeds `spare_available` at
+   61 elapsed minutes, then runs recovery so an overdue loan and pending substitute
+   proposal are ready. If that recovery call fails after creation, use the protected
+   recovery endpoint to finish it; do not overwrite the document.
+5. Deploy `main.py`, which exports `create_demo_app()`. Keep the existing 60-second
+   cap and Singapore region. `.vercelignore` excludes credentials and local files.
+6. Verify over HTTPS before adding any schedule:
+   - `/health` returns 200 without credentials; `/locker` returns 401 without Basic.
+   - Staff and borrower locker pages render with their own credentials.
+   - MCP initialization and `tools/list` work without a preview token or OAuth.
+   - A booking write persists, verified by a direct Firebase MCP read of the demo doc.
+   - Recovery is staff-only and idempotent. A first Firestore request is comfortably
+     under 60 seconds; idle time alone is not proof that Vercel evicted an instance.
+   - Cross-origin mutations are rejected. Clock and dev-login paths return 404.
+   - Approve a substitute, then use the operator reset and verify the pending
+     proposal is restored. Restore the showcase after other smoke-test writes too.
+   - `demo/current` has exactly the recorded content and update timestamp.
+7. Record the live URL, deployed commit, timings, data comparison, and scheduler
+   outcome here. Check the staged diff for secrets before committing.
 
-**Complete.** Before seeding, this returned `exists: False`. After seeding, it returned `exists: True`.
+## Operator reset between judges
 
-In a fresh PowerShell:
+Send `POST /local-test/reset` with Basic authentication as `local-operator` and JSON
+`{"scenario":"spare_available"}`. The existing API docs at `/docs` can send this
+request after the operator enters their credentials. Keep that password private.
+Use `spare_unavailable` only when deliberately showing the no-spare scenario.
 
-```powershell
-Remove-Item Env:FIRESTORE_EMULATOR_HOST -ErrorAction SilentlyContinue
-$env:GOOGLE_CLOUD_PROJECT = 'campus-asset-concierge'
-$env:GOOGLE_APPLICATION_CREDENTIALS = Read-Host 'Full path to your service-account key JSON'
-uv run --locked python -c "from campus_asset_concierge.storage.local_state import LocalStateStore; store = LocalStateStore(); assert store.client.project == 'campus-asset-concierge'; print('target:', store.client.project, store.document.path); print('exists:', store.document.get(timeout=20).exists)"
-```
+Reset always restores the chosen fictional fixture at 11:01 Malaysia time on
+November 7, 2026, then runs recovery to prepare its proposal or escalation. The
+clock stays fixed. Dates in bookings must follow that demo clock. The daily job
+does not advance time, send Gmail messages, approve proposals, or reset the data.
+State is shared and changes persist between judges until the operator resets it.
 
-Expect `exists: True` for the seeded database. `False` means the read succeeded but the document is absent. For an error, check the key path, credential validity, project, and IAM permissions; do not reseed to fix an access error.
+## Daily scheduler, after HTTPS verification
 
-## Step 3 — Seed the real database once
+Create exactly one cron-job.org job:
 
-**Complete.** The create-only seed and read-back passed. The command below is for a fresh, empty demo document only.
+| Field | Value |
+| --- | --- |
+| URL | `<stable HTTPS origin>/recovery/run` |
+| Method | `POST` |
+| Time zone | `Asia/Kuala_Lumpur` |
+| Schedule | Daily at 09:00 (`0 9 * * *`; 01:00 UTC) |
+| HTTP Basic username | `equipment-staff` |
+| HTTP Basic password | Same sensitive staff password as Vercel, entered privately |
+| Expected result | HTTP 200; repeat calls do not duplicate recovery records |
 
-Keep the two env vars from Step 2 set (emulator var still unset):
+Run one manual scheduler test and check its execution history before relying on it.
+No keep-awake job is planned or needed. `/health` is available for manual checks.
+Vercel Cron is not configured; it sends GET, while this endpoint requires POST.
+Scheduler account access is needed to create and verify the external job.
 
-```powershell
-uv run --locked python -m campus_asset_concierge.seed_demo spare_available
-```
+## Data and test guardrails
 
-This writes one `demo/current` document of fictional data. It refuses if data already exists; add `--replace` to overwrite on purpose. Re-run Step 2's check — it should now print `exists: True`.
-
-⚠️ Only seed the real database deliberately. Never point tests or the `reset` route at it.
-
-After the hosted checks, close that shell or clear its hosted settings before returning to local work:
-
-```powershell
-Remove-Item Env:GOOGLE_APPLICATION_CREDENTIALS, Env:GOOGLE_CLOUD_PROJECT -ErrorAction SilentlyContinue
-$env:FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080'
-```
-
-**Stop here for this change.** Steps 4–7 need separate hosting or integration work.
-
-## Step 4 — Host the app on Render (free)
-
-Hosts the FastAPI app: the locker page + booking API + recovery.
-
-1. On [render.com](https://render.com) → **New → Web Service** → connect this repo (branch `main`).
-2. Runtime **Docker**, or Python with start command:
-   ```
-   uv run --locked uvicorn campus_asset_concierge.api.app:create_app --factory --host 0.0.0.0 --port $PORT
-   ```
-3. **Environment variables:**
-   - `GOOGLE_CLOUD_PROJECT = campus-asset-concierge`
-   - `LOCAL_BORROWER_A_PASSWORD`, `LOCAL_BORROWER_B_PASSWORD`, `LOCAL_STAFF_PASSWORD`, `LOCAL_OPERATOR_PASSWORD` — pick strong values.
-   - Do **not** set `FIRESTORE_EMULATOR_HOST`.
-4. **Secret File** for the key: add a Secret File holding the JSON, e.g. at `/etc/secrets/firebase.json`, then set:
-   - `GOOGLE_APPLICATION_CREDENTIALS = /etc/secrets/firebase.json`
-5. Deploy. Note the public URL (e.g. `https://campus-asset-concierge.onrender.com`).
-6. Open `<url>/locker`, sign in — your live app on real Firestore.
-
-⚠️ Free Render sleeps after ~15 min idle (≈1 min cold start). See Step 6 to keep it awake for judging.
-
-## Step 5 — Student booking front door (decide)
-
-- **Primary:** Gemini Enterprise chat (Step 7, when the licence arrives).
-- **Backup:** a simple coded chat page using a free Gemini API key — build only if the licence is late. Ask me to add it.
-
-## Step 6 — Daily overdue recovery + keep-awake
-
-The "maximizing" automation = run recovery once a day.
-
-1. `POST /recovery/run` runs one recovery pass. It is staff-authenticated and idempotent, so it is safe to call on a schedule.
-2. Use a free scheduler ([cron-job.org](https://cron-job.org)) to call it daily with HTTP Basic auth as `equipment-staff` (plus the `x-preview-token` header while the preview gate is on). A ping every ~10 min during judging (Nov 11–14) also keeps the free host awake.
-
-## Step 7 — Gemini Enterprise (when the licence arrives)
-
-Follow [GEMINI_BUILD_SHEET.md](GEMINI_BUILD_SHEET.md):
-
-1. Deploy/point the MCP connector (`mcp_server`) at the same backend and Firestore.
-2. Build the chat agent + recovery workflow; register the **MCP** (3P) and **Gmail** (1P) connectors.
-3. Rehearse with [DEMO_SCRIPT.md](DEMO_SCRIPT.md).
-
-## Guardrails
-
-- Never commit the key (it is gitignored; keep it in Render's secrets).
-- Tests and CI stay on the **emulator** — do not set the real env vars there.
-- Fictional data only.
+- Fictional data only. Never seed, reset, or write hosted `demo/current`.
+- Baseline read on November 7: `demo/current` update timestamp is
+  `2026-11-06T09:19:18.605177Z`; scenario `spare_available`, elapsed minutes `0`.
+- Tests and CI use only the local emulator or mocked clients. Hosted entrypoint
+  unit tests mock credentials and store construction; they never create a cloud client.
+- The reset integration test uses the emulator's exact demo document, skips it if
+  already present, and removes only the document it created.
+- Never commit keys, passwords, tokens, preview-access URLs, or scheduler credentials.

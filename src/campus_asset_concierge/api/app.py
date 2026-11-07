@@ -176,7 +176,7 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     def confirm_reservation(offer_id: str, actor: Actor) -> dict:
         return reservations.confirm(actor.username, offer_id)
 
-    # shortcut: browser-cached Basic sign-in has no CSRF protection, add it before hosting.
+    # Hosted entrypoints must check the origin of browser mutations with cached Basic auth.
     @app.post("/reservations/{reservation_id}/load")
     def load_reservation(reservation_id: str, actor: Actor) -> dict:
         require_role(actor, Role.STAFF)

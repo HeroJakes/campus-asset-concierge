@@ -49,6 +49,8 @@ We are a team of four. Each person led one feature end to end — its rules, scr
 
 ## Run it locally
 
+To run the app on your laptop with the shared cloud Firestore database, follow [Cloud-connected local startup](docs/FIREBASE_SETUP.md#cloud-connected-local-startup). The steps below use a separate emulator database for tests and resettable rehearsals.
+
 The local prototype runs the lending backend and the locker page without any Google Cloud or Gemini account. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and the [Firebase Firestore emulator](https://firebase.google.com/docs/emulator-suite/install_and_configure), then start the emulator in one shell:
 
 ```sh
@@ -93,4 +95,4 @@ tests/        pytest and Node test suites
 
 ## Status and roadmap
 
-See [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the roadmap. The Firebase Spark database in Singapore is set up, and the backend connection and fictional demo seed are verified; see [Firebase setup](docs/FIREBASE_SETUP.md) and the [deployment plan](docs/DEPLOYMENT_PLAN.md). Local development and tests use the emulator. Backend hosting and Gemini integration remain pending.
+See [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the roadmap. The Firebase Spark database in Singapore is set up, and the backend connection and fictional demo seed are verified; see [Firebase setup](docs/FIREBASE_SETUP.md) and the [deployment plan](docs/DEPLOYMENT_PLAN.md). The app can run locally against cloud Firestore; tests and resettable rehearsals use the emulator. Backend hosting and Gemini integration remain pending.

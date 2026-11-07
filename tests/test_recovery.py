@@ -117,6 +117,26 @@ def test_overdue_recovery_creates_a_staff_owned_escalation_when_spare_is_booked(
 
 
 
+def test_run_recovery_endpoint_detects_overdue_and_is_staff_only(booking_app):
+    client, store = booking_app
+
+    # Advance the clock directly, bypassing the route that also runs recovery,
+    # so the loan is due but recovery has not processed it yet.
+    store.advance(61)
+    assert store.load()["loans"]["active-projector"]["status"] == "active"
+
+    ran = client.post("/recovery/run", auth=STAFF)
+    assert ran.status_code == 200
+    assert ran.json()["substitution_proposals"][0]["substitute_asset_id"] == "projector-b"
+    assert store.load()["loans"]["active-projector"]["status"] == "overdue"
+
+    # Safe for a daily scheduler to call repeatedly.
+    assert client.post("/recovery/run", auth=STAFF).status_code == 200
+    assert client.post("/recovery/run", auth=BORROWER_B).status_code == 403
+    assert client.post("/recovery/run", auth=OPERATOR).status_code == 403
+    assert client.post("/recovery/run").status_code == 401
+
+
 def test_recovery_is_idempotent_and_staff_only(booking_app):
     client, store = booking_app
     advance(client)

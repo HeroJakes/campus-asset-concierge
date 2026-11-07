@@ -102,8 +102,8 @@ Hosts the FastAPI app: the locker page + booking API + recovery.
 
 The "maximizing" automation = run recovery once a day.
 
-1. Expose a staff endpoint that runs recovery (e.g. `POST /run-recovery`). This does not exist yet — **ask me to add it.**
-2. Use a free scheduler ([cron-job.org](https://cron-job.org)) to call it daily. A ping every ~10 min during judging (Nov 11–14) also keeps the free host awake.
+1. `POST /recovery/run` runs one recovery pass. It is staff-authenticated and idempotent, so it is safe to call on a schedule.
+2. Use a free scheduler ([cron-job.org](https://cron-job.org)) to call it daily with HTTP Basic auth as `equipment-staff` (plus the `x-preview-token` header while the preview gate is on). A ping every ~10 min during judging (Nov 11–14) also keeps the free host awake.
 
 ## Step 7 — Gemini Enterprise (when the licence arrives)
 

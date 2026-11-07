@@ -192,6 +192,12 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
         require_role(actor, Role.STAFF)
         return recovery.staff_page()
 
+    # Idempotent trigger for a daily scheduler (cron-job.org) once hosted; staff-authenticated.
+    @app.post("/recovery/run")
+    def run_recovery(actor: Actor) -> dict:
+        require_role(actor, Role.STAFF)
+        return recovery.process()
+
     @app.post("/recovery/substitution-proposals/{reservation_id}/approve")
     def approve_substitution(reservation_id: str, request: ApproveRequest, actor: Actor) -> dict:
         require_role(actor, Role.STAFF)

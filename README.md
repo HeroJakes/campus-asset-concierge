@@ -97,4 +97,6 @@ tests/        pytest and Node test suites
 
 ## Status and roadmap
 
+An isolated [Vercel preview experiment](docs/VERCEL_PREVIEW_TEST.md) tests the API and MCP server against cloud Firestore. It is protected testing infrastructure; Gemini integration and production deployment remain pending.
+
 See [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the roadmap. The Firebase Spark database in Singapore is set up, and the backend connection and fictional demo seed are verified; see [Firebase setup](docs/FIREBASE_SETUP.md) and the [deployment plan](docs/DEPLOYMENT_PLAN.md). The app can run locally against cloud Firestore; tests and resettable rehearsals use the emulator. Backend hosting and Gemini integration remain pending.

@@ -16,5 +16,8 @@ serviceAccount*.json
 *-credentials.json
 .adk/
 .firebase/
+.vercel/
 firebase-debug.log*
 firestore-debug.log*
+.vercel
+.env*

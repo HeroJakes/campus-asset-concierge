@@ -33,9 +33,9 @@ Do **not** set these for local tests or `reset` commands; those stay on the emul
 
 The app runs on your laptop and reads and writes the shared cloud database directly. It does not need public hosting. Cloud data and emulator data do not sync.
 
-On Ivan's machine, `.env.cloud` contains the local credential path and demo passwords. Git ignores this file. Open it locally to find the passwords for `borrower-a`, `borrower-b`, and `equipment-staff`; do not share or commit it.
+On Ivan's machine, `.env` contains the local credential path and demo passwords. Git ignores this file. Open it locally to find the passwords for `borrower-a`, `borrower-b`, and `equipment-staff`; do not share or commit it.
 
-For another machine, create a private `.env.cloud` with these settings, filling in a valid credential path and three passwords:
+For another machine, create a private `.env` with these settings, filling in a valid credential path and three passwords:
 
 ```dotenv
 GOOGLE_CLOUD_PROJECT=campus-asset-concierge
@@ -52,10 +52,10 @@ Start from the repo root in PowerShell:
 
 ```powershell
 Remove-Item Env:FIRESTORE_EMULATOR_HOST -ErrorAction SilentlyContinue
-uv run --locked --env-file .env.cloud uvicorn campus_asset_concierge.api.app:create_app --factory --host 127.0.0.1 --port 8000
+uv run --locked --env-file .env uvicorn campus_asset_concierge.api.app:create_app --factory --host 127.0.0.1 --port 8000
 ```
 
-Open [the locker](http://127.0.0.1:8000/locker) or [the API docs](http://127.0.0.1:8000/docs). Bookings and locker actions use `campus-asset-concierge/(default)/demo/current`. Stop the server with Ctrl+C before switching profiles. Start tests in a separate shell with the emulator configuration, without `--env-file .env.cloud`.
+Open [the locker](http://127.0.0.1:8000/locker) or [the API docs](http://127.0.0.1:8000/docs). Bookings and locker actions use `campus-asset-concierge/(default)/demo/current`. Stop the server with Ctrl+C before switching profiles. Start tests in a separate shell with the emulator configuration, without `--env-file .env`.
 
 Verified on 2026-11-07: a read of the cloud document found the `spare_available` scenario with 3 assets, 1 reservation, and 1 loan. No seed or replacement was run during setup.
 

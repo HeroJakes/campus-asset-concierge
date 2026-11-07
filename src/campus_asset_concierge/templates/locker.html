@@ -48,6 +48,7 @@
 
   <main class="canvas{% if is_staff %} staff-canvas{% endif %}" id="main-content">
     <noscript><p class="notice">The locker actions need JavaScript. You can still read this page.</p></noscript>
+    {% if dev_login %}<p class="notice">Dev login · {{ request.cookies.get('dev_account') }} · No password · <a href="/logout">Switch account</a></p>{% endif %}
     <p class="notice notice--error" id="action-error" role="alert" hidden></p>
 
     {% if is_staff %}

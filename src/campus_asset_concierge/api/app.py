@@ -6,7 +6,7 @@ from secrets import compare_digest
 from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -51,17 +51,39 @@ LOCAL_ACCOUNTS = {
     "local-operator": (Role.OPERATOR, "LOCAL_OPERATOR_PASSWORD"),
 }
 
-basic = HTTPBasic()
+DEV_ACCOUNTS = {"borrower_a": BORROWER_A, "borrower_b": BORROWER_B, "staff": "equipment-staff"}
+basic = HTTPBasic(auto_error=False)
 
 
-def signed_in(credentials: Annotated[HTTPBasicCredentials, Depends(basic)]) -> LocalAccount:
-    account = LOCAL_ACCOUNTS.get(credentials.username)
-    if account is not None:
+def dev_login_enabled(request: Request) -> bool:
+    return (
+        os.environ.get("DEV_LOGIN") == "1"
+        and request.client is not None
+        and request.client.host in {"127.0.0.1", "::1"}
+        and request.url.hostname in {"127.0.0.1", "localhost", "::1"}
+    )
+
+
+def signed_in(
+    request: Request, credentials: Annotated[HTTPBasicCredentials | None, Depends(basic)],
+) -> LocalAccount:
+    dev_mode = dev_login_enabled(request)
+    if dev_mode:
+        username = DEV_ACCOUNTS.get(request.cookies.get("dev_account", ""))
+        if username is not None:
+            return LocalAccount(username, LOCAL_ACCOUNTS[username][0])
+        if credentials is None and request.url.path.startswith("/locker"):
+            raise HTTPException(303, headers={"Location": "/dev-login"})
+    account = LOCAL_ACCOUNTS.get(credentials.username) if credentials else None
+    if account is not None and credentials is not None:
         role, password_variable = account
         password = os.environ.get(password_variable)
         if password and compare_digest(password.encode(), credentials.password.encode()):
             return LocalAccount(credentials.username, role)
-    raise HTTPException(401, "Invalid local credentials.", headers={"WWW-Authenticate": "Basic"})
+    raise HTTPException(
+        401, "Choose a dev account." if dev_mode else "Invalid local credentials.",
+        headers={} if dev_mode else {"WWW-Authenticate": "Basic"},
+    )
 
 
 Actor = Annotated[LocalAccount, Depends(signed_in)]
@@ -103,6 +125,25 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     app.mount("/static", StaticFiles(directory=PACKAGE_DIR / "static"), name="static")
     templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
     templates.env.globals["requirements_text"] = requirements_text
+
+    @app.get("/dev-login", response_class=HTMLResponse)
+    def dev_login_page(request: Request) -> HTMLResponse:
+        if not dev_login_enabled(request):
+            raise HTTPException(404, "Not found.")
+        return templates.TemplateResponse(request, "dev_login.html", {"accounts": DEV_ACCOUNTS})
+
+    @app.post("/dev-login/{account}")
+    def dev_login(account: str, request: Request) -> RedirectResponse:
+        if not dev_login_enabled(request):
+            raise HTTPException(404, "Not found.")
+        if request.headers.get("origin", str(request.base_url).rstrip("/")) != str(request.base_url).rstrip("/"):
+            raise HTTPException(403, "Open dev login from this app.")
+        if account not in DEV_ACCOUNTS:
+            raise HTTPException(404, "Unknown dev account.")
+        response = RedirectResponse("/locker", status_code=303)
+        # Deliberately selectable identities for loopback-only demos, never public authentication.
+        response.set_cookie("dev_account", account, httponly=True, samesite="strict")
+        return response
 
     @app.exception_handler(ReservationError)
     async def reservation_error(_: Request, error: ReservationError) -> JSONResponse:
@@ -213,6 +254,7 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
             "is_staff": actor.role == Role.STAFF,
             "returns": [],
             "bookings_page": bookings_page,
+            "dev_login": dev_login_enabled(request),
         }
         if actor.role == Role.STAFF:
             context |= pickups.staff_page()
@@ -226,7 +268,11 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
         return templates.TemplateResponse(request, "locker.html", context)
 
     @app.get("/logout", response_class=HTMLResponse)
-    def logout() -> HTMLResponse:
+    def logout(request: Request) -> Response:
+        if dev_login_enabled(request):
+            response = RedirectResponse("/dev-login", status_code=303)
+            response.delete_cookie("dev_account")
+            return response
         # HTTP Basic has no real logout; a 401 makes the browser re-prompt so the
         # demo can switch between the staff and borrower accounts.
         body = (

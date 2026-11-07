@@ -5,25 +5,71 @@ Judging runs November 11–14, 2026. This plan replaces the older Render runbook
 
 ## Status
 
-The entrypoint is implemented on `feat/run-recovery-endpoint` for teammate review.
-No stable deployment, hosted seed, sensitive environment settings, or scheduler
-has been created in this change. PR #20 is merged; PR #21 must be reviewed and
-merged before release. The teammate must review the entrypoint changes too.
+The reviewed entrypoint and recovery trigger were merged in PR #21. The stable
+demo is deployed from `main` commit `7baf36a96860eb95c902224c6346f526afa7e2b6`.
+The create-only seed and live HTTPS checks passed on November 7, 2026. The daily
+scheduler is pending cron-job.org sign-in; no scheduler or keep-awake job exists yet.
 
 | Target | Setting |
 | --- | --- |
-| Planned Vercel project | `campus-asset-concierge-demo`, in Ivan Lee's projects, Hobby |
+| Vercel project | `campus-asset-concierge-demo`, in Ivan Lee's projects, Hobby |
 | Runtime | Python 3.12, FastAPI, Singapore (`sin1`), 60-second request cap |
 | Firebase | `campus-asset-concierge`, `(default)`, Singapore (`asia-southeast1`), Spark |
-| Live document after release | `demo/hackathon-20261111` only |
+| Live document | `demo/hackathon-20261111` only |
 | Locker | `/locker`, HTTP Basic |
 | MCP | `/mcp`, Streamable HTTP, no authentication for this fictional demo |
 | Health | `/health`, public, no database read or write |
-| Live URL | Pending review and deployment; do not use an experimental preview link |
+| Live URL | https://campus-asset-concierge-demo.vercel.app |
 
 `vercel_demo.py` requires the exact project and document. Startup never seeds or
 resets data. `vercel_preview.py` keeps its experimental token and document guards;
 the two wrappers share only MCP mounting and lifespan setup in `vercel_app.py`.
+
+## Live verification — November 7, 2026
+
+Deployment: `dpl_J2NACJqHk9GuxooMzo4VjF5H3Bg3`, Production, ready. This is a separate
+project from the experimental preview. Vercel's account-login barrier is disabled.
+All nine configured environment variables are sensitive and Production-only.
+No emulator or preview-gate variables are configured. No secrets were committed.
+
+| Check | HTTPS result |
+| --- | --- |
+| Public `/health` | 200, `{"status":"ok"}`, 0.443 seconds on the first measured request |
+| Locker without credentials | 401 with a Basic challenge |
+| Staff and borrower locker pages | Both 200; first Firestore-backed locker read 0.820 seconds |
+| Clock read/advance and dev-login | 404, including with operator credentials |
+| MCP initialization and discovery | 200 without auth; all five tools returned |
+| MCP booking | Confirmed a Raspberry Pi kit reservation; direct Firebase MCP read verified persistence |
+| Recovery trigger | 401 without auth; 403 as borrower; repeat staff calls returned identical results |
+| Operator reset | 401 without auth; 403 as staff; valid operator request returned 204 in 0.144 seconds |
+| Showcase restoration | Approved a substitute, then reset; Firebase confirmed the original booking and pending proposal restored |
+| Cross-origin reset / cross-site browser request | Both 403 |
+| Cross-origin MCP / wrong MCP hostname | 403 / 421 |
+| Slowest measured request | 0.820 seconds, below the 60-second cap |
+
+The smoke booking was `reservation-bfa601fe977f4d2b96fba84a531a4ee7`. After verifying
+its persistence, operator reset removed it and restored the clean showcase. The
+final Firebase MCP read found only `next-projector`, the overdue active loan, and
+the substitute proposal in `pending_staff_approval`, at 61 elapsed minutes.
+
+Hosted `demo/current` was read before seeding and after all live mutation checks:
+
+| Baseline | Before | After |
+| --- | --- | --- |
+| Update timestamp | `2026-11-06T09:19:18.605177Z` | `2026-11-06T09:19:18.605177Z` |
+| Content SHA-256 | `9df5b70dffc20cc5d314d63e90a38740e9be1db059846cb490d2fa73388a37c1` | `9df5b70dffc20cc5d314d63e90a38740e9be1db059846cb490d2fa73388a37c1` |
+
+The hash covers Firestore's typed `fields`, encoded as UTF-8 JSON with sorted keys
+and compact separators. Full snapshots and smoke measurements are kept in ignored
+local verification files. Account passwords are stored privately outside the repo;
+the service-account JSON was passed in memory to Vercel's sensitive variable.
+The `vercel-test-*` document was not written or reset.
+
+These checks used the public HTTPS address, with no Vercel login or preview token.
+They do not prove the later Gemini Enterprise handshake. Cold-invocation
+compatibility was established separately in the preview experiment; idle time
+alone cannot prove instance eviction. The unchanged reviewed code passed all
+183 Python tests on the emulator and all five browser tests before release.
 
 ## Authentication and browser requests
 

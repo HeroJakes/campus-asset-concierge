@@ -59,6 +59,30 @@ Verified live:
 - A separate direct Firestore read confirms the MCP writes persisted.
 - `demo/current` retains its original update timestamp.
 
+## First-after-idle live checks (2026-11-07)
+
+Tested the existing protected preview `campus-asset-concierge-vercel-test-26ghg6vh3.vercel.app`. Each idle-sensitive request used its own idle window, a new HTTP client, and no client retries. Staff `/recovery` was used for the Firestore read because `/pickups` requires a borrower role.
+
+| Request | Idle before request | HTTP result | Client round-trip |
+| --- | --- | --- | --- |
+| Staff `GET /recovery` | 308.5 seconds | 200 | 0.203 seconds |
+| Borrower booking confirmation | 314.4 seconds | 200 | 0.438 seconds |
+| MCP `run_overdue_recovery` | 316.8 seconds | 200 | 0.285 seconds |
+| MCP `tools/list` (warm comparison) | After recovery | 200, five tools | 0.085 seconds |
+| Without `x-preview-token` | Access cookie present | 401 | 0.156 seconds |
+| Fresh revision's first Firestore read | Unvisited for 5+ minutes after READY | 200 | 0.734 seconds |
+| MCP offer write on the fresh revision | After its first read | 200 | 0.686 seconds |
+
+The new booking and the fresh revision's new offer were verified directly through Firebase MCP in `demo/vercel-test-20261107-cccda3a6`, not through the application's read path. No seed or reset was used for these checks. The slowest measured request above was 0.734 seconds, below the configured 60-second cap. The HTTPS 401 response body was checked to confirm it came from the app's token gate, not Vercel sign-in protection.
+
+Before testing, `demo/current` had update time `2026-11-06T09:19:18.605177Z`. Its canonical Firestore fields had SHA-256 `9DF5B70DFFC20CC5D314D63E90A38740E9BE1DB059846CB490D2FA73388A37C1`. Direct Firebase MCP checks compare both the full field content and update time.
+
+Final Firebase MCP verification after all writes confirmed that both the update time and full content remained unchanged. Vercel reported no error or fatal logs for either tested preview during the test windows.
+
+Five minutes idle does not prove Vercel recycled the process. Vercel returned no trace for the timed read, so these measurements alone establish first-after-idle success, not independently verified cold-instance startup.
+
+To exercise initial connection setup separately, a forced, uncached build created preview `campus-asset-concierge-vercel-test-djigurwe1.vercel.app` (`dpl_ATKXPkp85QXYbK8FZJGs74V7BUdo`). It reached READY at 07:22:49 UTC. Its first app request was the staff Firestore read after 07:27:50 UTC, sent directly with authenticated CLI access, without opening a share URL or warming the app first. This verifies the new revision's first Firestore use; Vercel did not expose an explicit process cold-start flag.
+
 ## Limits and next steps
 
 This confirms Vercel-to-Firestore compatibility for the tested workflows. It does not verify Gemini Enterprise, real email, unattended scheduling, load capacity, or long-running MCP streams. The API's demo clock remains manually controlled.

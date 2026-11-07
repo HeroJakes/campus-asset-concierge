@@ -14,7 +14,7 @@ The first deployment of the empty test project was automatically labeled product
 
 ## Small changes
 
-`main.py` exports a Vercel app assembled in `vercel_preview.py`. It reuses the API, MCP tools, lending services, and transactions. The store now accepts an optional Google credential object; normal local startup still uses its existing credentials.
+The tested experiment used `main.py` to export an app assembled in `vercel_preview.py`. The stable demo change switches `main.py` to `vercel_demo.py`; `create_preview_app()` retains its isolated document and token guards. Do not redeploy the experimental project with the new root entrypoint and its old environment. It reuses the API, MCP tools, lending services, and transactions. The store accepts an optional Google credential object; normal local startup still uses its existing credentials.
 
 The wrapper requires a separate `vercel-test-` document ID and a random access token. It rejects emulator configuration and passwordless dev mode. It mounts MCP at `/mcp`, manages the MCP lifespan, and uses JSON responses so tool calls finish promptly. The regular locker/API routes and static assets remain available behind the preview token and their existing account permissions.
 

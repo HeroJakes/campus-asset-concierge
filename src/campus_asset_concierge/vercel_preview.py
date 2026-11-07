@@ -1,6 +1,5 @@
 """Protected Vercel experiment against an isolated fictional Firestore document."""
 
-from contextlib import asynccontextmanager
 import json
 import os
 import re
@@ -10,8 +9,8 @@ from fastapi.responses import JSONResponse
 from google.oauth2.service_account import Credentials
 
 from campus_asset_concierge.api.app import create_app
-from campus_asset_concierge.mcp_server import create_mcp_server
 from campus_asset_concierge.storage.local_state import LocalStateStore
+from campus_asset_concierge.vercel_app import mount_mcp
 
 
 def create_preview_app():
@@ -26,20 +25,7 @@ def create_preview_app():
     credentials = Credentials.from_service_account_info(json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"]))
     store = LocalStateStore(document_id, credentials=credentials)
     app = create_app(store)
-    mcp = create_mcp_server(store, transport="streamable-http")
-    mcp.settings.json_response = True
     hostname = os.environ.get("VERCEL_URL")
-    if hostname:
-        mcp.settings.transport_security.allowed_hosts = [hostname]
-        mcp.settings.transport_security.allowed_origins = [f"https://{hostname}"]
-    mcp_app = mcp.streamable_http_app()
-
-    @asynccontextmanager
-    async def lifespan(app):
-        async with mcp_app.router.lifespan_context(mcp_app):
-            yield
-
-    app.router.lifespan_context = lifespan
 
     @app.middleware("http")
     async def protect_preview(request, call_next):
@@ -52,5 +38,6 @@ def create_preview_app():
     def preview_status():
         return {"status": "preview", "document": store.document.path}
 
-    app.mount("/", mcp_app)
+    mount_mcp(app, store, hosts=[hostname] if hostname else [],
+              origins=[f"https://{hostname}"] if hostname else [])
     return app

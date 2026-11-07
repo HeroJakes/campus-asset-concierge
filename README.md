@@ -47,6 +47,12 @@ We are a team of four. Each person led one feature end to end — its rules, scr
 - **Video (3–4 min):** _link._
 - **Architecture:** [Target architecture](docs/ARCHITECTURE.md) · [MCP connector](docs/MCP_LOCAL_CONTAINER.md)
 
+The stable Vercel demo entrypoint is prepared for review; it has not been deployed.
+It serves the locker with HTTP Basic and an unauthenticated MCP endpoint backed only
+by `demo/hackathon-20261111`. Operator reset restores the fictional overdue showcase;
+hosted clock controls and passwordless login are disabled. See the
+[deployment runbook](docs/DEPLOYMENT_PLAN.md) for configuration and release checks.
+
 ## Run it locally
 
 To run the app on your laptop with the shared cloud Firestore database, follow [Cloud-connected local startup](docs/FIREBASE_SETUP.md#cloud-connected-local-startup). The steps below use a separate emulator database for tests and resettable rehearsals.

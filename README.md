@@ -51,6 +51,8 @@ We are a team of four. Each person led one feature end to end — its rules, scr
 
 To run the app on your laptop with the shared cloud Firestore database, follow [Cloud-connected local startup](docs/FIREBASE_SETUP.md#cloud-connected-local-startup). The steps below use a separate emulator database for tests and resettable rehearsals.
 
+For passwordless local demos, set `DEV_LOGIN=1` and open `/dev-login` to choose `borrower_a`, `borrower_b`, or `staff`. This mode is for loopback-only use; disable it before hosting. Password-based login remains available when dev mode is off.
+
 The local prototype runs the lending backend and the locker page without any Google Cloud or Gemini account. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and the [Firebase Firestore emulator](https://firebase.google.com/docs/emulator-suite/install_and_configure), then start the emulator in one shell:
 
 ```sh

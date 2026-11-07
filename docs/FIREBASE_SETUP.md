@@ -33,7 +33,7 @@ Do **not** set these for local tests or `reset` commands; those stay on the emul
 
 The app runs on your laptop and reads and writes the shared cloud database directly. It does not need public hosting. Cloud data and emulator data do not sync.
 
-On Ivan's machine, `.env` contains the local credential path and demo passwords. Git ignores this file. Open it locally to find the passwords for `borrower-a`, `borrower-b`, and `equipment-staff`; do not share or commit it.
+On Ivan's machine, `.env` contains the local credential path and enables passwordless dev login. Git ignores this file. Open [dev login](http://127.0.0.1:8000/dev-login) and choose `borrower_a`, `borrower_b`, or `staff`. These labels map to the existing database identities, so saved bookings stay intact. Log out to switch accounts. The API docs use the same browser login cookie.
 
 For another machine, create a private `.env` with these settings, filling in a valid credential path and three passwords:
 
@@ -44,9 +44,12 @@ LOCAL_BORROWER_A_PASSWORD=your-borrower-a-password
 LOCAL_BORROWER_B_PASSWORD=your-borrower-b-password
 LOCAL_STAFF_PASSWORD=your-staff-password
 LOCAL_OPERATOR_PASSWORD=
+DEV_LOGIN=1
 ```
 
 Leave the operator password empty to disable operator reset and clock actions in this profile. This also means the stored demo clock will not advance by itself. Do not put `FIRESTORE_EMULATOR_HOST` in this file, even with an empty value: the Firestore SDK treats its presence as an emulator setting.
+
+Dev login is accepted only when `DEV_LOGIN=1` and both the request host and connecting address are loopback. It grants access to fictional borrower or staff data without proving identity. Keep the app bound to `127.0.0.1`, do not expose it through a tunnel, and disable `DEV_LOGIN` before hosting. With dev login off, the existing password-based login applies. The operator is never a dev login choice.
 
 Start from the repo root in PowerShell:
 

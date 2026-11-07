@@ -22,8 +22,7 @@ scheduler is pending cron-job.org sign-in; no scheduler or keep-awake job exists
 | Live URL | https://campus-asset-concierge-demo.vercel.app |
 
 `vercel_demo.py` requires the exact project and document. Startup never seeds or
-resets data. `vercel_preview.py` keeps its experimental token and document guards;
-the two wrappers share only MCP mounting and lifespan setup in `vercel_app.py`.
+resets data. MCP mounting and lifespan setup are shared through `vercel_app.py`.
 
 ## Live verification — November 7, 2026
 
@@ -66,9 +65,9 @@ the service-account JSON was passed in memory to Vercel's sensitive variable.
 The `vercel-test-*` document was not written or reset.
 
 These checks used the public HTTPS address, with no Vercel login or preview token.
-They do not prove the later Gemini Enterprise handshake. Cold-invocation
-compatibility was established separately in the preview experiment; idle time
-alone cannot prove instance eviction. The unchanged reviewed code passed all
+They do not prove the later Gemini Enterprise handshake. Cold starts were checked
+separately: a freshly deployed instance served its first Firestore request in under
+a second; idle time alone cannot prove instance eviction. The unchanged reviewed code passed all
 183 Python tests on the emulator and all five browser tests before release.
 
 ## Authentication and browser requests

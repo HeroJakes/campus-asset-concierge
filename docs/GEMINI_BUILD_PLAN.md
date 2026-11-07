@@ -36,13 +36,13 @@ Purpose: protect the next booking when equipment is late, without a human watchi
 
 ## Connectors to configure
 
-- **MCP connector** (third-party): the hosted backend (Cloud Run, set up when wiring Gemini). Exposes `find_equipment`, `confirm_booking`, `check_pickup_status`, `check_return_status`, and `run_overdue_recovery`.
+- **MCP connector** (third-party): the backend live on Vercel at `https://campus-asset-concierge-demo.vercel.app/mcp`. Exposes `find_equipment`, `confirm_booking`, `check_pickup_status`, `check_return_status`, and `run_overdue_recovery`.
 - **Gmail** (first-party): to draft the staff email.
 
 ## Build steps when the licence arrives
 
 1. Create the Gemini Enterprise app; enable chat agents and workflows.
-2. Deploy the MCP connector to Cloud Run and register it as a third-party connector (OAuth client id, secret, redirect URL).
+2. Register the live Vercel MCP endpoint as a third-party connector (choose No authentication for this fictional demo).
 3. Configure the Gmail connector.
 4. Build the chat agent: the instructions above, the four borrower tools, Flash model.
 5. Build the workflow: schedule → `run_overdue_recovery` → condition on at-risk bookings → draft email → approval, Flash model.

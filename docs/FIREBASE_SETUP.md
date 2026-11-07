@@ -64,6 +64,6 @@ Verified on 2026-11-07: a read of the cloud document found the `spare_available`
 
 ## What still needs work
 
-Backend hosting (Render or similar) and the Gemini integration are still pending.
+The Gemini integration is still pending; backend hosting is live on Vercel (see the [deployment plan](DEPLOYMENT_PLAN.md)).
 
-Firebase Authentication, web app registration, Storage, and backend hosting are not set up. The Python backend does not need a Firebase browser SDK configuration. Cloud Run requires billing and is outside this free-plan setup. See [Firebase pricing plans](https://firebase.google.com/docs/projects/billing/firebase-pricing-plans).
+Firebase Authentication, web app registration, and Storage are not set up. The Python backend does not need a Firebase browser SDK configuration. Cloud Run requires billing, so the backend is hosted on Vercel's free tier instead. See [Firebase pricing plans](https://firebase.google.com/docs/projects/billing/firebase-pricing-plans).

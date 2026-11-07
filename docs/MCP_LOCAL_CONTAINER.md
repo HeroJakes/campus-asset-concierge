@@ -92,4 +92,4 @@ Verified end to end on 2026-11-06:
 - Persistence after an MCP container restart.
 - Host/origin rejection and invalid-port startup failure.
 
-Cloud persistence, host selection, service authentication, and deployment remain on hold. See the [readiness plan](MCP_CLOUD_RUN_IMPLEMENTATION.md).
+Cloud persistence (Firestore Spark) and deployment (Vercel) are now live; see the [deployment plan](DEPLOYMENT_PLAN.md). Trusted caller identity for the MCP endpoint is still pending.

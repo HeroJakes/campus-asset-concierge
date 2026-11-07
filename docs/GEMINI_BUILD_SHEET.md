@@ -4,7 +4,7 @@ Paste-ready content for building the Gemini Enterprise app when the licence arri
 
 Fill the two placeholders before you start:
 
-- `<MCP_URL>` — the deployed connector URL, for example `https://campus-mcp-xxxx.run.app/mcp`.
+- `<MCP_URL>` — the deployed connector URL, which is `https://campus-asset-concierge-demo.vercel.app/mcp`.
 - `<STAFF_EMAIL>` — the equipment-staff address that receives recovery emails.
 
 ## 1. App and connectors
@@ -109,7 +109,7 @@ Field map: values come from the matching `escalations[]` item (`reservation_id`,
 ## 4. Assembly checklist
 
 1. Create the app; enable chat agents and workflows.
-2. Deploy the MCP connector (items 2/5 of the readiness plan) and register it as the third-party connector with `<MCP_URL>`.
+2. Register the live Vercel MCP endpoint as the third-party connector with `<MCP_URL>` (choose **No authentication**).
 3. Configure the Gmail connector.
 4. Build the chat agent: name, four borrower tools, the instruction above, Flash.
 5. Build the workflow: the steps above, both email templates, approval to `<STAFF_EMAIL>`, Flash.
@@ -117,4 +117,4 @@ Field map: values come from the matching `escalations[]` item (`reservation_id`,
 
 ## Blocked on the licence
 
-Building the agent and workflow in Gemini Enterprise, hosting the connector, and the full round-trip are Stage 1.5. This sheet is ready to execute the moment the licence and a connector host exist.
+Building the agent and workflow in Gemini Enterprise and the full round-trip are Stage 1.5. The connector is already hosted on Vercel, so this sheet is ready to execute the moment the licence arrives.

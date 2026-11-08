@@ -35,8 +35,8 @@ from campus_asset_concierge.storage.local_state import LocalStateStore
 PACKAGE_DIR = Path(__file__).resolve().parent.parent
 logger = logging.getLogger(__name__)
 
-# The borrower assistant model id; override with GEMINI_MODEL. Confirm the exact id in AI Studio.
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
+# The borrower assistant model id; override with GEMINI_MODEL. Current free full Flash.
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
 
 
 class ResetRequest(BaseModel):

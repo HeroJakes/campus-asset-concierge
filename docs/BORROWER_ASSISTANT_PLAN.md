@@ -108,8 +108,8 @@ trip fits comfortably.
 
 `GEMINI_API_KEY` is read from the environment at request time (set it as a Vercel
 sensitive env var for the demo; local dev reads it from `.env`). `GEMINI_MODEL`
-overrides the model id (default `gemini-flash-latest` — confirm the exact id in AI
-Studio). **If the key is absent the chat degrades to a friendly fallback rather than
+overrides the model id (default `gemini-3.8-flash`, the current free full Flash — confirm
+it is listed in AI Studio; switching is one line). **If the key is absent the chat degrades to a friendly fallback rather than
 failing startup**, so a missing key never takes down the locker or the rest of the app.
 
 **Untouched**: all booking/recovery/locker domain logic (reused, not duplicated),

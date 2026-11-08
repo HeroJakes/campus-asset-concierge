@@ -95,6 +95,33 @@ def test_reset_checks_the_document_at_the_write_boundary():
     store.seed.assert_not_called()
 
 
+@pytest.mark.parametrize("username,password,role", [
+    ("borrower-a", "BorrowerA2026!", "borrower"),
+    ("borrower-b", "BorrowerB2026!", "borrower"),
+    ("equipment-staff", "Staff2026!", "staff"),
+])
+def test_public_judge_accounts_keep_operator_and_internal_secrets_private(
+    demo_environment, username, password, role,
+):
+    with TestClient(vercel_demo.create_demo_app(), base_url="https://demo.example") as client:
+        page = client.get("/login")
+        assert username in page.text and password in page.text
+        assert "local-operator" not in page.text
+        for label in ("STAFF", "BORROWER_A", "BORROWER_B", "OPERATOR"):
+            assert os.environ[f"LOCAL_{label}_PASSWORD"] not in page.text
+        form = {"username": username, "password": password, "role": role}
+        assert client.post("/login", data=form, headers={"Origin": "https://other.example"}).status_code == 403
+        assert client.post("/login", data=form, follow_redirects=False).status_code == 303
+        assert client.get("/me").json() == {"username": username, "role": role}
+        assert client.post("/local-test/reset", json={"scenario": "spare_available"}).status_code == 403
+        client.get("/logout")
+        assert client.get("/me", auth=(username, password)).json()["role"] == role
+        assert client.get("/me", auth=("local-operator", password)).status_code == 401
+        failed = client.post("/login", data={**form, "password": "incorrect"})
+        assert failed.status_code == 401
+        assert "Try an account" in failed.text
+
+
 def test_first_seed_stops_if_the_document_exists(monkeypatch):
     store = Mock()
     store.seed.side_effect = AlreadyExists("already seeded")

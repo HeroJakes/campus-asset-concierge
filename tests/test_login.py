@@ -40,6 +40,17 @@ def test_login_page_is_public_and_locker_redirects(login_client):
 
 
 @pytest.mark.parametrize("username,password,role", [
+    ("borrower-a", "BorrowerA2026!", "borrower"),
+    ("borrower-b", "BorrowerB2026!", "borrower"),
+    ("equipment-staff", "Staff2026!", "staff"),
+])
+def test_judge_passwords_are_unavailable_in_standard_app(login_client, username, password, role):
+    assert "Try an account" not in login_client.get("/login").text
+    assert sign_in(login_client, username, password, role).status_code == 401
+    assert login_client.get("/me", auth=(username, password)).status_code == 401
+
+
+@pytest.mark.parametrize("username,password,role", [
     ("borrower-a", "test-borrower_a", "borrower"),
     ("borrower-b", "test-borrower_b", "borrower"),
     ("equipment-staff", "test-staff", "staff"),

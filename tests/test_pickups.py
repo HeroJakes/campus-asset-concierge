@@ -436,14 +436,14 @@ def test_locker_page_shows_staff_their_actions_without_any_code(booking_app):
     assert "Equipment Staff confirmed loading" in page
 
 
-def test_locker_page_hides_the_code_so_only_email_delivers_it(booking_app):
+def test_locker_page_hides_the_code_and_supplies_a_code_input(booking_app):
     client, _ = booking_app
     reservation_id, code = loaded_and_open(client)
     owner = client.get("/locker", auth=BORROWER_A)
     assert owner.status_code == 200
-    # The code is emailed, not shown on the locker screen; the owner still gets the keypad.
+    # The presentation retrieves codes separately; the locker only accepts code entry.
     assert code not in owner.text
-    assert "from your email" in owner.text
+    assert "one-time code" in owner.text
     assert f"/reservations/{reservation_id}/unlock" in owner.text
     assert reservation_id not in client.get("/locker", auth=BORROWER_B).text
 

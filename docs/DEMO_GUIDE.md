@@ -30,7 +30,9 @@ staff finish the condition check.
 
 Use separate browser sessions for staff (`equipment-staff`), Borrower A
 (`borrower-a`), and the backstage operator (`local-operator`). All use the live
-locker URL except operator/API actions at `/docs`. Passwords are supplied privately.
+locker URL except operator/API actions at `/docs`. The login page lists borrower
+and staff test passwords, with **Use account** buttons. Only the operator password
+is supplied privately.
 
 Staff and borrowers use `/login` and choose their account type.
 Keep the operator in a separate session with Basic authorization at `/docs`;

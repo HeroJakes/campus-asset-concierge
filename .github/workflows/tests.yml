@@ -24,8 +24,8 @@ jobs:
         with:
           enable-cache: false
       - run: uv sync --locked
-      - name: Check booking search interactions
-        run: node --test tests/booking_search.test.cjs
+      - name: Check browser interactions
+        run: node --test tests/booking_search.test.cjs tests/borrower_code.test.cjs
       - name: Run tests with the Firestore emulator
         env:
           FIRESTORE_EMULATOR_HOST: '127.0.0.1:8080'

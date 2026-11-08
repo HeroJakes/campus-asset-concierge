@@ -44,8 +44,25 @@ needed by this Python backend. Keep key files outside the repository.
 
 ## Authentication
 
-Browser users select borrower/staff at `/login` and sign in with their account
-credentials. REST Basic remains available for cron and operator clients.
+The isolated hackathon login page publishes these judging accounts:
+
+| Username | Public test password |
+| --- | --- |
+| `borrower-a` | `BorrowerA2026!` |
+| `borrower-b` | `BorrowerB2026!` |
+| `equipment-staff` | `Staff2026!` |
+
+Use an account-selection button to fill the form, then sign in. No sign-up is
+needed. Public passwords also work with REST Basic. They are enabled only by the
+demo entrypoint after its project/document checks. They do not grant operator
+access. Anyone can use the listed roles and change fictional demo activity.
+
+Keep all existing sensitive environment passwords: they still sign sessions and
+authenticate private clients, including cron. None are rendered on the page.
+No environment or scheduler update is needed for public judging accounts.
+
+Browser users select borrower/staff at `/login` and sign in. REST Basic remains
+available for judging, cron, and operator clients.
 
 Existing accounts:
 

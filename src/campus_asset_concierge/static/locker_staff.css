@@ -1,4 +1,4 @@
-/* Staff overview only; the borrower layout uses locker.css. */
+/* Staff overview only; borrower additions live in locker_borrower.css. */
 :root { --sidebar-width: 236px; --ground: #f7f6fc; --surface: #fff; --raised: #eeebfc; --border: #ece9f5; --rule: #efedf7; --text: #18152f; --muted: #65627b; --accent: #6240d9; --door: #6240d9; --radius-card: 18px; --radius-control: 10px; }
 html { scroll-behavior: smooth; scroll-padding-top: 24px; }
 body { background: radial-gradient(ellipse at 75% 0, #f0edff 0, transparent 65%), var(--ground); font-size: 14px; line-height: 1.5; min-height: 100vh; }

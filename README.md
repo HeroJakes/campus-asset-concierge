@@ -44,6 +44,9 @@ The MCP endpoint exposes these lending tools for the Gemini Enterprise agent.
 **Gemini chat, its workflow, and Gmail delivery are still pending the trial licence
 and integration checks.** Automatic pickup/return-code email is not connected yet.
 
+The borrower page redesign on `feat/borrower-locker-ui` adds pickup/return cards,
+compartment states, and six-box code entry. It is awaiting review and deployment.
+
 ## How we built it (and what we researched)
 
 1. **Read the brief first.** We studied the enablement session and event rules:
@@ -86,11 +89,12 @@ or tools, tests, and demo evidence — and reviewed the others' pull requests be
 ## Try the demo
 
 The [login page](https://campus-asset-concierge-demo.vercel.app/login) is live.
-Choose borrower or staff and use your supplied credentials. Browser sessions last
+Use **Try an account** to fill in a borrower or staff login. The page shows the
+test usernames and passwords; no sign-up is needed. Browser sessions last
 eight hours; sign out before switching accounts in the same browser session.
 
 1. Open the [virtual locker](https://campus-asset-concierge-demo.vercel.app/locker).
-   Staff and borrower credentials are supplied privately.
+   Choose Borrower A, Borrower B, or equipment staff on the login page.
 2. As staff, review the overdue Projector A loan and the replacement proposal.
    Approve it to protect the next student's booking.
 3. Follow the [demo guide](docs/DEMO_GUIDE.md) for Borrower A's booking, pickup,

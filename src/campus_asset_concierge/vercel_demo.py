@@ -58,7 +58,7 @@ def create_demo_app():
         if len(os.environ.get(f"LOCAL_{account}_PASSWORD", "")) < 32:
             raise RuntimeError(f"Set LOCAL_{account}_PASSWORD to a strong generated password.")
     store = _demo_store()
-    app = create_app(store)
+    app = create_app(store, public_demo_accounts=True)
     app.title = "Campus Asset Concierge · Hackathon Demo"
     app.router.routes[:] = [
         route for route in app.router.routes

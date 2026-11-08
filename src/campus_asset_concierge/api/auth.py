@@ -33,17 +33,26 @@ LOCAL_ACCOUNTS = {
     "local-operator": (Role.OPERATOR, "LOCAL_OPERATOR_PASSWORD"),
 }
 DEV_ACCOUNTS = {"borrower_a": BORROWER_A, "borrower_b": BORROWER_B, "staff": "equipment-staff"}
+# Public judging credentials, accepted only by the isolated hackathon entrypoint.
+DEMO_PASSWORDS = {
+    BORROWER_A: "BorrowerA2026!",
+    BORROWER_B: "BorrowerB2026!",
+    "equipment-staff": "Staff2026!",
+}
 SESSION_COOKIE = "campus_session"
 SESSION_MAX_AGE = 8 * 60 * 60
 basic = HTTPBasic(auto_error=False)
 
 
-def authenticate(username: str, password: str) -> LocalAccount | None:
+def authenticate(username: str, password: str, *, public_demo_accounts: bool = False) -> LocalAccount | None:
     account = LOCAL_ACCOUNTS.get(username)
     if account is not None:
         role, variable = account
         expected = os.environ.get(variable)
         if expected and compare_digest(expected.encode(), password.encode()):
+            return LocalAccount(username, role)
+        public_password = DEMO_PASSWORDS.get(username) if public_demo_accounts else None
+        if public_password and compare_digest(public_password.encode(), password.encode()):
             return LocalAccount(username, role)
     return None
 
@@ -116,7 +125,10 @@ def signed_in(
     if account is not None:
         return account
     if credentials is not None:
-        account = authenticate(credentials.username, credentials.password)
+        account = authenticate(
+            credentials.username, credentials.password,
+            public_demo_accounts=request.app.state.public_demo_accounts,
+        )
         if account is not None:
             return account
     if credentials is None and request.url.path.startswith("/locker"):

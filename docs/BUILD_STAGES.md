@@ -51,6 +51,10 @@ the Firestore emulator and five browser tests**. Historical counts differ becaus
 the old preview tests were retired. See [operations evidence](OPERATIONS.md#release-evidence)
 for the separate live HTTPS checks. Automated tests never use hosted Firestore.
 
+November 8: the hosted login page now lists public borrower/staff test accounts
+with form-fill buttons. No sign-up is needed. Operator access stays private;
+existing internal passwords and cron credentials are unchanged.
+
 ## Team ownership
 
 | Lead | Main responsibility |

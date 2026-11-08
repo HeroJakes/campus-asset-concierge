@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 from campus_asset_concierge.api.booking_view import booking_overview
 from campus_asset_concierge.api.auth import (
-    Actor, DEV_ACCOUNTS, LocalAccount, Role, SESSION_COOKIE, SESSION_MAX_AGE,
+    Actor, DEMO_PASSWORDS, DEV_ACCOUNTS, LOCAL_ACCOUNTS, LocalAccount, Role, SESSION_COOKIE, SESSION_MAX_AGE,
     authenticate, browser_account, dev_login_enabled, require_role,
     require_same_origin, secure_session_cookie, session_signer,
 )
@@ -52,7 +52,7 @@ class ApproveRequest(BaseModel):
     proposal_id: Annotated[str, Field(strict=True, min_length=1)]
 
 
-def create_app(store: LocalStateStore | None = None) -> FastAPI:
+def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bool = False) -> FastAPI:
     local_store = store if store is not None else LocalStateStore()
     reservations = Reservations(local_store)
     pickups = Pickups(local_store)
@@ -60,9 +60,14 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     recovery = Recovery(local_store)
     reassignment = Reassignment(local_store)
     app = FastAPI(title="Campus Asset Concierge · Local Development")
+    app.state.public_demo_accounts = public_demo_accounts
     app.mount("/static", StaticFiles(directory=PACKAGE_DIR / "static"), name="static")
     templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
     templates.env.globals["requirements_text"] = requirements_text
+    templates.env.globals["demo_accounts"] = [
+        {"username": username, "password": password, "role": LOCAL_ACCOUNTS[username][0].value}
+        for username, password in DEMO_PASSWORDS.items()
+    ] if public_demo_accounts else []
 
     @app.get("/", include_in_schema=False)
     def home():
@@ -87,7 +92,7 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     ):
         require_same_origin(request)
         username = username.strip()
-        account = authenticate(username, password)
+        account = authenticate(username, password, public_demo_accounts=public_demo_accounts)
         if account is None or account.role != role:
             response = templates.TemplateResponse(request, "login.html", {
                 "role": role, "username": username,

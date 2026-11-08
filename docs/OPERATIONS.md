@@ -43,10 +43,25 @@ needed by this Python backend. Keep key files outside the repository.
 
 ## Authentication
 
-The recorded live release below uses HTTP Basic. The new `/login` page on
-`feat/borrower-staff-login` is awaiting review and deployment. After release,
-browser users select borrower/staff and sign in with these same account credentials;
-REST Basic remains available for cron and operator clients.
+The isolated hackathon login page publishes these judging accounts:
+
+| Username | Public test password |
+| --- | --- |
+| `borrower-a` | `BorrowerA2026!` |
+| `borrower-b` | `BorrowerB2026!` |
+| `equipment-staff` | `Staff2026!` |
+
+Use an account-selection button to fill the form, then sign in. No sign-up is
+needed. Public passwords also work with REST Basic. They are enabled only by the
+demo entrypoint after its project/document checks. They do not grant operator
+access. Anyone can use the listed roles and change fictional demo activity.
+
+Keep all existing sensitive environment passwords: they still sign sessions and
+authenticate private clients, including cron. None are rendered on the page.
+No environment or scheduler update is needed for public judging accounts.
+
+Browser users select borrower/staff at `/login` and sign in. REST Basic remains
+available for judging, cron, and operator clients.
 
 Existing accounts:
 
@@ -63,8 +78,7 @@ actions. OAuth and trusted borrower roles are deferred until tested with the rea
 connector; real data must not use this demo exception.
 
 Vercel account-login protection is disabled so judges and Gemini can reach the
-app. Public `/health` reads no database data. HTTP Basic introduces no session
-cookie in the recorded live version. The new login uses an eight-hour HttpOnly,
+app. Public `/health` reads no database data. Browser login uses an eight-hour HttpOnly,
 SameSite=Strict cookie, Secure over HTTPS. It reuses the configured account secret
 for purpose-specific signatures, with no new environment variable. Rotation revokes
 that account's cookies. Browser mutations reject a supplied foreign Origin or cross-site Fetch

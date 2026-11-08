@@ -41,6 +41,13 @@ button, input { font: inherit; }
 .login-submit:hover { background: linear-gradient(110deg, #6741db, #4527ac); }
 .login-submit:active { transform: translateY(1px); }
 .login-help { margin: 24px 0 0; color: #646c84; font-size: 13px; line-height: 1.5; text-align: center; }
+.login-accounts { margin-top: 26px; border-top: 1px solid #e0dbee; padding-top: 20px; }
+.login-accounts h3 { margin: 0; font-size: 16px; }
+.login-accounts p { margin: 8px 0 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.login-accounts ul { list-style: none; margin: 0; padding: 0; }
+.login-accounts li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; font-size: 13px; line-height: 1.6; }
+.login-accounts li span { color: var(--muted); }
+.account-fill { border: 1px solid #d9cffa; border-radius: 8px; padding: 9px 12px; background: #f3efff; color: #4e2bc5; font-size: 12px; font-weight: 650; cursor: pointer; }
 .login-error { padding: 12px 14px; margin: 0; border: 1px solid #f0c5cf; border-radius: 10px; background: #fff4f6; color: #94324a; font-size: 14px; line-height: 1.45; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .login-brand:focus-visible, button:focus-visible { outline: 3px solid #8060e5; outline-offset: 4px; }

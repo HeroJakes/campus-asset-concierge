@@ -60,7 +60,22 @@
         </div>
         <button class="login-submit" type="submit">Sign in {{ icon('arrow', 19) }}</button>
       </form>
+      {% if demo_accounts %}
+      <section class="login-accounts" aria-labelledby="accounts-title">
+        <h3 id="accounts-title">Try an account</h3>
+        <p>Choose an account to fill the form. No sign-up needed.</p>
+        <ul>
+          {% for account in demo_accounts %}
+          <li>
+            <div><strong>{{ account.username }}</strong><br><span>Password: <code>{{ account.password }}</code></span></div>
+            <button type="button" class="account-fill" data-username="{{ account.username }}" data-password="{{ account.password }}" data-role="{{ account.role }}" aria-label="Use {{ account.username }}" hidden>Use account</button>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% else %}
       <p class="login-help">Use the account provided by your equipment team.</p>
+      {% endif %}
     </section>
   </main>
 </body>

@@ -128,6 +128,12 @@ choosing staff cannot turn a borrower into staff. `/logout` clears browser cooki
 The operator cannot sign in through this form. REST also retains HTTP Basic for
 non-browser clients and operator tools. Use OpenAPI at `/docs` for full schemas.
 
+Only the pinned hackathon entrypoint enables public judging passwords from
+`DEMO_PASSWORDS`. The login page lists them and can fill the form. The standard
+app rejects them. These public passwords also work with REST Basic for judging.
+Private environment passwords still work and sign cookies; they are never rendered
+into the page. The operator has no public password or account-selection button.
+
 Cookie signatures use itsdangerous with SHA-256, a purpose-specific salt, and the
 account's existing password secret, so no new deployment variable is needed.
 Rotation invalidates that account's cookies; signatures work across serverless

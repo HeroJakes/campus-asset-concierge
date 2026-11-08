@@ -44,11 +44,11 @@ Stage numbers stay stable. "Done" describes the scope shown, not a complete univ
 - Vercel/Firestore compatibility experiment: PR #20; its superseded harness was removed in PR #23.
 - Stable Vercel demo and staff-only recovery trigger: PR #21; deployment evidence recorded in PR #22.
 - November 8: owner confirmed cron works; obsolete Vercel test project removed. Documentation and leftover-file cleanup is on this branch.
-- November 8: borrower/staff login page and eight-hour signed browser sessions implemented on `feat/borrower-staff-login`; review and deployment pending. Basic clients for cron/operator tools remain supported.
+- November 8: borrower/staff login merged in PR #25 and deployed from `84d0dce`. All three accounts, sign-out, secure cookies, Basic clients, and five MCP tools passed 38 live HTTPS checks. Both hosted demo documents were unchanged.
 
-The latest completed CI run before this consolidation passed **176 Python tests on
-the Firestore emulator and five browser tests**. Historical counts differ because
-the old preview tests were retired. See [operations evidence](OPERATIONS.md#release-evidence)
+The merged login feature's CI passed **194 Python tests on the Firestore emulator
+and five browser tests**. Historical counts differ because tests changed with
+each feature. See [operations evidence](OPERATIONS.md#release-evidence)
 for the separate live HTTPS checks. Automated tests never use hosted Firestore.
 
 November 8: the hosted login page now lists public borrower/staff test accounts

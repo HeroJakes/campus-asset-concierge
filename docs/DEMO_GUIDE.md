@@ -34,8 +34,7 @@ locker URL except operator/API actions at `/docs`. The login page lists borrower
 and staff test passwords, with **Use account** buttons. Only the operator password
 is supplied privately.
 
-Once the login-page change is deployed, staff and borrowers use `/login` and choose
-their account type. The recorded live release still uses Basic until deployment.
+Staff and borrowers use `/login` and choose their account type.
 Keep the operator in a separate session with Basic authorization at `/docs`;
 the login form does not grant operator access.
 

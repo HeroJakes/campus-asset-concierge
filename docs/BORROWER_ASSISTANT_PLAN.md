@@ -5,7 +5,8 @@ It is the interim stand-in for the Gemini Enterprise borrower agent; see
 [ADR 0001](adr/0001-interim-gemini-api-chat.md) for why it exists, and
 [GLOSSARY.md](../GLOSSARY.md) for *offer* vs *reservation* vs *loan*.
 
-This document is the build spec. Nothing here is implemented yet.
+The assistant is implemented on `feat/borrower-assistant`. Review, real Gemini
+verification, and deployment are still pending. This document records its scope.
 
 ## Settled decisions
 
@@ -27,8 +28,13 @@ This document is the build spec. Nothing here is implemented yet.
 | --- | --- | --- | --- |
 | `find_equipment` | LLM function call | `Reservations.offer(actor.username, req)` | Writes an offer |
 | `confirm_booking` | **Confirm button** (not the LLM) | `Reservations.confirm(actor.username, offer_id)` | Writes a reservation |
-| `check_pickup_status` | LLM function call | `Pickups.borrower_page(actor.username)` | Read only |
-| `check_return_status` | LLM function call | `Returns.borrower_page(actor.username)` | Read only |
+| `check_pickup_status` | LLM function call | `Pickups.status(actor.username)` | Read only; omits codes |
+| `check_return_status` | LLM function call | `Returns.status(actor.username)` | Read only; omits codes |
+
+One-time codes must never enter model tool results. The authenticated borrower's
+`GET /pickups` and `GET /returns` still include usable codes as the manual demo
+stand-in for email. No email is sent. Those code-bearing helpers are for the
+borrower API and locker page, not the assistant.
 
 `confirm_booking` is a real capability of the agent, but in this prototype it is wired
 to the Confirm button for safety (deterministic, human-in-the-loop). In Enterprise it
@@ -91,7 +97,7 @@ trip fits comfortably.
 ## Files to add / change
 
 **New**
-- `src/campus_asset_concierge/assistant.py` — builds the four function declarations,
+- `src/campus_asset_concierge/assistant.py` — builds three model tool declarations,
   runs the Gemini call + tool-dispatch loop, maps each tool to the domain classes.
 - `templates/locker_assistant.html` — the chat page (borrower shell, reuses the top bar).
 - `static/locker_assistant.css` — chat styling, matching the borrower design tokens.

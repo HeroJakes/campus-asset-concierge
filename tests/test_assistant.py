@@ -8,6 +8,8 @@ import pytest
 
 from conftest import BORROWER_A, OPERATOR, STAFF
 from campus_asset_concierge import assistant
+from test_pickups import book, load
+from test_returns import return_request
 
 
 def scripted(script):
@@ -140,6 +142,43 @@ def test_chat_status_query_returns_reply_without_offer(booking_app, monkeypatch)
     body = chat(client, [{"role": "user", "text": "where do I pick up?"}]).json()
     assert body["offer"] is None
     assert "collect" in body["reply"].lower()
+
+
+@pytest.mark.parametrize("kind", ["pickup", "return"])
+def test_status_codes_stay_in_borrower_api_and_out_of_model_transcript(booking_app, monkeypatch, kind):
+    client, _ = booking_app
+    if kind == "pickup":
+        reservation = book(client, category="raspberry_pi_kit")
+        assert load(client, reservation).status_code == 200
+    else:
+        assert return_request(client).status_code == 200
+    # Email is not connected: the authenticated borrower API remains the demo stand-in.
+    before = client.get(f"/{kind}s", auth=BORROWER_A).json()
+    assert before and all("code" in record for record in before)
+    model_results = []
+
+    def factory(_api_key, _model, _current_time):
+        def generate(transcript):
+            if transcript[-1]["role"] == "user":
+                return {"calls": [{"name": f"check_{kind}_status", "args": {}}]}
+            response = transcript[-1]["response"]
+            model_results.append(response)
+            records = response[f"{kind}s"]
+            assert records
+            assert all("code" not in record for record in records)
+            assert [(r["asset_id"], r["step"]) for r in records] == [
+                (r["asset_id"], r["step"]) for r in before
+            ]
+            return {"text": "Here is your current status.", "calls": []}
+        return generate
+
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(assistant, "gemini_generate", factory)
+    result = chat(client, [{"role": "user", "text": "Check my status"}])
+    assert result.status_code == 200
+    assert result.json() == {"reply": "Here is your current status.", "offer": None}
+    assert len(model_results) == 1
+    assert client.get(f"/{kind}s", auth=BORROWER_A).json() == before
 
 
 def test_chat_falls_back_gracefully_when_key_is_missing(booking_app, monkeypatch):

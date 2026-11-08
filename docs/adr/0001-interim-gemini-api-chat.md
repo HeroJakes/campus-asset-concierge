@@ -19,6 +19,7 @@ prompt and tool schema port almost directly to the Enterprise agent, so the work
 a head start, not throwaway; (3) it is deliberately capped at Enterprise parity — no
 extra chat powers — so the prototype and the eventual final product stay aligned.
 
-When the Enterprise licence arrives, the Enterprise agent is added alongside this
-chat (both call the MCP connector). This interim chat stays as the no-licence
-fallback and is not removed just because Enterprise works.
+When the Enterprise licence arrives, its agent will call the MCP connector. This
+interim chat calls the same domain services directly and stays as the no-licence
+fallback. It is not removed just because Enterprise works. Both status paths omit
+one-time codes; the borrower-owned API supplies the manual email stand-in.

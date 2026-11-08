@@ -47,6 +47,11 @@ and integration checks.** Automatic pickup/return-code email is not connected ye
 The borrower page redesign on `feat/borrower-locker-ui` adds pickup/return cards,
 compartment states, and six-box code entry. It is awaiting review and deployment.
 
+An interim Gemini API booking chat is implemented on `feat/borrower-assistant`,
+awaiting review and deployment. It reuses the booking rules, requires the borrower
+to confirm an offer, and keeps one-time codes out of model status results. Until
+email is connected, the presenter retrieves codes through the borrower's own API.
+
 ## How we built it (and what we researched)
 
 1. **Read the brief first.** We studied the enablement session and event rules:

@@ -111,9 +111,9 @@ def make_dispatch(reservations, pickups, returns, borrower_id: str) -> Callable[
             if name == "find_equipment":
                 return reservations.offer(borrower_id, ReservationRequest(**_clean_find_args(args)))
             if name == "check_pickup_status":
-                return {"pickups": pickups.borrower_page(borrower_id)}
+                return {"pickups": pickups.status(borrower_id)}
             if name == "check_return_status":
-                return {"returns": returns.borrower_page(borrower_id)}
+                return {"returns": returns.status(borrower_id)}
             return {"error": f"Unknown tool: {name}"}
         except ReservationError as error:
             return {"error": str(error)}

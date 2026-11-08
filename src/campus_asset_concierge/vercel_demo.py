@@ -36,7 +36,6 @@ def _demo_store() -> DemoStateStore:
         raise RuntimeError("The demo requires the campus-asset-concierge project.")
     if "FIRESTORE_EMULATOR_HOST" in os.environ or os.environ.get("DEV_LOGIN") == "1":
         raise RuntimeError("The hosted demo requires cloud Firestore and password-based accounts.")
-    # Deliberately parallel to the isolated preview: neither entrypoint uses key files.
     credentials = Credentials.from_service_account_info(json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"]))
     return DemoStateStore(credentials=credentials)
 

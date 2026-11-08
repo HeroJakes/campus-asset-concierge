@@ -7,8 +7,7 @@ __pycache__/
 build/
 dist/
 *.egg-info/
-.env
-.env.*
+.env*
 # Never commit service-account / admin-SDK keys
 *firebase-adminsdk*.json
 *service-account*.json
@@ -19,5 +18,3 @@ serviceAccount*.json
 .vercel/
 firebase-debug.log*
 firestore-debug.log*
-.vercel
-.env*

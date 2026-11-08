@@ -21,9 +21,9 @@ Everything in this folder is what we hand in for the hackathon. **Content is not
 ## Where the material already lives (reuse, do not rewrite)
 
 - Problem & status: [`README.md`](../README.md)
-- Architecture & the Gemini pivot: [`docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md)
-- Gemini agent + workflow design: [`docs/GEMINI_BUILD_PLAN.md`](../docs/GEMINI_BUILD_PLAN.md)
-- Connector design: [`docs/MCP_CONNECTOR_IMPLEMENTATION.md`](../docs/MCP_CONNECTOR_IMPLEMENTATION.md)
+- Architecture, lending rules & connector: [`docs/DEVELOPMENT.md`](../docs/DEVELOPMENT.md)
+- Demo sequence & Gemini/Gmail assembly: [`docs/DEMO_GUIDE.md`](../docs/DEMO_GUIDE.md)
+- Live deployment, cron & release evidence: [`docs/OPERATIONS.md`](../docs/OPERATIONS.md)
 - Stages & ownership: [`docs/BUILD_STAGES.md`](../docs/BUILD_STAGES.md)
 
 ## When to write the content

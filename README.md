@@ -1,110 +1,66 @@
 # Campus Asset Concierge
 
-A Gemini Enterprise assistant that stops late equipment returns from costing the next student their booking.
+A late equipment return can leave the next student without the projector they booked.
+Campus Asset Concierge detects that conflict and gives staff a verified replacement
+to approve, or a clear escalation when no suitable spare exists.
 
-## Problem
+## What works today
 
-Universities lend shared equipment — projectors, Raspberry Pi kits, cameras, and more. When an item comes back late, the next person who booked it loses their slot. Today staff usually notice the clash only when the borrower turns up, then scramble to find a spare or apologise by hand. Nothing spots the conflict early or offers a fix.
+The lending backend and virtual locker are live on Vercel with fictional data in Firestore.
 
-## Solution
+- Reserve a projector or Raspberry Pi kit, with optional HDMI and speaker requirements.
+- Load, collect, and return equipment using one-time codes and a staff condition check.
+- Detect overdue loans, propose a substitute, and apply it only after staff approval.
+- Run recovery daily through cron-job.org at 09:00 Malaysia time; the owner confirmed the job works.
 
-Campus Asset Concierge is built inside **Gemini Enterprise**, with no application code at its core:
+The MCP endpoint exposes these lending tools for the planned Gemini Enterprise
+agent. **Gemini chat, its workflow, and Gmail delivery are still pending the licence
+and integration checks.** Automatic pickup/return-code email is not connected yet.
 
-- **Borrower chat agent** — a student books in plain language ("a projector with HDMI, 2–3pm today"). The agent matches the requirements, offers a unit, and confirms the booking.
-- **Overdue-recovery workflow (the "maximizing" pattern)** — runs on a daily schedule. It finds loans that are overdue *and* threaten an upcoming booking, then either proposes a **verified substitute** or **escalates to staff by email**, each behind an approval step. Read a source, take action, keep a human in the loop, run 24/7 — exactly the pattern the judges asked for.
-- **Connectors** — our lending backend is exposed as an **MCP connector** (third-party) that the agent and workflow call; **Gmail** is the first-party connector used to draft recovery emails.
-- **Virtual locker page** — a small web page where staff load items and borrowers pick up and return them with a one-time code.
+## Try the demo
 
-The same booking-and-recovery flow extends to other shared campus assets — rooms, lab kits, sports gear — by adding a category rather than rebuilding the agent.
+1. Open the [virtual locker](https://campus-asset-concierge-demo.vercel.app/locker).
+   Staff and borrower credentials are supplied privately.
+2. As staff, review the overdue Projector A loan and the replacement proposal.
+   Approve it to protect the next student's booking.
+3. Follow the [demo guide](docs/DEMO_GUIDE.md) for Borrower A's booking, pickup,
+   return, and the separate no-spare scenario.
 
-## How we built it (and what we researched)
+The [API docs](https://campus-asset-concierge-demo.vercel.app/docs) provide booking
+until Gemini is connected; the borrower locker page has no booking form.
+The [MCP endpoint](https://campus-asset-concierge-demo.vercel.app/mcp) is for tool
+clients and is not a chat page.
 
-1. **Read the brief first.** We studied the enablement session and event rules: Gemini Enterprise is mandatory, the solution must be no-code at its core, "maximizing" workflows are favoured, and connectors are the scoring axis. That ruled out shipping a hand-coded app as the deliverable.
-2. **Pivoted the architecture.** We kept our lending logic but moved the agent and workflow into Gemini Enterprise, re-using the backend as an MCP connector instead of as the product itself.
-3. **Built and proved the connector.** Python 3.12, FastAPI, and Cloud Firestore (emulator for local dev and CI), wrapped as a Streamable-HTTP **MCP server** (FastMCP) in a non-root Docker image. We verified it end to end in a container: booking, pickup, returns, and both recovery outcomes over HTTP.
-4. **Made the Gemini build paste-ready.** The agent instruction, tool list, email templates, and a two-scenario demo story are written up so the Gemini Enterprise app can be assembled the moment the licence arrives — see the [build sheet](docs/GEMINI_BUILD_SHEET.md) and [demo script](docs/DEMO_SCRIPT.md).
+The hosted clock is fixed at **November 7, 2026, 11:01 MYT**. The live document is
+`demo/hackathon-20261111`. A protected operator reset restores the showcase between
+runs. MCP has no authentication for this fictional demo; locker and REST actions
+use HTTP Basic. Gemini app and video links will be added after verification and recording.
 
-## Teamwork
+## How it fits together
 
-We are a team of four. Each person led one feature end to end — its rules, screens or tools, tests, and demo evidence — and reviewed the others' pull requests before merging:
+The planned Gemini agent handles the conversation and calls our MCP tools.
+The existing FastAPI services enforce lending rules and save transactions in
+Firestore. The locker page uses those same services. Recovery emails are planned
+through Gemini's Gmail connector; the current scheduler runs backend recovery only.
 
-- **Ivan Lee (lead)** — find-and-reserve booking flow and richer requirement matching (HDMI, speakers); coordinated the Gemini Enterprise connector work.
-- **Bing Hang** — load-and-collect pickup flow and the virtual locker web page.
-- **Jordan** — equipment returns and staff condition checks.
-- **Yew Shan** — overdue recovery and substitute reassignment; coordinated the rehearsal and demo.
+The intended benefit is fewer disrupted bookings and less manual substitute-finding.
+No measured recovery-rate claim is made yet.
 
-## Impact
+## Team
 
-- **Target: resolve 80% of overdue-driven booking conflicts automatically.** The workflow hands staff a ready-to-approve substitute instead of a manual scramble, and escalates only the cases where no spare exists.
-- **Better for students:** no silent lost bookings; a substitute is offered before the pickup time.
-- **Less manual work for staff:** detection, substitute-finding, and the first draft of every email are automated, with staff keeping the final approval.
+Ivan Lee leads reservations and matching; Bing Hang leads pickup and the locker;
+Jordan leads returns; Yew Shan leads recovery and rehearsal. The team reviews each
+other's changes and tests the connected flow.
 
-> The 80% figure is our projected target for the prototype, based on the seeded scenarios. Replace it with measured numbers once the app sees real use.
+## Project guide
 
-## Demo
+| Document | Use it for |
+| --- | --- |
+| [Build stages and progress](docs/BUILD_STAGES.md) | What is implemented, what is left, and who owns it |
+| [Development](docs/DEVELOPMENT.md) | Architecture, lending rules, local startup, and emulator tests |
+| [Demo guide](docs/DEMO_GUIDE.md) | Presentation sequence and Gemini/Gmail assembly |
+| [Operations](docs/OPERATIONS.md) | Deployment, credentials, reset, cron, and verification |
+| [Submission checklist](submission/README.md) | Video, deck, app link, and write-up |
 
-- **Live app (Gemini Enterprise):** _added once the licence is provisioned._
-- **Video (3–4 min):** _link._
-- **Architecture:** [Target architecture](docs/ARCHITECTURE.md) · [MCP connector](docs/MCP_LOCAL_CONTAINER.md)
-
-The [live locker demo](https://campus-asset-concierge-demo.vercel.app/locker) uses
-HTTP Basic. The [MCP endpoint](https://campus-asset-concierge-demo.vercel.app/mcp)
-uses no authentication for this fictional demo. Both use only
-`demo/hackathon-20261111`. Operator reset restores the overdue showcase; hosted
-clock controls and passwordless login are disabled. HTTPS checks passed. Daily
-scheduling awaits cron-job.org account access. See the
-[deployment runbook](docs/DEPLOYMENT_PLAN.md) for the release evidence and settings.
-
-## Run it locally
-
-To run the app on your laptop with the shared cloud Firestore database, follow [Cloud-connected local startup](docs/FIREBASE_SETUP.md#cloud-connected-local-startup). The steps below use a separate emulator database for tests and resettable rehearsals.
-
-For passwordless local demos, set `DEV_LOGIN=1` and open `/dev-login` to choose `borrower_a`, `borrower_b`, or `staff`. This mode is for loopback-only use; disable it before hosting. Password-based login remains available when dev mode is off.
-
-The local prototype runs the lending backend and the locker page without any Google Cloud or Gemini account. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and the [Firebase Firestore emulator](https://firebase.google.com/docs/emulator-suite/install_and_configure), then start the emulator in one shell:
-
-```sh
-uv sync --locked
-firebase emulators:start --only firestore --project demo-campus-asset-concierge
-```
-
-In a second shell, set four local passwords and start the API on loopback (PowerShell 7):
-
-```powershell
-$env:FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080'
-$env:LOCAL_BORROWER_A_PASSWORD = Read-Host 'Password for borrower-a' -MaskInput
-$env:LOCAL_BORROWER_B_PASSWORD = Read-Host 'Password for borrower-b' -MaskInput
-$env:LOCAL_STAFF_PASSWORD = Read-Host 'Password for equipment-staff' -MaskInput
-$env:LOCAL_OPERATOR_PASSWORD = Read-Host 'Password for local-operator' -MaskInput
-uv run --locked uvicorn campus_asset_concierge.api.app:create_app --factory --host 127.0.0.1
-```
-
-Open the [locker page](http://127.0.0.1:8000/locker) and the [API docs](http://127.0.0.1:8000/docs). For the full click-through — booking, pickup, return, and overdue recovery — follow the **[local walkthrough](docs/LOCAL_WALKTHROUGH.md)**. To run the backend as the MCP connector in a container, use the [MCP container guide](docs/MCP_LOCAL_CONTAINER.md).
-
-## Tests
-
-```sh
-node --test tests/booking_search.test.cjs   # locker search behaviour
-uv run --locked pytest                       # with FIRESTORE_EMULATOR_HOST set
-```
-
-GitHub Actions runs both on every pull request into `main`.
-
-## Project layout
-
-```text
-src/campus_asset_concierge/
-  agent/      ADK agent and typed tool adapters
-  api/        FastAPI entry points and request handling
-  domain/     Lending rules and workflows
-  storage/    Firestore persistence
-  templates/  Server-rendered locker views
-  static/     Locker styles and browser scripts
-tests/        pytest and Node test suites
-```
-
-## Status and roadmap
-
-The REST API, locker, and MCP endpoint are deployed on Vercel against cloud Firestore (see the [Demo](#demo) links and the [deployment runbook](docs/DEPLOYMENT_PLAN.md) for release evidence). Gemini Enterprise integration is the remaining step, pending the trial licence.
-
-See [Build Stages](docs/BUILD_STAGES.md) for team ownership, the prototype stop line, and the roadmap. The Firebase Spark database in Singapore is set up, and the backend connection and fictional demo seed are verified; see [Firebase setup](docs/FIREBASE_SETUP.md) and the [deployment plan](docs/DEPLOYMENT_PLAN.md). The app can run locally against cloud Firestore; tests and resettable rehearsals use the emulator. Backend hosting is live on Vercel; Gemini integration remains pending.
+For local use, follow [Development](docs/DEVELOPMENT.md#local-setup).
+No cloud account is needed for emulator-based development.

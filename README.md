@@ -85,6 +85,11 @@ or tools, tests, and demo evidence — and reviewed the others' pull requests be
 
 ## Try the demo
 
+The borrower/staff login page is implemented on `feat/borrower-staff-login` and
+awaits deployment. It uses the existing account credentials at `/login`, with a
+role selector, an eight-hour browser session, and sign-out. The live release below
+still uses its original Basic login until that change is reviewed and deployed.
+
 1. Open the [virtual locker](https://campus-asset-concierge-demo.vercel.app/locker).
    Staff and borrower credentials are supplied privately.
 2. As staff, review the overdue Projector A loan and the replacement proposal.

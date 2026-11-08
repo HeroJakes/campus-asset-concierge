@@ -44,6 +44,7 @@ Stage numbers stay stable. "Done" describes the scope shown, not a complete univ
 - Vercel/Firestore compatibility experiment: PR #20; its superseded harness was removed in PR #23.
 - Stable Vercel demo and staff-only recovery trigger: PR #21; deployment evidence recorded in PR #22.
 - November 8: owner confirmed cron works; obsolete Vercel test project removed. Documentation and leftover-file cleanup is on this branch.
+- November 8: borrower/staff login page and eight-hour signed browser sessions implemented on `feat/borrower-staff-login`; review and deployment pending. Basic clients for cron/operator tools remain supported.
 
 The latest completed CI run before this consolidation passed **176 Python tests on
 the Firestore emulator and five browser tests**. Historical counts differ because

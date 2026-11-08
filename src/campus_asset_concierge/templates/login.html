@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · Campus Asset Concierge</title>
+  <link rel="stylesheet" href="/static/login.css">
+  <script src="/static/login.js" defer></script>
+</head>
+<body class="login-page">
+  {% from "locker_icons.html" import icon %}
+  <main class="login-layout">
+    <section class="login-hero" aria-labelledby="hero-title">
+      <a class="login-brand" href="/login" aria-label="Campus Asset Concierge home">
+        {{ icon('cube', 44) }}<span>Campus Asset<br>Concierge</span>
+      </a>
+      <div class="hero-copy">
+        <h1 id="hero-title">Borrow. Collect.<br>Return. <span>Self-service.</span></h1>
+        <p>A smarter way to borrow shared campus equipment.<br class="wide-break"> Projectors, Raspberry Pi kits, and a little less waiting.</p>
+        <ul class="login-benefits" aria-label="Service features">
+          <li>{{ icon('bolt', 25) }}<span>Quick pickup</span></li>
+          <li>{{ icon('layers', 25) }}<span>Clear status</span></li>
+          <li>{{ icon('shield', 25) }}<span>Secure access</span></li>
+        </ul>
+      </div>
+      <img class="login-locker-art" src="/static/login-locker.png" width="1280" height="1280" alt="A purple equipment locker with a projector and Raspberry Pi kit.">
+    </section>
+
+    <section class="login-card" aria-labelledby="login-title">
+      <header class="login-card-heading">
+        <h2 id="login-title">Welcome back</h2>
+        <p>Sign in to Campus Asset Concierge</p>
+      </header>
+      <form action="/login" method="post">
+        <fieldset class="login-roles">
+          <legend class="visually-hidden">Choose your account type</legend>
+          <label class="login-role">
+            <input type="radio" name="role" value="borrower" {% if role == 'borrower' %}checked{% endif %} required>
+            <span>{{ icon('user', 27) }}<span>Student / Borrower</span></span>
+          </label>
+          <label class="login-role">
+            <input type="radio" name="role" value="staff" {% if role == 'staff' %}checked{% endif %} required>
+            <span>{{ icon('briefcase', 27) }}<span>Equipment Staff</span></span>
+          </label>
+        </fieldset>
+        {% if error %}<p class="login-error" id="login-error" role="alert">{{ error }}</p>{% endif %}
+        <div class="login-field">
+          <label for="username">Username</label>
+          <div class="login-input">
+            {{ icon('user', 21) }}
+            <input id="username" name="username" value="{{ username }}" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Enter your username" maxlength="80" required {% if error %}aria-invalid="true" aria-describedby="login-error"{% endif %}>
+          </div>
+        </div>
+        <div class="login-field">
+          <label for="password">Password</label>
+          <div class="login-input">
+            {{ icon('lock', 21) }}
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" maxlength="256" required {% if error %}aria-invalid="true" aria-describedby="login-error"{% endif %}>
+            <button class="password-toggle" type="button" aria-label="Show password" aria-controls="password" aria-pressed="false" hidden>{{ icon('eye', 22) }}</button>
+          </div>
+        </div>
+        <button class="login-submit" type="submit">Sign in {{ icon('arrow', 19) }}</button>
+      </form>
+      <p class="login-help">Use the account provided by your equipment team.</p>
+    </section>
+  </main>
+</body>
+</html>

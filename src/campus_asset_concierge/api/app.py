@@ -1,19 +1,19 @@
-import os
-from dataclasses import dataclass
-from enum import StrEnum
 from pathlib import Path
-from secrets import compare_digest
 from typing import Annotated, Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, Form, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from google.api_core.exceptions import NotFound
 from pydantic import BaseModel, Field
 
 from campus_asset_concierge.api.booking_view import booking_overview
+from campus_asset_concierge.api.auth import (
+    Actor, DEV_ACCOUNTS, LocalAccount, Role, SESSION_COOKIE, SESSION_MAX_AGE,
+    authenticate, browser_account, dev_login_enabled, require_role,
+    require_same_origin, session_signer,
+)
 from campus_asset_concierge.domain.reservations import (
     ReservationError,
     ReservationRequest,
@@ -21,7 +21,7 @@ from campus_asset_concierge.domain.reservations import (
     malaysia_times,
     requirements_text,
 )
-from campus_asset_concierge.domain.scenarios import BORROWER_A, BORROWER_B, TestScenario
+from campus_asset_concierge.domain.scenarios import TestScenario
 from campus_asset_concierge.pickups import Pickups
 from campus_asset_concierge.reassignment import Reassignment
 from campus_asset_concierge.recovery import Recovery
@@ -30,68 +30,6 @@ from campus_asset_concierge.returns import Returns
 from campus_asset_concierge.storage.local_state import LocalStateStore
 
 PACKAGE_DIR = Path(__file__).resolve().parent.parent
-
-
-class Role(StrEnum):
-    BORROWER = "borrower"
-    STAFF = "staff"
-    OPERATOR = "operator"
-
-
-@dataclass(frozen=True)
-class LocalAccount:
-    username: str
-    role: Role
-
-
-LOCAL_ACCOUNTS = {
-    BORROWER_A: (Role.BORROWER, "LOCAL_BORROWER_A_PASSWORD"),
-    BORROWER_B: (Role.BORROWER, "LOCAL_BORROWER_B_PASSWORD"),
-    "equipment-staff": (Role.STAFF, "LOCAL_STAFF_PASSWORD"),
-    "local-operator": (Role.OPERATOR, "LOCAL_OPERATOR_PASSWORD"),
-}
-
-DEV_ACCOUNTS = {"borrower_a": BORROWER_A, "borrower_b": BORROWER_B, "staff": "equipment-staff"}
-basic = HTTPBasic(auto_error=False)
-
-
-def dev_login_enabled(request: Request) -> bool:
-    return (
-        os.environ.get("DEV_LOGIN") == "1"
-        and request.client is not None
-        and request.client.host in {"127.0.0.1", "::1"}
-        and request.url.hostname in {"127.0.0.1", "localhost", "::1"}
-    )
-
-
-def signed_in(
-    request: Request, credentials: Annotated[HTTPBasicCredentials | None, Depends(basic)],
-) -> LocalAccount:
-    dev_mode = dev_login_enabled(request)
-    if dev_mode:
-        username = DEV_ACCOUNTS.get(request.cookies.get("dev_account", ""))
-        if username is not None:
-            return LocalAccount(username, LOCAL_ACCOUNTS[username][0])
-        if credentials is None and request.url.path.startswith("/locker"):
-            raise HTTPException(303, headers={"Location": "/dev-login"})
-    account = LOCAL_ACCOUNTS.get(credentials.username) if credentials else None
-    if account is not None and credentials is not None:
-        role, password_variable = account
-        password = os.environ.get(password_variable)
-        if password and compare_digest(password.encode(), credentials.password.encode()):
-            return LocalAccount(credentials.username, role)
-    raise HTTPException(
-        401, "Choose a dev account." if dev_mode else "Invalid local credentials.",
-        headers={} if dev_mode else {"WWW-Authenticate": "Basic"},
-    )
-
-
-Actor = Annotated[LocalAccount, Depends(signed_in)]
-
-
-def require_role(account: LocalAccount, role: Role) -> None:
-    if account.role != role:
-        raise HTTPException(403, "This account cannot perform that action.")
 
 
 class ResetRequest(BaseModel):
@@ -126,6 +64,48 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
     templates.env.globals["requirements_text"] = requirements_text
 
+    @app.get("/", include_in_schema=False)
+    def home():
+        return RedirectResponse("/login", status_code=303)
+
+    @app.get("/login", response_class=HTMLResponse, include_in_schema=False)
+    def login_page(request: Request):
+        if browser_account(request) is not None:
+            return RedirectResponse("/locker", status_code=303)
+        response = templates.TemplateResponse(request, "login.html", {
+            "role": "borrower", "username": "", "error": None,
+        })
+        response.headers["Cache-Control"] = "no-store"
+        return response
+
+    @app.post("/login", response_class=HTMLResponse, include_in_schema=False)
+    def login(
+        request: Request,
+        username: Annotated[str, Form(min_length=1, max_length=80)],
+        password: Annotated[str, Form(min_length=1, max_length=256)],
+        role: Annotated[Literal["borrower", "staff"], Form()],
+    ):
+        require_same_origin(request)
+        username = username.strip()
+        account = authenticate(username, password)
+        if account is None or account.role != role:
+            response = templates.TemplateResponse(request, "login.html", {
+                "role": role, "username": username,
+                "error": "Check your username, password, and account type.",
+            }, status_code=401)
+        else:
+            signer = session_signer(account.username)
+            assert signer is not None
+            response = RedirectResponse("/locker", status_code=303)
+            response.set_cookie(
+                SESSION_COOKIE, f"{account.username}:{signer.dumps(account.username)}",
+                max_age=SESSION_MAX_AGE, httponly=True, samesite="strict",
+                secure=request.url.scheme == "https",
+            )
+            response.delete_cookie("dev_account")
+        response.headers["Cache-Control"] = "no-store"
+        return response
+
     @app.get("/dev-login", response_class=HTMLResponse)
     def dev_login_page(request: Request) -> HTMLResponse:
         if not dev_login_enabled(request):
@@ -136,8 +116,7 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
     def dev_login(account: str, request: Request) -> RedirectResponse:
         if not dev_login_enabled(request):
             raise HTTPException(404, "Not found.")
-        if request.headers.get("origin", str(request.base_url).rstrip("/")) != str(request.base_url).rstrip("/"):
-            raise HTTPException(403, "Open dev login from this app.")
+        require_same_origin(request)
         if account not in DEV_ACCOUNTS:
             raise HTTPException(404, "Unknown dev account.")
         response = RedirectResponse("/locker", status_code=303)
@@ -273,23 +252,18 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
             context["returns"] = returns.borrower_page(actor.username)
         return templates.TemplateResponse(request, "locker.html", context)
 
-    @app.get("/logout", response_class=HTMLResponse)
+    @app.get("/logout", include_in_schema=False)
     def logout(request: Request) -> Response:
-        if dev_login_enabled(request):
-            response = RedirectResponse("/dev-login", status_code=303)
-            response.delete_cookie("dev_account")
-            return response
-        # HTTP Basic has no real logout; a 401 makes the browser re-prompt so the
-        # demo can switch between the staff and borrower accounts.
-        body = (
-            "<!doctype html><meta charset=utf-8><title>Signed out</title>"
-            "<p style=\"font-family:system-ui;margin:2rem\">Signed out. "
-            "<a href=\"/locker\">Sign in to the locker</a> with another account.</p>"
+        require_same_origin(request)
+        target = "/dev-login" if dev_login_enabled(request) else "/login"
+        response = RedirectResponse(target, status_code=303)
+        response.delete_cookie(
+            SESSION_COOKIE, httponly=True, samesite="strict",
+            secure=request.url.scheme == "https",
         )
-        return HTMLResponse(
-            body, status_code=401,
-            headers={"WWW-Authenticate": 'Basic realm="Campus Asset Concierge"'},
-        )
+        response.delete_cookie("dev_account")
+        response.headers["Cache-Control"] = "no-store"
+        return response
 
     @app.post("/local-test/reset", status_code=204)
     def reset(request: ResetRequest, actor: Actor) -> Response:

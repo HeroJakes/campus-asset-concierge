@@ -4,10 +4,11 @@ import json
 import os
 from urllib.parse import urlsplit
 
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse
 from google.oauth2.service_account import Credentials
 
 from campus_asset_concierge.api.app import create_app
+from campus_asset_concierge.api.auth import same_origin
 from campus_asset_concierge.domain.scenarios import TestScenario
 from campus_asset_concierge.recovery import Recovery
 from campus_asset_concierge.storage.local_state import LocalStateStore
@@ -67,17 +68,11 @@ def create_demo_app():
     @app.middleware("http")
     async def protect_browser_mutations(request, call_next):
         if request.method not in {"GET", "HEAD", "OPTIONS"}:
-            supplied_origin = request.headers.get("origin")
-            if ((supplied_origin is not None and supplied_origin != origin)
-                    or request.headers.get("sec-fetch-site") == "cross-site"):
+            if not same_origin(request, origin):
                 return JSONResponse({"detail": "Open this action from the demo app."}, status_code=403)
         response = await call_next(request)
         response.headers["Cache-Control"] = "no-store"
         return response
-
-    @app.get("/")
-    def home():
-        return RedirectResponse("/locker")
 
     @app.get("/health")
     def health():

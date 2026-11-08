@@ -49,7 +49,7 @@ Stage 2.2 adds strict boolean projector requirements. True means required; false
 ## Running it
 
 - Local test with the MCP Inspector (stdio): `uv run python -m campus_asset_concierge.mcp_server`.
-- Local HTTP: set `MCP_TRANSPORT=streamable-http` and follow the [container and seeding guide](MCP_LOCAL_CONTAINER.md). The server uses stateless HTTP at `/mcp` with host/origin checks. Hosting and trusted caller identity remain pending.
+- Local HTTP: set `MCP_TRANSPORT=streamable-http` and follow the [container and seeding guide](MCP_LOCAL_CONTAINER.md). The server uses stateless HTTP at `/mcp` with host/origin checks. It is live on Vercel; trusted caller identity remains pending.
 - Add the official `mcp` package to `pyproject.toml` dependencies.
 
 ## Testing
@@ -75,7 +75,7 @@ Stage 2.2 adds strict boolean projector requirements. True means required; false
 
 ## Out of scope
 
-- Hosting and deploy (Cloud Run) — done later, when wiring Gemini.
+- Hosting and deploy — now done on Vercel; see the [deployment plan](DEPLOYMENT_PLAN.md).
 - Locker device actions over MCP — they stay on the staff locker page.
 - Real trusted-identity binding — Stage 1.5.
 

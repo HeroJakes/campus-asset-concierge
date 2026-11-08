@@ -21,7 +21,7 @@ We keep our **FastAPI + Firestore** backend (Stages 1.1–1.3) and connect it to
 └───────────────────────────────────│────────────────────────────────────┘
                                      │  tools: find/book, pickup, return, list-overdue
                     ┌────────────────▼─────────────────┐
-                    │  Backend — FastAPI + MCP server   │  ◄── we build/own (Cloud Run)
+                    │  Backend — FastAPI + MCP server   │  ◄── we build/own (Vercel)
                     │  reservations / pickups / returns │
                     └────────────────┬─────────────────┘
                                      │
@@ -41,10 +41,10 @@ We keep our **FastAPI + Firestore** backend (Stages 1.1–1.3) and connect it to
 | --- | --- | --- |
 | Chat interface + borrower agent | Gemini Enterprise (no-code) | To build — needs the licence |
 | Maximizing overdue workflow | Gemini Enterprise (no-code) | To build — local recovery logic is ready; needs the licence |
-| MCP connector (thin wrapper over the backend) | Our FastAPI, Python MCP SDK | Built locally with stdio, HTTP, seeding, and a container; hosted integration pending |
+| MCP connector (thin wrapper over the backend) | Our FastAPI, Python MCP SDK | Built with stdio, HTTP, seeding, and a container; live on Vercel, Gemini registration pending |
 | Backend logic and data | FastAPI + Firestore | Built locally through Stage 2.2 (PRs #10, #12) |
 | Staff locker page | Our web UI (`/locker`, `/locker/bookings`) | Built — overview refresh and Bookings workspace (PR #15) |
-| Hosting | Cloud Run + Cloud Firestore | Google credits expected to cover it |
+| Hosting | Vercel + Cloud Firestore (Spark) | Free tiers; no billing account needed |
 | Staff email (optional) | Gmail 1P connector | Easy to add later |
 
 ## One source of truth
@@ -54,7 +54,7 @@ The Gemini chat and the locker page read and write the **same Firestore**. A boo
 ## What is left to build
 
 - **Hosted identity and access** — bind MCP callers to trusted identities and roles. The local connector currently trusts borrower IDs supplied by callers.
-- **Deploy** the backend to Cloud Run and wire the MCP connector into Gemini Enterprise (the fiddly part is the connector auth: client ID, secret, redirect URL).
+- **Wire the MCP connector into Gemini Enterprise** — the backend and its MCP endpoint are already live on Vercel; the remaining fiddly part is connector registration and auth when the licence arrives.
 - **Gemini Enterprise build** — the chat agent and the workflow. Blocked until the licence is distributed.
 
 ## Connector terms (quick reference)

@@ -1,5 +1,7 @@
 # Backup plan
 
+> **Status (2026-11-07): resolved.** Vercel is now the live host — a free, no-card platform — so the "where does the connector run" gap this plan addressed is closed. Kept as a demo-day fallback and for Plan B (pure no-code).
+
 This plan covers one case: the organizers give us the **Gemini Enterprise licence** but **no GCP credits or project**.
 
 In that case the mandatory tool (Gemini Enterprise) is covered. The only real gap is **where our connector runs**: Cloud Run needs a billing-enabled GCP project. The database does not force the issue — **Cloud Firestore has a free tier (Firebase Spark plan) that needs no billing and no card**, so our existing storage layer can stay as it is. The backups below keep our code and only swap the host.

@@ -33,7 +33,7 @@ Before starting each numbered feature, run a short Grill Me round on its rules, 
 
 For P0, A shares the booking flow and inventory lookup with B and D. B shares pickup and active loan records with C and D. C shares verified return and condition status with A and D. See the P1 and P2 sections for their first deliverables and handoffs.
 
-After 1.0, all four leads can start with agreed local test data and connect their features as the earlier flows land. Start with the existing Python, ADK, FastAPI, and Firestore emulator scaffold. Confirm the choices in the relevant feature round. If hosting is approved later, the current option is Cloud Run for the backend, hosted Firestore, and Agent Runtime for the registered agent.
+After 1.0, all four leads can start with agreed local test data and connect their features as the earlier flows land. Start with the existing Python, ADK, FastAPI, and Firestore emulator scaffold. Confirm the choices in the relevant feature round. The backend and MCP endpoint are now hosted on Vercel with hosted Firestore; Agent Runtime remains for the registered agent when the licence arrives.
 
 ## Status
 
@@ -125,7 +125,7 @@ See the [Stage 1.4 implementation doc](STAGE_1_4_IMPLEMENTATION.md) for the reco
 
 ### Stage 1.5 — Gemini Enterprise access check
 
-The [MCP readiness plan](MCP_CLOUD_RUN_IMPLEMENTATION.md) separates local preparation from hosted work. HTTP transport, safe seeding, and the container work locally; see the [local container guide](MCP_LOCAL_CONTAINER.md). Cloud persistence and service configuration remain on hold pending separate database and container-host decisions. No cloud validation has started, and this preparation does not complete the Gemini Enterprise access check. The [build sheet](GEMINI_BUILD_SHEET.md) and [demo script](DEMO_SCRIPT.md) specify the agent, workflow, and demo to run once access arrives.
+HTTP transport, safe seeding, and the container work locally; see the [local container guide](MCP_LOCAL_CONTAINER.md). Cloud persistence (Firestore Spark) and hosting (Vercel) are now live and validated; see the [deployment plan](DEPLOYMENT_PLAN.md). This does not complete the Gemini Enterprise access check. The [build sheet](GEMINI_BUILD_SHEET.md) and [demo script](DEMO_SCRIPT.md) specify the agent, workflow, and demo to run once access arrives.
 
 **Depends on** · 1.1 inventory lookup, event app access, and Agent Runtime permissions.
 

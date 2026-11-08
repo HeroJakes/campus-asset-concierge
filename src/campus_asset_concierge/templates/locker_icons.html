@@ -17,11 +17,15 @@
 {% elif kind == 'shield' %}<path d="M12 2 3 6v6c0 5 9 10 9 10s9-5 9-10V6Z"/><path d="m8 12 3 3 5-6"/>
 {% elif kind == 'eye' %}<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>
 {% elif kind == 'check' %}<path d="m5 12 4 4L19 6"/>
+{% elif kind == 'sparkles' %}<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5ZM20 2v4m-2-2h4M3 18v4m-2-2h4"/>
+{% elif kind == 'bulb' %}<path d="M9 18v-2c-5-4-4-11 3-12 7 1 8 8 3 12v2Zm0 3h6m-6-3h6"/>
 {% elif kind == 'pin' %}<path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2"/>
 {% elif kind == 'tag' %}<path d="M3 3h8l10 10-8 8L3 11Z"/><circle cx="7.5" cy="7.5" r="1"/>
 {% elif kind == 'key' %}<circle cx="16" cy="8" r="5"/><path d="m12 12-9 9v-5l6-6m7-7v3h3"/>
 {% elif kind == 'return' %}<path d="m8 4-5 5 5 5M3 9h12a6 6 0 0 1 0 12h-3"/>
 {% elif kind == 'logout' %}<path d="M9 3H3v18h6m5-14 5 5-5 5m-7-5h12"/>
+{% elif kind == 'chat' %}<path d="M4 5h16v12H9l-5 4V5Z"/><path d="M8 10h8m-8 3h5"/>
+{% elif kind == 'send' %}<path d="m4 12 16-7-7 16-2-7-7-2Z"/>
 {% elif kind == 'lock' or kind == 'open' %}<rect x="5" y="10" width="14" height="11" rx="2"/>{% if kind == 'open' %}<path d="M9 10V6a4 4 0 0 1 8 0"/>{% else %}<path d="M8 10V6a4 4 0 0 1 8 0v4"/>{% endif %}<path d="M12 15v2"/>
 {% else %}<path d="m12 2 9 5v10l-9 5-9-5V7Z"/><path d="m3 7 9 5 9-5m-9 5v10M7.5 4.5l9 5"/>
 {% endif %}

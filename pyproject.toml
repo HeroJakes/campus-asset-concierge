@@ -8,6 +8,7 @@ dependencies = [
     "fastapi",
     "google-adk",
     "google-cloud-firestore",
+    "google-genai>=2.34.0",
     "itsdangerous>=2.2.0",
     "jinja2",
     "mcp<2",

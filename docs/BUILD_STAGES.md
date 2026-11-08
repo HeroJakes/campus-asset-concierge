@@ -59,6 +59,13 @@ Borrower UI redesign is implemented on `feat/borrower-locker-ui`, awaiting revie
 and deployment: pickup/return cards, real compartment states, responsive layout,
 and six-box code entry. Lending rules and the staff workspace are unchanged.
 
+Borrower booking assistant is implemented on `feat/borrower-assistant`, awaiting
+review and deployment: a Gemini-API (free Flash) chat on its own page that books in
+plain language over the existing reservation logic — an interim stand-in for the
+Gemini Enterprise agent. See [the plan](BORROWER_ASSISTANT_PLAN.md) and
+[ADR 0001](adr/0001-interim-gemini-api-chat.md). It degrades to a friendly fallback
+when `GEMINI_API_KEY` is absent, so the rest of the app is unaffected.
+
 ## Team ownership
 
 | Lead | Main responsibility |

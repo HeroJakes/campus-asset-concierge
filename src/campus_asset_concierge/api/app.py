@@ -1,3 +1,5 @@
+import logging
+import os
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -8,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 from google.api_core.exceptions import NotFound
 from pydantic import BaseModel, Field
 
+from campus_asset_concierge import assistant
 from campus_asset_concierge.api.booking_view import booking_overview
 from campus_asset_concierge.api.auth import (
     Actor, DEMO_PASSWORDS, DEV_ACCOUNTS, LOCAL_ACCOUNTS, LocalAccount, Role, SESSION_COOKIE, SESSION_MAX_AGE,
@@ -30,10 +33,23 @@ from campus_asset_concierge.returns import Returns
 from campus_asset_concierge.storage.local_state import LocalStateStore
 
 PACKAGE_DIR = Path(__file__).resolve().parent.parent
+logger = logging.getLogger(__name__)
+
+# The borrower assistant model id; override with GEMINI_MODEL. Current free full Flash.
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
 
 
 class ResetRequest(BaseModel):
     scenario: TestScenario
+
+
+class AssistantMessage(BaseModel):
+    role: Literal["user", "model"]
+    text: Annotated[str, Field(min_length=1, max_length=2000)]
+
+
+class AssistantChat(BaseModel):
+    messages: Annotated[list[AssistantMessage], Field(min_length=1, max_length=40)]
 
 
 class AdvanceRequest(BaseModel):
@@ -151,6 +167,34 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
             for reservation_id, reservation in load_state()["reservations"].items()
             if reservation["borrower_id"] == actor.username
         ]
+
+    @app.get("/assistant", response_class=HTMLResponse)
+    def assistant_page(request: Request, actor: Actor) -> HTMLResponse:
+        require_role(actor, Role.BORROWER)
+        response = templates.TemplateResponse(request, "locker_assistant.html", {
+            "username": actor.username,
+            "current_time": pickups.current_time(),
+            "dev_login": dev_login_enabled(request),
+        })
+        response.headers["Cache-Control"] = "no-store"
+        return response
+
+    @app.post("/assistant/chat")
+    def assistant_chat(payload: AssistantChat, actor: Actor) -> dict:
+        require_role(actor, Role.BORROWER)
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            return {"reply": assistant.FALLBACK_REPLY, "offer": None}
+        try:
+            return assistant.respond(
+                [{"role": m.role, "text": m.text} for m in payload.messages],
+                borrower_id=actor.username, reservations=reservations,
+                pickups=pickups, returns=returns, current_time=pickups.current_time(),
+                api_key=api_key, model=GEMINI_MODEL,
+            )
+        except Exception:  # noqa: BLE001 - external dependency; degrade to a friendly reply.
+            logger.exception("Assistant chat failed")
+            return {"reply": assistant.FALLBACK_REPLY, "offer": None}
 
     @app.post("/reservation-offers", status_code=201)
     def offer_reservation(request: ReservationRequest, actor: Actor) -> dict:

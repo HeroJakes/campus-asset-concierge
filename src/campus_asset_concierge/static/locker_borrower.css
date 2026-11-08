@@ -15,6 +15,15 @@
 .borrower-clock time, .borrower-user strong { display: block; font-weight: 700; }
 .borrower-user { padding: 0 14px; border-left: 1px solid #d9d4ed; }
 .borrower-user > svg { color: var(--accent); }
+.borrower-nav { display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 14px; background: #efeafb; border: 1px solid #e3dcf7; box-shadow: inset 0 1px 2px #35226d0d; }
+.borrower-nav-link { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 10px; color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 650; transition: color .2s ease, background-color .2s ease, box-shadow .25s ease, transform .18s cubic-bezier(.16, 1, .3, 1); }
+.borrower-nav-link svg { transition: transform .2s cubic-bezier(.16, 1, .3, 1); }
+.borrower-nav-link:hover { color: var(--text); background: #ffffffa6; transform: translateY(-1px); }
+.borrower-nav-link:hover svg { transform: scale(1.12) rotate(-3deg); }
+.borrower-nav-link:active { transform: translateY(0) scale(.98); }
+.borrower-nav-link.is-current { color: var(--accent); background: #fff; box-shadow: 0 2px 7px #4a259d1f, 0 0 0 1px #e2d8fb; }
+.borrower-nav-link.is-current:hover { transform: none; }
+.borrower-nav-link:focus-visible { outline: 3px solid #8155e5; outline-offset: 2px; }
 .borrower-shell .canvas { max-width: 1720px; gap: 22px; padding: 28px clamp(22px, 3.5vw, 60px) 48px; }
 .borrower-shell .button { gap: 9px; height: auto; min-height: 42px; padding: 10px 16px; font-weight: 650; border-radius: 12px; }
 .borrower-shell .button--quiet { border: 1px solid #e5ddfa; background: #ffffffb8; box-shadow: 0 3px 7px #30225c0b; }
@@ -124,4 +133,8 @@
   .borrower-action { justify-self: stretch; }
   .borrower-code-form .button { width: 100%; }
   .borrower-shell .button--quiet { padding: 8px 10px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .borrower-nav-link, .borrower-nav-link svg { transition: none; }
+  .borrower-nav-link:hover, .borrower-nav-link:active, .borrower-nav-link:hover svg { transform: none; }
 }

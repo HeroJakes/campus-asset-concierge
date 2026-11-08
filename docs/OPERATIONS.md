@@ -10,6 +10,7 @@ for emulator-only work and [Build stages](BUILD_STAGES.md) for progress.
 | Project | `campus-asset-concierge-demo`, Ivan Lee's projects, Vercel Hobby |
 | Login | https://campus-asset-concierge-demo.vercel.app/login |
 | Locker | https://campus-asset-concierge-demo.vercel.app/locker |
+| Borrower assistant | https://campus-asset-concierge-demo.vercel.app/assistant |
 | REST schemas / operator reset | https://campus-asset-concierge-demo.vercel.app/docs |
 | MCP | https://campus-asset-concierge-demo.vercel.app/mcp |
 | Health | https://campus-asset-concierge-demo.vercel.app/health |
@@ -17,8 +18,7 @@ for emulator-only work and [Build stages](BUILD_STAGES.md) for progress.
 | Firebase | `campus-asset-concierge`, Spark, no billing account linked at setup |
 | Database | `(default)`, Standard / Native, Singapore `asia-southeast1` |
 | Live document | `demo/hackathon-20261111` |
-| Deployed source | Reviewed main commit `84d0dce6997b0d1923006e04d8367a8e470cc203` (PR #25) |
-| Deployment | `dpl_Az3pP3PtRchwawp6iRYYkASMaepr` |
+| Release source and deployments | [Vercel production history](https://vercel.com/ivan-lees-projects-7028786e/campus-asset-concierge-demo/deployments) records the exact source commit and deployment ID |
 
 The obsolete `campus-asset-concierge-vercel-test` project was deleted November 8.
 The local `.vercel/project.json` points to the live demo. Do not recreate the test
@@ -93,7 +93,7 @@ remain documented here and the hosted dev-login guard is unchanged.
 
 ## Environment and secrets
 
-All nine variables are sensitive and Production-only on the dedicated project:
+All eleven variables are sensitive and Production-only on the dedicated project:
 
 | Variable | Value |
 | --- | --- |
@@ -106,6 +106,8 @@ All nine variables are sensitive and Production-only on the dedicated project:
 | `LOCAL_BORROWER_A_PASSWORD` | Unique generated password, at least 32 characters |
 | `LOCAL_BORROWER_B_PASSWORD` | Unique generated password, at least 32 characters |
 | `LOCAL_OPERATOR_PASSWORD` | Unique generated password, at least 32 characters |
+| `GEMINI_API_KEY` | Gemini API key; never render it into the browser |
+| `GEMINI_MODEL` | `gemini-3.8-flash` |
 
 Do not set `FIRESTORE_EMULATOR_HOST`, `GOOGLE_APPLICATION_CREDENTIALS`,
 `VERCEL_TEST_DOCUMENT_ID`, `PREVIEW_ACCESS_TOKEN`, or OAuth variables in Vercel.
@@ -118,6 +120,17 @@ one-off helpers are in `~/.codex/private/campus-asset-concierge-demo-evidence/`.
 Neither belongs in Git, chat, logs, or deployment uploads. The service-account JSON
 was passed in memory to the sensitive variable; no key file was added to the repo.
 `.vercelignore` uploads only source and build inputs.
+
+The local `.env` is ignored by Git and has a Windows ACL restricted to the owner
+and SYSTEM. Keep it as `.env` so existing local startup commands still work. The
+Gemini settings were transferred to Vercel through process input, without printing
+values or putting them in command arguments. Account/cron passwords are unchanged.
+
+The assistant uses a shared 45-second model budget, low thinking, and no automatic
+SDK retries. Google availability or the project's daily quota can still prevent a
+reply. Release checks encountered provider HTTP 504/503 responses; a real model
+tool round-trip is not yet proven. The chat shows its fallback in these cases.
+One-time codes stay in the borrower API stand-in and never enter model tool results.
 
 ## Seed and reset
 

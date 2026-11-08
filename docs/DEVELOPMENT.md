@@ -230,7 +230,7 @@ With an emulator already running:
 ```powershell
 $env:FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080'
 uv run --locked pytest
-node --test tests/booking_search.test.cjs tests/borrower_code.test.cjs
+node --test tests/booking_search.test.cjs tests/borrower_code.test.cjs tests/assistant_chat.test.cjs
 ```
 
 Or let Firebase start and stop it, as CI does:

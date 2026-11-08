@@ -43,7 +43,12 @@ needed by this Python backend. Keep key files outside the repository.
 
 ## Authentication
 
-Locker and REST use HTTP Basic:
+The recorded live release below uses HTTP Basic. The new `/login` page on
+`feat/borrower-staff-login` is awaiting review and deployment. After release,
+browser users select borrower/staff and sign in with these same account credentials;
+REST Basic remains available for cron and operator clients.
+
+Existing accounts:
 
 | Account | Role |
 | --- | --- |
@@ -59,9 +64,17 @@ connector; real data must not use this demo exception.
 
 Vercel account-login protection is disabled so judges and Gemini can reach the
 app. Public `/health` reads no database data. HTTP Basic introduces no session
-cookie. Browser mutations reject a supplied foreign Origin or cross-site Fetch
+cookie in the recorded live version. The new login uses an eight-hour HttpOnly,
+SameSite=Strict cookie, Secure over HTTPS. It reuses the configured account secret
+for purpose-specific signatures, with no new environment variable. Rotation revokes
+that account's cookies. Browser mutations reject a supplied foreign Origin or cross-site Fetch
 Metadata. Non-browser requests without Origin still need Basic for protected REST.
 Responses are not cached. MCP accepts only the configured stable host/origin.
+
+The operator is excluded from browser login. Use a separate browser session for
+operator `/docs` actions; a signed-in borrower/staff cookie takes precedence over
+Basic credentials. Login-page UI has no test-mode notice; the data/clock constraints
+remain documented here and the hosted dev-login guard is unchanged.
 
 ## Environment and secrets
 

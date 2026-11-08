@@ -32,6 +32,11 @@ Use separate browser sessions for staff (`equipment-staff`), Borrower A
 (`borrower-a`), and the backstage operator (`local-operator`). All use the live
 locker URL except operator/API actions at `/docs`. Passwords are supplied privately.
 
+Once the login-page change is deployed, staff and borrowers use `/login` and choose
+their account type. The recorded live release still uses Basic until deployment.
+Keep the operator in a separate session with Basic authorization at `/docs`;
+the login form does not grant operator access.
+
 Before recording, operator POST `/local-test/reset` with
 `{"scenario":"spare_available"}`. Refresh the staff and borrower pages.
 Reset clears previous activity. Do not reseed cloud data or change the clock.

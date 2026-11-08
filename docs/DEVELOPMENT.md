@@ -27,7 +27,7 @@ checks. The server-rendered locker is a virtual device, not physical hardware.
 | `reservations.py`, `pickups.py`, `returns.py` | Lending transactions |
 | `recovery.py`, `reassignment.py` | Detect conflicts, propose, recheck, and apply substitutes |
 | `storage/local_state.py` | One Firestore state document and transaction helper |
-| `api/app.py`, `templates/`, `static/` | Role-protected REST, locker views, and browser actions |
+| `api/app.py`, `api/auth.py`, `templates/`, `static/` | Login, shared account checks, role-protected REST, and locker views |
 | `agent/reservations.py` | Existing ADK booking tools and instructions |
 | `mcp_server.py` | Five tools, stdio or stateless Streamable HTTP |
 | `vercel_demo.py`, `vercel_app.py`, root `main.py` | Hosted guards, MCP lifespan, and Vercel export |
@@ -121,8 +121,24 @@ credential storage and trusted identities.
 
 ## API and MCP contracts
 
-REST uses HTTP Basic with borrower ownership checks, staff permissions, and a
-separate operator account. Use generated OpenAPI at `/docs` for full request schemas.
+Browser users sign in at `/login`, choosing borrower or staff and using their
+existing username/password. A signed HttpOnly, SameSite=Strict cookie lasts eight
+hours and is Secure over HTTPS. Roles always come from the account configuration;
+choosing staff cannot turn a borrower into staff. `/logout` clears browser cookies.
+The operator cannot sign in through this form. REST also retains HTTP Basic for
+non-browser clients and operator tools. Use OpenAPI at `/docs` for full schemas.
+
+Cookie signatures use itsdangerous with SHA-256, a purpose-specific salt, and the
+account's existing password secret, so no new deployment variable is needed.
+Rotation invalidates that account's cookies; signatures work across serverless
+instances. Sign-out clears this browser's copy; copied tokens stay valid until
+expiry or password rotation. Cookies contain no password. Cookie sessions take
+precedence over Basic, so use a separate session for another API/operator account.
+Form parsing uses FastAPI's standard multipart dependency. Browser mutations and
+login reject foreign Origin and cross-site Fetch Metadata; CLI clients may omit Origin.
+
+The login page is implemented in this branch; the live deployment version is
+recorded separately in [Operations](OPERATIONS.md#live-target).
 
 | Route group | Access and purpose |
 | --- | --- |

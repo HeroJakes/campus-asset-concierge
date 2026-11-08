@@ -57,7 +57,7 @@ def test_demo_rejects_unsafe_configuration(demo_environment, monkeypatch, name, 
 def test_demo_auth_browser_protection_and_public_mcp(demo_environment):
     with TestClient(vercel_demo.create_demo_app(), base_url="https://demo.example") as client:
         assert client.get("/health").json() == {"status": "ok"}
-        assert client.get("/locker").status_code == 401
+        assert client.get("/locker", follow_redirects=False).headers["location"] == "/login"
         assert client.get("/local-test/clock").status_code == 404
         assert client.post("/local-test/clock/advance", json={"minutes": 1}).status_code == 404
         assert client.get("/dev-login").status_code == 404
@@ -75,6 +75,13 @@ def test_demo_auth_browser_protection_and_public_mcp(demo_environment):
         assert client.post("/mcp", headers={"Host": "other.example"}, json={
             "jsonrpc": "2.0", "id": 2, "method": "tools/list",
         }).status_code == 421
+        login = client.post("/login", data={
+            "username": "equipment-staff", "password": os.environ["LOCAL_STAFF_PASSWORD"],
+            "role": "staff",
+        }, headers={"Origin": "https://demo.example"}, follow_redirects=False)
+        assert login.status_code == 303
+        assert "Secure" in login.headers.get_list("set-cookie")[0]
+        assert client.get("/me").json()["role"] == "staff"
     factory, credentials = demo_environment
     factory.assert_called_once_with(credentials=credentials)
 

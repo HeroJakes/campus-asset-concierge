@@ -455,7 +455,7 @@ def test_locker_page_hides_the_code_so_only_email_delivers_it(booking_app):
 
 def test_locker_page_needs_a_staff_or_borrower_sign_in(booking_app):
     client, _ = booking_app
-    assert client.get("/locker").status_code == 401
+    assert client.get("/locker", follow_redirects=False).headers["location"] == "/login"
     assert client.get("/locker", auth=OPERATOR).status_code == 403
     assert client.get("/static/locker.css").status_code == 200
     assert client.get("/static/locker.js").status_code == 200

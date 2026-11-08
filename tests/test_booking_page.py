@@ -18,7 +18,7 @@ def row(reservation_id):
 
 def test_bookings_page_is_staff_only(booking_app):
     client, _ = booking_app
-    assert client.get("/locker/bookings").status_code == 401
+    assert client.get("/locker/bookings", follow_redirects=False).headers["location"] == "/login"
     for account in (BORROWER_A, BORROWER_B, OPERATOR):
         assert client.get("/locker/bookings", auth=account).status_code == 403
     assert 'href="/locker/bookings"' in client.get("/locker", auth=STAFF).text

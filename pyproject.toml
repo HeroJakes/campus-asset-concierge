@@ -8,8 +8,10 @@ dependencies = [
     "fastapi",
     "google-adk",
     "google-cloud-firestore",
+    "itsdangerous>=2.2.0",
     "jinja2",
     "mcp<2",
+    "python-multipart>=0.0.33",
     "uvicorn",
 ]
 

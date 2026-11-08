@@ -1,0 +1,49 @@
+{%- macro name(value) %}{{ value | replace("-", " ") | title }}{% endmacro -%}
+{%- macro hhmm(value) %}{{ value[11:16] }}{% endmacro -%}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assistant · Campus Asset Concierge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/locker.css">
+  <link rel="stylesheet" href="/static/locker_borrower.css">
+  <link rel="stylesheet" href="/static/locker_assistant.css">
+  <script src="/static/locker_assistant.js" defer></script>
+</head>
+<body class="borrower-shell">
+  {% from "locker_icons.html" import icon %}
+  {% set bar_title = "Assistant" %}
+  {% set bar_subtitle = "Book equipment by chatting in plain language." %}
+  {% set bar_active = "assistant" %}
+  {% include "locker_borrower_bar.html" %}
+
+  <main class="canvas assistant-canvas" id="main-content">
+    <noscript><p class="notice">The assistant needs JavaScript. Use the My Locker page to collect and return items.</p></noscript>
+    {% if dev_login %}<p class="notice">Dev login · {{ request.cookies.get('dev_account') }} · No password · <a href="/logout">Switch account</a></p>{% endif %}
+
+    <section class="assistant" aria-label="Booking assistant">
+      <div class="assistant-log" id="assistant-log" aria-live="polite" aria-label="Conversation">
+        <div class="assistant-row assistant-row--bot">
+          <span class="assistant-avatar">{{ icon('chat', 20) }}</span>
+          <div class="assistant-bubble">
+            <p>Hi! Tell me what you need and when, and I'll find a unit to book.</p>
+            <p class="assistant-hint">For example: <em>"a projector with HDMI today 2pm to 4pm"</em> or <em>"a Raspberry Pi kit tomorrow 10am for 2 hours"</em>.</p>
+          </div>
+        </div>
+      </div>
+
+      <form class="assistant-form" id="assistant-form" autocomplete="off">
+        <label class="sr-only" for="assistant-input">Message the assistant</label>
+        <textarea id="assistant-input" name="message" rows="1" maxlength="2000"
+          placeholder="Describe what you want to book…" required></textarea>
+        <button class="button button--primary" type="submit" id="assistant-send">{{ icon('send', 18) }} Send</button>
+      </form>
+      <p class="assistant-foot">Pickup codes, unlocking, and returns happen on <a href="/locker">My Locker</a>, not here.</p>
+    </section>
+  </main>
+</body>
+</html>

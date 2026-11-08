@@ -15,6 +15,11 @@
 .borrower-clock time, .borrower-user strong { display: block; font-weight: 700; }
 .borrower-user { padding: 0 14px; border-left: 1px solid #d9d4ed; }
 .borrower-user > svg { color: var(--accent); }
+.borrower-nav { display: flex; align-items: center; gap: 6px; }
+.borrower-nav-link { display: inline-flex; align-items: center; gap: 7px; padding: 9px 13px; border-radius: 11px; border: 1px solid transparent; color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 650; }
+.borrower-nav-link:hover { background: #ffffffb0; color: var(--text); }
+.borrower-nav-link.is-current { background: #eee8ff; color: var(--accent); border-color: #ddd2fb; }
+.borrower-nav-link:focus-visible { outline: 3px solid #8155e5; outline-offset: 2px; }
 .borrower-shell .canvas { max-width: 1720px; gap: 22px; padding: 28px clamp(22px, 3.5vw, 60px) 48px; }
 .borrower-shell .button { gap: 9px; height: auto; min-height: 42px; padding: 10px 16px; font-weight: 650; border-radius: 12px; }
 .borrower-shell .button--quiet { border: 1px solid #e5ddfa; background: #ffffffb8; box-shadow: 0 3px 7px #30225c0b; }

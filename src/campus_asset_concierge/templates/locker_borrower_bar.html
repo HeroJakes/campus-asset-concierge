@@ -1,0 +1,15 @@
+{# Shared borrower top bar. Expects name/hhmm macros and the `icon` macro in scope,
+   plus current_time, username, bar_title, bar_subtitle, bar_active ("locker"|"assistant"). #}
+<header class="borrower-bar">
+  <a class="borrower-brand" href="/locker">{{ icon('cube', 40) }}<span>Campus Asset<br>Concierge</span></a>
+  <div class="borrower-title"><h1>{{ bar_title }}</h1><p>{{ bar_subtitle }}</p></div>
+  <nav class="borrower-nav" aria-label="Borrower sections">
+    <a href="/locker" class="borrower-nav-link{% if bar_active == 'locker' %} is-current{% endif %}"{% if bar_active == 'locker' %} aria-current="page"{% endif %}>{{ icon('cube', 18) }} My Locker</a>
+    <a href="/assistant" class="borrower-nav-link{% if bar_active == 'assistant' %} is-current{% endif %}"{% if bar_active == 'assistant' %} aria-current="page"{% endif %}>{{ icon('chat', 18) }} Assistant</a>
+  </nav>
+  <div class="borrower-session">
+    <div class="borrower-clock">{{ icon('clock', 25) }}<div><span>Test clock (simulated) · MYT</span><time datetime="{{ current_time }}">{{ current_time[:10] }} · {{ hhmm(current_time) }}</time></div></div>
+    <div class="borrower-user">{{ icon('user', 26) }}<div><span>Signed in as</span><strong>{{ name(username) }}</strong></div></div>
+    <a class="button button--quiet" href="/logout">{{ icon('logout', 19) }} Log out</a>
+  </div>
+</header>

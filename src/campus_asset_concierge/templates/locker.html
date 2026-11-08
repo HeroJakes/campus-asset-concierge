@@ -21,16 +21,10 @@
   {% if is_staff %}
     {% include "locker_sidebar.html" %}
   {% else %}
-  <header class="borrower-bar">
-    <a class="borrower-brand" href="/locker">{{ icon('cube', 40) }}<span>Campus Asset<br>Concierge</span></a>
-    <div class="borrower-title"><h1>My Locker</h1><p>Collect and return your booked equipment.</p></div>
-    <div class="borrower-session">
-      <div class="borrower-clock">{{ icon('clock', 25) }}<div><span>Test clock (simulated) · MYT</span><time datetime="{{ current_time }}">{{ current_time[:10] }} · {{ hhmm(current_time) }}</time></div></div>
-      <div class="borrower-user">{{ icon('user', 26) }}<div><span>Signed in as</span><strong>{{ name(username) }}</strong></div></div>
-      <a class="button button--quiet" href="/locker">{{ icon('refresh', 19) }} Refresh</a>
-      <a class="button button--quiet" href="/logout">{{ icon('logout', 19) }} Log out</a>
-    </div>
-  </header>
+  {% set bar_title = "My Locker" %}
+  {% set bar_subtitle = "Collect and return your booked equipment." %}
+  {% set bar_active = "locker" %}
+  {% include "locker_borrower_bar.html" %}
   {% endif %}
 
   <main class="canvas{% if is_staff %} staff-canvas{% endif %}" id="main-content">

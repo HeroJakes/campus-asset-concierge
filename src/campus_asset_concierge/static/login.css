@@ -2,8 +2,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; }
 button, input { font: inherit; }
-.login-page { min-height: 100svh; color: var(--ink); font-family: "Segoe UI", Arial, sans-serif; background: radial-gradient(ellipse at 95% 12%, #eae2ff 0, transparent 56%), radial-gradient(ellipse at 15% 85%, #eeebff 0, transparent 57%), #fafaff; }
-.login-page::before { content: ""; position: fixed; z-index: -1; width: 100vw; height: 100vw; left: 39%; top: 18%; border-radius: 50%; background: linear-gradient(140deg, #e9e1fc99, #ffffff00 60%); pointer-events: none; }
+.login-page { min-height: 100svh; color: var(--ink); font-family: "Segoe UI", Arial, sans-serif; background: #fafaff url("/static/login-background.png") left bottom / cover no-repeat fixed; }
 .login-layout { display: grid; grid-template-columns: 1.13fr 1fr; gap: clamp(32px, 5vw, 80px); align-items: center; max-width: 1520px; min-height: 100svh; margin: auto; padding: 48px clamp(30px, 5vw, 76px); }
 .login-hero { align-self: stretch; position: relative; min-height: 660px; }
 .login-brand { display: inline-flex; align-items: center; gap: 15px; color: var(--ink); text-decoration: none; font-weight: 750; font-size: 21px; letter-spacing: -.6px; line-height: 1.15; }
@@ -17,7 +16,6 @@ button, input { font: inherit; }
 .login-benefits li:first-child { padding-left: 0; }
 .login-benefits li:last-child { border: 0; padding-right: 0; }
 .login-benefits svg { color: var(--purple); flex: none; }
-.login-locker-art { position: absolute; width: 100%; height: 54%; object-fit: contain; object-position: left bottom; left: -9px; bottom: -30px; }
 .login-card { position: relative; width: 100%; max-width: 560px; justify-self: center; border: 1px solid #e7e2f8; border-radius: 26px; padding: 42px; background: #ffffffdb; box-shadow: 0 24px 70px #4b358217, 0 2px 4px #4b358209; }
 .login-card-heading { text-align: center; }
 .login-card h2 { margin: 0; font-size: 34px; letter-spacing: -1px; font-weight: 750; }
@@ -47,8 +45,7 @@ button, input { font: inherit; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .login-brand:focus-visible, button:focus-visible { outline: 3px solid #8060e5; outline-offset: 4px; }
 .login-role > input:focus-visible + span { outline: 3px solid #8060e5; outline-offset: 4px; }
-@media (min-width: 1500px) { .login-locker-art { height: 57%; } }
 @media (max-width: 1100px) { .login-layout { gap: 28px; padding: 32px; } .login-card { padding: 32px; } .login-benefits li { padding: 0 10px; font-size: 12px; gap: 6px; } .hero-copy h1 { letter-spacing: -1.4px; } .wide-break { display: none; } }
-@media (max-width: 850px) { .login-layout { grid-template-columns: 1fr; gap: 30px; padding: 28px 22px 42px; } .login-hero { min-height: 0; } .login-brand { font-size: 18px; } .login-brand > svg { width: 36px; height: 36px; } .hero-copy { margin-top: 28px; } .hero-copy h1 { font-size: 34px; letter-spacing: -1.1px; } .hero-copy > p { max-width: 520px; margin-top: 16px; font-size: 15px; } .login-benefits { margin-top: 20px; } .login-locker-art { display: none; } .login-card { padding: 30px; max-width: 520px; } .login-card h2 { font-size: 30px; } }
+@media (max-width: 850px) { .login-layout { grid-template-columns: 1fr; gap: 30px; padding: 28px 22px 42px; } .login-hero { min-height: 0; } .login-brand { font-size: 18px; } .login-brand > svg { width: 36px; height: 36px; } .hero-copy { margin-top: 28px; } .hero-copy h1 { font-size: 34px; letter-spacing: -1.1px; } .hero-copy > p { max-width: 520px; margin-top: 16px; font-size: 15px; } .login-benefits { margin-top: 20px; } .login-card { padding: 30px; max-width: 520px; } .login-card h2 { font-size: 30px; } }
 @media (max-width: 420px) { .login-layout { padding: 24px 16px 32px; } .login-card { padding: 26px 22px; border-radius: 22px; } .login-roles { gap: 10px; } .login-role > span { font-size: 12px; } .login-benefits li { padding: 0 9px; font-size: 11px; } .login-benefits svg { width: 20px; height: 20px; } .hero-copy h1 { font-size: 30px; } .login-card-heading > p { font-size: 14px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }

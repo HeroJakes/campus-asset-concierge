@@ -85,10 +85,9 @@ or tools, tests, and demo evidence — and reviewed the others' pull requests be
 
 ## Try the demo
 
-The borrower/staff login page is implemented on `feat/borrower-staff-login` and
-awaits deployment. It uses the existing account credentials at `/login`, with a
-role selector, an eight-hour browser session, and sign-out. The live release below
-still uses its original Basic login until that change is reviewed and deployed.
+The [login page](https://campus-asset-concierge-demo.vercel.app/login) is live.
+Choose borrower or staff and use your supplied credentials. Browser sessions last
+eight hours; sign out before switching accounts in the same browser session.
 
 1. Open the [virtual locker](https://campus-asset-concierge-demo.vercel.app/locker).
    Staff and borrower credentials are supplied privately.
@@ -104,8 +103,9 @@ clients and is not a chat page.
 
 The hosted clock is fixed at **November 7, 2026, 11:01 MYT**. The live document is
 `demo/hackathon-20261111`. A protected operator reset restores the showcase between
-runs. MCP has no authentication for this fictional demo; locker and REST actions
-use HTTP Basic. Gemini app and video links will be added after verification and recording.
+runs. MCP has no authentication for this fictional demo. Browser users sign in
+through the login page; REST clients and operator tools still support HTTP Basic.
+Gemini app and video links will be added after verification and recording.
 
 ## Project guide
 

@@ -8,6 +8,7 @@ for emulator-only work and [Build stages](BUILD_STAGES.md) for progress.
 | Setting | Value |
 | --- | --- |
 | Project | `campus-asset-concierge-demo`, Ivan Lee's projects, Vercel Hobby |
+| Login | https://campus-asset-concierge-demo.vercel.app/login |
 | Locker | https://campus-asset-concierge-demo.vercel.app/locker |
 | REST schemas / operator reset | https://campus-asset-concierge-demo.vercel.app/docs |
 | MCP | https://campus-asset-concierge-demo.vercel.app/mcp |
@@ -16,8 +17,8 @@ for emulator-only work and [Build stages](BUILD_STAGES.md) for progress.
 | Firebase | `campus-asset-concierge`, Spark, no billing account linked at setup |
 | Database | `(default)`, Standard / Native, Singapore `asia-southeast1` |
 | Live document | `demo/hackathon-20261111` |
-| Deployed source | Reviewed main commit `7baf36a96860eb95c902224c6346f526afa7e2b6` |
-| Deployment | `dpl_J2NACJqHk9GuxooMzo4VjF5H3Bg3` |
+| Deployed source | Reviewed main commit `84d0dce6997b0d1923006e04d8367a8e470cc203` (PR #25) |
+| Deployment | `dpl_Az3pP3PtRchwawp6iRYYkASMaepr` |
 
 The obsolete `campus-asset-concierge-vercel-test` project was deleted November 8.
 The local `.vercel/project.json` points to the live demo. Do not recreate the test
@@ -43,10 +44,8 @@ needed by this Python backend. Keep key files outside the repository.
 
 ## Authentication
 
-The recorded live release below uses HTTP Basic. The new `/login` page on
-`feat/borrower-staff-login` is awaiting review and deployment. After release,
-browser users select borrower/staff and sign in with these same account credentials;
-REST Basic remains available for cron and operator clients.
+Browser users select borrower/staff at `/login` and sign in with their account
+credentials. REST Basic remains available for cron and operator clients.
 
 Existing accounts:
 
@@ -63,8 +62,7 @@ actions. OAuth and trusted borrower roles are deferred until tested with the rea
 connector; real data must not use this demo exception.
 
 Vercel account-login protection is disabled so judges and Gemini can reach the
-app. Public `/health` reads no database data. HTTP Basic introduces no session
-cookie in the recorded live version. The new login uses an eight-hour HttpOnly,
+app. Public `/health` reads no database data. Browser login uses an eight-hour HttpOnly,
 SameSite=Strict cookie, Secure over HTTPS. It reuses the configured account secret
 for purpose-specific signatures, with no new environment variable. Rotation revokes
 that account's cookies. Browser mutations reject a supplied foreign Origin or cross-site Fetch
@@ -155,6 +153,25 @@ not advance the fixed clock, reset activity, approve substitutes, or send Gmail.
 The later Gemini/Gmail workflow needs its own integration and delivery checks.
 
 ## Release evidence
+
+The login release passed 38 live HTTPS checks on November 8:
+
+- Borrower A, Borrower B, and staff signed in, opened their pages, and signed out.
+- Session cookies were Secure, HttpOnly, SameSite=Strict, with an eight-hour expiry.
+- Wrong credentials, role restrictions, and cross-origin login were rejected.
+- Staff/operator Basic clients still worked; MCP returned all five tools.
+- Health returned 200; dev-login and clock routes remained 404.
+- The slowest request took 0.443 seconds. No database mutations were performed.
+- Full document content and update timestamps matched before and after: `demo/current`
+  at `2026-11-06T09:19:18.605177Z`, and `demo/hackathon-20261111` at
+  `2026-11-07T08:21:42.693519Z`.
+
+The merged feature's CI passed 194 Python tests on the emulator and five browser
+tests. No environment variables, credentials, seed, reset, or scheduler settings
+changed for this release. The Vercel project has no Git integration, so merging
+alone does not deploy; this release used the Vercel CLI from reviewed main.
+
+### Initial release
 
 Live HTTPS checks on November 7 used no Vercel account session or preview token:
 

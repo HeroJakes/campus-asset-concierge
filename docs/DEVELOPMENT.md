@@ -137,8 +137,8 @@ precedence over Basic, so use a separate session for another API/operator accoun
 Form parsing uses FastAPI's standard multipart dependency. Browser mutations and
 login reject foreign Origin and cross-site Fetch Metadata; CLI clients may omit Origin.
 
-The login page is implemented in this branch; the live deployment version is
-recorded separately in [Operations](OPERATIONS.md#live-target).
+The login page is live. Its deployed version is recorded in
+[Operations](OPERATIONS.md#live-target).
 
 | Route group | Access and purpose |
 | --- | --- |

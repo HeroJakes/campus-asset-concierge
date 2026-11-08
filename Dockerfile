@@ -12,7 +12,7 @@ RUN useradd --create-home --uid 10001 app
 COPY --from=build /app/.venv /app/.venv
 # Defaults target the localhost demo. Before deploying to a real host, set
 # MCP_ALLOWED_HOSTS/MCP_ALLOWED_ORIGINS to that host or every request returns 421.
-# See docs/MCP_LOCAL_CONTAINER.md.
+# See docs/DEVELOPMENT.md#local-mcp-and-container.
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     MCP_TRANSPORT=streamable-http \

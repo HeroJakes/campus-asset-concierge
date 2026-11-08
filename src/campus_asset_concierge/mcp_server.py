@@ -1,7 +1,7 @@
 """MCP connector: a second entry point that exposes the backend to Gemini Enterprise.
 
 The tools reuse the same domain classes as the FastAPI app. See
-docs/MCP_CONNECTOR_IMPLEMENTATION.md.
+docs/DEVELOPMENT.md#api-and-mcp-contracts.
 """
 
 from collections.abc import Callable

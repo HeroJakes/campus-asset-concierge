@@ -5,6 +5,8 @@ service. Pure loop/dispatch tests run without the emulator; endpoint tests use i
 """
 
 import pytest
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 from conftest import BORROWER_A, OPERATOR, STAFF
 from campus_asset_concierge import assistant
@@ -91,6 +93,41 @@ def test_clean_find_args_coerces_floats_and_drops_nulls():
     cleaned = assistant._clean_find_args({"duration_minutes": 60.0, "due_at": None, "category": "projector"})
     assert cleaned["duration_minutes"] == 60
     assert "due_at" not in cleaned
+
+
+def test_sdk_round_trip_preserves_model_parts_and_groups_parallel_tool_results(monkeypatch):
+    from google import genai
+    from google.genai import types
+
+    content = types.Content(role="model", parts=[
+        types.Part(function_call=types.FunctionCall(name="check_pickup_status", args={}, id="pickup"),
+                   thought_signature=b"test-signature"),
+        types.Part(function_call=types.FunctionCall(name="check_return_status", args={}, id="return")),
+    ])
+    generate = Mock(side_effect=[
+        types.GenerateContentResponse(candidates=[types.Candidate(content=content)]),
+        types.GenerateContentResponse(candidates=[types.Candidate(content=types.Content(
+            role="model", parts=[types.Part(text="Your status is ready.")],
+        ))]),
+    ])
+    client = Mock(return_value=SimpleNamespace(models=SimpleNamespace(generate_content=generate)))
+    monkeypatch.setattr(genai, "Client", client)
+    monkeypatch.setattr(assistant, "monotonic", Mock(side_effect=[100, 101, 111]))
+    result = assistant.run_assistant(
+        assistant.gemini_generate("test-key", "test-model", "2026-11-07T11:01:00+08:00"),
+        [{"role": "user", "text": "Check both statuses"}],
+        lambda name, args: {"status": "ready"},
+    )
+    assert result["reply"] == "Your status is ready."
+    sent = generate.call_args_list[1].kwargs["contents"]
+    assert [item.role for item in sent] == ["user", "model", "user"]
+    assert sent[1] is content
+    assert sent[1].parts[0].thought_signature == b"test-signature"
+    assert [part.function_response.id for part in sent[2].parts] == ["pickup", "return"]
+    assert client.call_args.kwargs["http_options"].timeout == 45000
+    assert client.call_args.kwargs["http_options"].retry_options.attempts == 1
+    assert [call.kwargs["config"].http_options.timeout for call in generate.call_args_list] == [44000, 34000]
+    assert generate.call_args.kwargs["config"].thinking_config.thinking_level == types.ThinkingLevel.LOW
 
 
 # --- endpoint tests (mock Gemini, real dispatch against the emulator) ---

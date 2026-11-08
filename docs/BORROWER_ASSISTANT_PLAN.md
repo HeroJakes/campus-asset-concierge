@@ -5,8 +5,8 @@ It is the interim stand-in for the Gemini Enterprise borrower agent; see
 [ADR 0001](adr/0001-interim-gemini-api-chat.md) for why it exists, and
 [GLOSSARY.md](../GLOSSARY.md) for *offer* vs *reservation* vs *loan*.
 
-The assistant is implemented on `feat/borrower-assistant`. Review, real Gemini
-verification, and deployment are still pending. This document records its scope.
+The assistant is implemented in PR #28. This document records its scope; hosted
+configuration and release limits are recorded in [Operations](OPERATIONS.md).
 
 ## Settled decisions
 
@@ -19,6 +19,9 @@ verification, and deployment are still pending. This document records its scope.
 - **State:** stateless server; the browser sends the message history each turn.
 - **Key & failure:** `GEMINI_API_KEY` is a server-side env var; on API error or rate-limit
   the chat shows a graceful message pointing to `/docs` (the deterministic fallback).
+- **Runtime:** use low thinking and one shared 45-second model budget, with automatic
+  retries off. Preserve original Gemini response parts and function-call IDs when
+  returning tool results. Tool results use the user role required by the Gemini API.
 - **Tools run in-process:** the backend calls the domain classes directly, as the MCP server does.
 - **Placement:** its own page (`/assistant`), separate from the locker page; top-bar nav links the two.
 - **Page:** a chat panel with illustrated offer cards, a quick-prompt sidebar, and tips.

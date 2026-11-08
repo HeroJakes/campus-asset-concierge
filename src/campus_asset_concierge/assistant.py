@@ -12,6 +12,7 @@ friendly fallback instead of breaking the page.
 from __future__ import annotations
 
 from typing import Any, Callable, Protocol
+from time import monotonic
 
 from pydantic import ValidationError
 
@@ -148,12 +149,12 @@ def run_assistant(
         calls = reply.get("calls") or []
         if not calls:
             return {"reply": reply.get("text") or "", "offer": offer}
-        transcript.append({"role": "model", "calls": calls})
+        transcript.append({"role": "model", "calls": calls, "content": reply.get("content")})
         for call in calls:
             result = dispatch(call["name"], call.get("args") or {})
             if call["name"] == "find_equipment" and "error" not in result:
                 offer = result
-            transcript.append({"role": "tool", "name": call["name"], "response": result})
+            transcript.append({"role": "tool", "name": call["name"], "id": call.get("id"), "response": result})
     return {"reply": "Sorry, I couldn't finish that - please try again.", "offer": offer}
 
 
@@ -182,7 +183,10 @@ def gemini_generate(api_key: str, model: str, current_time: str) -> Callable[[li
     from google import genai
     from google.genai import types
 
-    client = genai.Client(api_key=api_key)
+    # One shared budget leaves time for Firestore and the response within Vercel's cap.
+    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(
+        timeout=45000, retry_options=types.HttpRetryOptions(attempts=1),
+    ))
     tools = [types.Tool(function_declarations=[
         types.FunctionDeclaration(
             name=d["name"], description=d["description"], parameters=_schema(types, d["parameters"]),
@@ -192,18 +196,29 @@ def gemini_generate(api_key: str, model: str, current_time: str) -> Callable[[li
     config = types.GenerateContentConfig(
         system_instruction=SYSTEM_PROMPT.format(current_time=current_time),
         tools=tools,
+        thinking_config=types.ThinkingConfig(thinking_level="low"),
         automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
     )
 
+    deadline = monotonic() + 45
+
     def generate(transcript: list[dict]) -> dict:
+        remaining = int((deadline - monotonic()) * 1000)
+        if remaining <= 0:
+            raise TimeoutError("Assistant request timed out.")
         response = client.models.generate_content(
-            model=model, contents=_to_contents(types, transcript), config=config,
+            model=model, contents=_to_contents(types, transcript), config=config.model_copy(update={
+                "http_options": types.HttpOptions(
+                    timeout=remaining, retry_options=types.HttpRetryOptions(attempts=1),
+                ),
+            }),
         )
         calls = [
-            {"name": fc.name, "args": dict(fc.args or {})}
+            {"name": fc.name, "args": dict(fc.args or {}), "id": fc.id}
             for fc in (response.function_calls or [])
         ]
-        return {"text": response.text, "calls": calls}
+        return {"text": response.text if not calls else None, "calls": calls,
+                "content": response.candidates[0].content if response.candidates else None}
 
     return generate
 
@@ -230,6 +245,10 @@ def _to_contents(types, transcript: list[dict]) -> list:
         if role == "user":
             contents.append(types.Content(role="user", parts=[types.Part(text=item["text"])]))
         elif role == "model" and item.get("calls"):
+            if item.get("content") is not None:
+                # Preserve the original parts, including Gemini's thought signatures.
+                contents.append(item["content"])
+                continue
             parts = [
                 types.Part(function_call=types.FunctionCall(name=c["name"], args=c.get("args") or {}))
                 for c in item["calls"]
@@ -238,7 +257,11 @@ def _to_contents(types, transcript: list[dict]) -> list:
         elif role == "model":
             contents.append(types.Content(role="model", parts=[types.Part(text=item.get("text") or "")]))
         elif role == "tool":
-            contents.append(types.Content(role="tool", parts=[
-                types.Part.from_function_response(name=item["name"], response=item["response"]),
-            ]))
+            part = types.Part(function_response=types.FunctionResponse(
+                name=item["name"], response=item["response"], id=item.get("id"),
+            ))
+            if contents and contents[-1].role == "user" and contents[-1].parts[0].function_response:
+                contents[-1].parts.append(part)
+            else:
+                contents.append(types.Content(role="user", parts=[part]))
     return contents

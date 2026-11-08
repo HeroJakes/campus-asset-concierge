@@ -7,8 +7,9 @@ Judging runs November 11–14, 2026. This plan replaces the older Render runbook
 
 The reviewed entrypoint and recovery trigger were merged in PR #21. The stable
 demo is deployed from `main` commit `7baf36a96860eb95c902224c6346f526afa7e2b6`.
-The create-only seed and live HTTPS checks passed on November 7, 2026. The daily
-scheduler is pending cron-job.org sign-in; no scheduler or keep-awake job exists yet.
+The create-only seed and live HTTPS checks passed on November 7, 2026. The project
+owner confirmed the daily cron-job.org recovery job is working on November 8.
+The obsolete Vercel test project was deleted on November 8. No keep-awake job is used.
 
 | Target | Setting |
 | --- | --- |
@@ -59,8 +60,8 @@ Hosted `demo/current` was read before seeding and after all live mutation checks
 | Content SHA-256 | `9df5b70dffc20cc5d314d63e90a38740e9be1db059846cb490d2fa73388a37c1` | `9df5b70dffc20cc5d314d63e90a38740e9be1db059846cb490d2fa73388a37c1` |
 
 The hash covers Firestore's typed `fields`, encoded as UTF-8 JSON with sorted keys
-and compact separators. Full snapshots and smoke measurements are kept in ignored
-local verification files. Account passwords are stored privately outside the repo;
+and compact separators. Full snapshots and smoke measurements are kept in private
+verification files outside the repo. Account passwords are also stored outside the repo;
 the service-account JSON was passed in memory to Vercel's sensitive variable.
 The `vercel-test-*` document was not written or reset.
 
@@ -93,9 +94,9 @@ empty. Real connector verification waits for the licence.
 
 ## Vercel environment
 
-Set these on the dedicated project's Production environment. Use a separate project
-from `campus-asset-concierge-vercel-test`. Verify the team and project before changing
-settings. Do not copy the local `.env`, where dev login may be enabled.
+Set these on the `campus-asset-concierge-demo` project's Production environment.
+Verify the team and project before changing settings. Do not copy the local `.env`,
+where dev login may be enabled.
 
 | Variable | Value |
 | --- | --- |
@@ -162,13 +163,14 @@ clock stays fixed. Dates in bookings must follow that demo clock. The daily job
 does not advance time, send Gmail messages, approve proposals, or reset the data.
 State is shared and changes persist between judges until the operator resets it.
 
-## Daily scheduler, after HTTPS verification
+## Daily scheduler
 
-Create exactly one cron-job.org job:
+The project owner confirmed this cron-job.org job is configured and working.
+Execution history has not been independently inspected by the coding agent.
 
 | Field | Value |
 | --- | --- |
-| URL | `<stable HTTPS origin>/recovery/run` |
+| URL | `https://campus-asset-concierge-demo.vercel.app/recovery/run` |
 | Method | `POST` |
 | Time zone | `Asia/Kuala_Lumpur` |
 | Schedule | Daily at 09:00 (`0 9 * * *`; 01:00 UTC) |
@@ -179,7 +181,7 @@ Create exactly one cron-job.org job:
 Run one manual scheduler test and check its execution history before relying on it.
 No keep-awake job is planned or needed. `/health` is available for manual checks.
 Vercel Cron is not configured; it sends GET, while this endpoint requires POST.
-Scheduler account access is needed to create and verify the external job.
+Keep the job enabled through judging and check its execution history for failures.
 
 ## Data and test guardrails
 

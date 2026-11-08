@@ -51,8 +51,9 @@ The [live locker demo](https://campus-asset-concierge-demo.vercel.app/locker) us
 HTTP Basic. The [MCP endpoint](https://campus-asset-concierge-demo.vercel.app/mcp)
 uses no authentication for this fictional demo. Both use only
 `demo/hackathon-20261111`. Operator reset restores the overdue showcase; hosted
-clock controls and passwordless login are disabled. HTTPS checks passed. Daily
-scheduling awaits cron-job.org account access. See the
+clock controls and passwordless login are disabled. HTTPS checks passed. The daily
+cron-job.org recovery job is configured and working, as confirmed by the project owner.
+The old Vercel test project has been removed. See the
 [deployment runbook](docs/DEPLOYMENT_PLAN.md) for the release evidence and settings.
 
 ## Run it locally

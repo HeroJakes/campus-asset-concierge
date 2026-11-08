@@ -55,6 +55,10 @@ November 8: the hosted login page now lists public borrower/staff test accounts
 with form-fill buttons. No sign-up is needed. Operator access stays private;
 existing internal passwords and cron credentials are unchanged.
 
+Borrower UI redesign is implemented on `feat/borrower-locker-ui`, awaiting review
+and deployment: pickup/return cards, real compartment states, responsive layout,
+and six-box code entry. Lending rules and the staff workspace are unchanged.
+
 ## Team ownership
 
 | Lead | Main responsibility |

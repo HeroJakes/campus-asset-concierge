@@ -255,6 +255,7 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
         else:
             context["pickups"] = pickups.borrower_page(actor.username)
             context["returns"] = returns.borrower_page(actor.username)
+            context["pickup_location"] = load_state()["location"]["name"]
         return templates.TemplateResponse(request, "locker.html", context)
 
     @app.get("/logout", include_in_schema=False)

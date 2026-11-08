@@ -133,6 +133,14 @@ def test_cookie_survives_another_app_instance_and_form_has_no_open_redirect(logi
         assert other.get("/me").json()["username"] == "borrower-a"
 
 
+def test_hosted_cookie_stays_secure_behind_a_tls_proxy(login_client, monkeypatch):
+    monkeypatch.setenv("PUBLIC_BASE_URL", "https://campus.example")
+    with TestClient(create_app(store=object()), base_url="http://campus.example") as internal:
+        response = sign_in(internal)
+        assert response.status_code == 303
+        assert "Secure" in response.headers.get_list("set-cookie")[0]
+
+
 def test_browser_session_drives_real_locker_views_on_emulator(booking_app):
     client, store = booking_app
     response = sign_in(client)

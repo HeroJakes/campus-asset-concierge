@@ -12,7 +12,7 @@ from campus_asset_concierge.api.booking_view import booking_overview
 from campus_asset_concierge.api.auth import (
     Actor, DEV_ACCOUNTS, LocalAccount, Role, SESSION_COOKIE, SESSION_MAX_AGE,
     authenticate, browser_account, dev_login_enabled, require_role,
-    require_same_origin, session_signer,
+    require_same_origin, secure_session_cookie, session_signer,
 )
 from campus_asset_concierge.domain.reservations import (
     ReservationError,
@@ -100,7 +100,7 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
             response.set_cookie(
                 SESSION_COOKIE, f"{account.username}:{signer.dumps(account.username)}",
                 max_age=SESSION_MAX_AGE, httponly=True, samesite="strict",
-                secure=request.url.scheme == "https",
+                secure=secure_session_cookie(request),
             )
             response.delete_cookie("dev_account")
         response.headers["Cache-Control"] = "no-store"
@@ -259,7 +259,7 @@ def create_app(store: LocalStateStore | None = None) -> FastAPI:
         response = RedirectResponse(target, status_code=303)
         response.delete_cookie(
             SESSION_COOKIE, httponly=True, samesite="strict",
-            secure=request.url.scheme == "https",
+            secure=secure_session_cookie(request),
         )
         response.delete_cookie("dev_account")
         response.headers["Cache-Control"] = "no-store"

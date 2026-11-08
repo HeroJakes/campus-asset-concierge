@@ -87,6 +87,12 @@ def require_same_origin(request: Request) -> None:
         raise HTTPException(403, "Open this action from the app.")
 
 
+def secure_session_cookie(request: Request) -> bool:
+    # A TLS-terminating host may forward an internal HTTP request to the app.
+    return (request.url.scheme == "https"
+            or os.environ.get("PUBLIC_BASE_URL", "").startswith("https://"))
+
+
 def dev_login_enabled(request: Request) -> bool:
     return (
         os.environ.get("DEV_LOGIN") == "1"

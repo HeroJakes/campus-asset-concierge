@@ -21,6 +21,9 @@ verification, and deployment are still pending. This document records its scope.
   the chat shows a graceful message pointing to `/docs` (the deterministic fallback).
 - **Tools run in-process:** the backend calls the domain classes directly, as the MCP server does.
 - **Placement:** its own page (`/assistant`), separate from the locker page; top-bar nav links the two.
+- **Page:** a chat panel with illustrated offer cards, a quick-prompt sidebar, and tips.
+  Quick actions fill the composer without sending. Change request starts a follow-up;
+  it does not modify a confirmed reservation. No cancellation or email-delivery claims.
 
 ## The four capabilities
 

@@ -16,13 +16,17 @@ function el(tag, className, text) {
 
 function addRow(side) {
   const row = el("div", `assistant-row assistant-row--${side}`);
-  if (side === "bot") {
-    const avatar = el("span", "assistant-avatar");
-    avatar.textContent = "AI";
-    row.appendChild(avatar);
-  }
+  const avatar = el("span", "assistant-avatar");
+  avatar.appendChild(document.getElementById(`assistant-${side}-icon`).content.cloneNode(true));
+  row.appendChild(avatar);
+  const message = el("div", "assistant-message");
   const bubble = el("div", "assistant-bubble");
-  row.appendChild(bubble);
+  message.appendChild(bubble);
+  const clock = document.querySelector(".borrower-clock time");
+  const stamp = el("time", "message-time", clock.textContent.trim().split("·").pop().trim());
+  stamp.dateTime = clock.dateTime;
+  message.appendChild(stamp);
+  row.appendChild(message);
   log.appendChild(row);
   log.scrollTop = log.scrollHeight;
   return bubble;
@@ -47,7 +51,12 @@ function requirementsText(offer) {
 function addOfferCard(offer) {
   const bubble = addRow("bot");
   const card = el("div", "offer-card");
-  card.appendChild(el("h3", null, (offer.asset_id || "").replace(/-/g, " ")));
+  card.appendChild(el("p", null, "Here's your equipment offer:"));
+  const summary = el("div", "offer-summary");
+  const art = document.getElementById((offer.asset_id || "").includes("raspberry") ? "assistant-kit-art" : "assistant-projector-art");
+  summary.appendChild(art.content.cloneNode(true));
+  const details = el("div");
+  details.appendChild(el("h3", null, (offer.asset_id || "").replace(/-/g, " ")));
   const meta = el("dl", "offer-meta");
   const rows = [
     ["Location", offer.pickup_location],
@@ -59,10 +68,21 @@ function addOfferCard(offer) {
     meta.appendChild(el("dt", null, label));
     meta.appendChild(el("dd", null, value || "—"));
   }
-  card.appendChild(meta);
+  details.appendChild(meta);
+  summary.appendChild(details);
+  card.appendChild(summary);
+  card.appendChild(el("p", null, "Would you like to confirm this booking?"));
 
-  const confirm = el("button", "button button--success", "Confirm booking");
+  const actions = el("div", "offer-actions");
+  const confirm = el("button", "button button--primary", "✓ Confirm booking");
+  const change = el("button", "button button--quiet", "Change request");
+  change.type = "button";
+  change.addEventListener("click", () => {
+    input.value = "I'd like to change my request: ";
+    input.focus();
+  });
   const status = el("p", "offer-status");
+  status.setAttribute("role", "status");
   confirm.addEventListener("click", async () => {
     confirm.disabled = true;
     status.textContent = "Booking…";
@@ -77,6 +97,7 @@ function addOfferCard(offer) {
         return;
       }
       confirm.remove();
+      change.remove();
       status.className = "offer-status offer-status--ok";
       status.textContent = "";
       status.appendChild(el("span", null, "Booked ✓ "));
@@ -88,7 +109,9 @@ function addOfferCard(offer) {
       confirm.disabled = false;
     }
   });
-  card.appendChild(confirm);
+  actions.appendChild(confirm);
+  actions.appendChild(change);
+  card.appendChild(actions);
   card.appendChild(status);
   bubble.appendChild(card);
   log.scrollTop = log.scrollHeight;
@@ -106,7 +129,6 @@ async function send(text) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ messages }),
     });
-    typing.parentElement.remove();
     const data = res.ok ? await res.json() : { reply: "The assistant hit an error. Please try again.", offer: null };
     const reply = data.reply || "";
     if (reply) {
@@ -115,9 +137,9 @@ async function send(text) {
     }
     if (data.offer) addOfferCard(data.offer);
   } catch {
-    typing.parentElement.remove();
     addMessage("bot", "Network error — please try again.");
   } finally {
+    typing.closest(".assistant-row").remove();
     sendButton.disabled = false;
     input.focus();
   }
@@ -125,11 +147,19 @@ async function send(text) {
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (sendButton.disabled) return;
   const text = input.value.trim();
   if (!text) return;
   input.value = "";
   input.style.height = "auto";
   send(text);
+});
+
+document.querySelectorAll("[data-prompt]").forEach((button) => {
+  button.addEventListener("click", () => {
+    input.value = button.dataset.prompt;
+    input.focus();
+  });
 });
 
 input.addEventListener("input", () => {

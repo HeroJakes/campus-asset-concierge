@@ -51,6 +51,7 @@ An interim Gemini API booking chat is implemented on `feat/borrower-assistant`,
 awaiting review and deployment. It reuses the booking rules, requires the borrower
 to confirm an offer, and keeps one-time codes out of model status results. Until
 email is connected, the presenter retrieves codes through the borrower's own API.
+Its redesigned page includes quick prompts, booking summary cards, and a tips sidebar.
 
 ## How we built it (and what we researched)
 

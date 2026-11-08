@@ -1,13 +1,6 @@
 {%- macro name(value) %}{{ value | replace("-", " ") | title }}{% endmacro -%}
 {%- macro hhmm(value) %}{{ value[11:16] }}{% endmacro -%}
 {%- macro requirements(value) %}<span class="meta">Requirements: {{ requirements_text(value) }}</span>{% endmacro -%}
-{%- macro door(compartment, state, label) %}
-<div class="door door--{{ state }}">
-  <span class="door-name">Compartment {{ compartment | upper }}</span>
-  <span class="door-state">{{ {"empty": "Empty", "loaded": "Loaded & locked", "unlocked": "Open", "return_reserved": "Return, locked", "returned": "Returned, awaiting check"}.get(state, state) }}</span>
-  {% if label %}<span class="door-label">{{ label }}</span>{% endif %}
-</div>
-{% endmacro -%}
 <!doctype html>
 <html lang="en">
 <head>
@@ -18,30 +11,24 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/locker.css">
-  {% if is_staff %}<link rel="stylesheet" href="/static/locker_staff.css">{% endif %}
+  {% if is_staff %}<link rel="stylesheet" href="/static/locker_staff.css">{% else %}<link rel="stylesheet" href="/static/locker_borrower.css"><script src="/static/locker_borrower.js" defer></script>{% endif %}
   {% if bookings_page %}<link rel="stylesheet" href="/static/locker_bookings.css">{% endif %}
   <script src="/static/locker.js" defer></script>
   {% if bookings_page %}<script src="/static/locker_bookings.js" defer></script>{% endif %}
 </head>
-<body{% if is_staff %} class="staff-shell"{% endif %}>
+<body class="{{ 'staff-shell' if is_staff else 'borrower-shell' }}">
   {% from "locker_icons.html" import icon, equipment %}
   {% if is_staff %}
     {% include "locker_sidebar.html" %}
   {% else %}
-  <header class="bar">
-    <div class="brand">
-      <svg class="mark" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-        <rect x="3" y="2" width="18" height="20" rx="2" fill="#141414"/>
-        <rect x="6" y="5" width="12" height="6" fill="#fff"/>
-        <rect x="6" y="13" width="12" height="6" fill="#fff"/>
-        <rect x="14" y="7" width="2" height="2" fill="#1d5fbf"/>
-      </svg>
-      <span>Campus Asset Concierge</span>
-    </div>
-    <div class="session">
-      <span>Signed in as {{ name(username) }}</span>
-      <a class="button button--quiet" href="/locker">Refresh</a>
-      <a class="button button--quiet" href="/logout">Log out</a>
+  <header class="borrower-bar">
+    <a class="borrower-brand" href="/locker">{{ icon('cube', 40) }}<span>Campus Asset<br>Concierge</span></a>
+    <div class="borrower-title"><h1>My Locker</h1><p>Collect and return your booked equipment.</p></div>
+    <div class="borrower-session">
+      <div class="borrower-clock">{{ icon('clock', 25) }}<div><span>Test clock (simulated) · MYT</span><time datetime="{{ current_time }}">{{ current_time[:10] }} · {{ hhmm(current_time) }}</time></div></div>
+      <div class="borrower-user">{{ icon('user', 26) }}<div><span>Signed in as</span><strong>{{ name(username) }}</strong></div></div>
+      <a class="button button--quiet" href="/locker">{{ icon('refresh', 19) }} Refresh</a>
+      <a class="button button--quiet" href="/logout">{{ icon('logout', 19) }} Log out</a>
     </div>
   </header>
   {% endif %}
@@ -54,102 +41,7 @@
     {% if is_staff %}
       {% include "locker_staff.html" %}
     {% else %}
-    {% set active = pickups | rejectattr("step", "equalto", "collected") | list %}
-    <div class="title-row">
-      <div>
-        <h1>My pickups</h1>
-        <p class="subtitle">
-          {% if active %}{{ active | length }} {{ "booking" if active | length == 1 else "bookings" }} to collect at {{ active[0].pickup_location }}.
-          {% else %}Nothing to collect right now.{% endif %}
-        </p>
-      </div>
-      <p class="clock">Test clock <strong>{{ hhmm(current_time) }}</strong> <span>{{ current_time[:10] }}</span></p>
-    </div>
-
-    {% for pickup in pickups %}
-    <section class="panel pickup" aria-labelledby="pickup-{{ loop.index }}">
-      <div class="pickup-main">
-        <h2 id="pickup-{{ loop.index }}">{{ name(pickup.asset_id) }}</h2>
-        <p class="meta">{{ pickup.pickup_location }} · {{ pickup.pickup_at[:10] }} · pickup {{ hhmm(pickup.pickup_at) }}, return by {{ hhmm(pickup.due_at) }}</p>
-        <p>{{ requirements(pickup) }}</p>
-
-        {% if pickup.step == "waiting_for_loading" %}
-          <p class="next">Staff haven't loaded this item yet. Your code appears here once they do.</p>
-        {% elif pickup.step in ["code_not_open", "enter_code"] %}
-          {% if pickup.step == "enter_code" %}
-          <p class="next">Enter the one-time code from your email to open compartment {{ pickup.compartment | upper }}.</p>
-          <form class="code-form" data-unlock="/reservations/{{ pickup.id }}/unlock">
-            <div class="field">
-              <label for="code-{{ loop.index }}">Enter code at the locker</label>
-              <input id="code-{{ loop.index }}" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="12" required>
-            </div>
-            <button class="button button--primary" type="submit">Unlock compartment</button>
-          </form>
-          {% else %}
-          <p class="next">Your one-time code was emailed to you. The locker accepts it from {{ hhmm(pickup.pickup_at) }}.</p>
-          {% endif %}
-        {% elif pickup.step == "confirm_pickup" %}
-          <p class="next">Compartment {{ pickup.compartment | upper }} is open. Take the item, then confirm. Your loan starts when you do.</p>
-          <button class="button button--primary" type="button" data-post="/reservations/{{ pickup.id }}/confirm-pickup">Confirm pickup</button>
-        {% elif pickup.step == "collected" %}
-          <p class="next">Collected. Please return it by {{ hhmm(pickup.due_at) }}.</p>
-        {% elif pickup.step == "code_blocked" %}
-          <p class="notice notice--error">This code is blocked after too many wrong tries. Please speak to the loan desk staff.</p>
-        {% elif pickup.step == "code_expired" %}
-          <p class="notice notice--error">This code expired at {{ hhmm(pickup.code_closes_at) }}. Please speak to the loan desk staff.</p>
-        {% elif pickup.step == "pickup_missed" %}
-          <p class="notice notice--error">The pickup window closed before this item was loaded. Please speak to the loan desk staff.</p>
-        {% endif %}
-      </div>
-      {% if pickup.compartment and pickup.step != "collected" %}
-      <div class="pickup-door">
-        {{ door(pickup.compartment, "unlocked" if pickup.step == "confirm_pickup" else "loaded", "") }}
-      </div>
-      {% endif %}
-    </section>
-    {% else %}
-    <section class="panel" aria-label="No bookings">
-      <p class="empty">You have no bookings. Reserve equipment first, and it appears here.</p>
-    </section>
-    {% endfor %}
-
-    {% if returns %}
-    <div class="title-row">
-      <div><h1>My returns</h1><p class="subtitle">Return an item you have on loan through the locker.</p></div>
-    </div>
-    {% for item in returns %}
-    <section class="panel return" aria-labelledby="return-{{ loop.index }}">
-      <div class="pickup-main">
-        <h2 id="return-{{ loop.index }}">{{ name(item.asset_id) }}</h2>
-        <p class="meta">On loan, due back by {{ hhmm(item.due_at) }}.</p>
-
-        {% if item.step == "can_return" %}
-          <p class="next">Ready to return this item? Reserve a locker compartment and get a one-time code.</p>
-          <button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/return-request">Return this item</button>
-        {% elif item.step == "enter_code" %}
-          <p class="next">Enter the one-time return code from your email to open compartment {{ item.compartment | upper }}.</p>
-          <form class="code-form" data-unlock="/assets/{{ item.asset_id }}/return-unlock">
-            <div class="field">
-              <label for="return-code-{{ loop.index }}">Enter code at compartment {{ item.compartment | upper }}</label>
-              <input id="return-code-{{ loop.index }}" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="12" required>
-            </div>
-            <button class="button button--primary" type="submit">Unlock compartment</button>
-          </form>
-        {% elif item.step == "confirm_drop" %}
-          <p class="next">Compartment {{ item.compartment | upper }} is open. Place the item inside, then confirm the drop-off.</p>
-          <button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/return-drop">Confirm drop-off</button>
-        {% elif item.step == "awaiting_check" %}
-          <p class="next">Dropped off in compartment {{ item.compartment | upper }}. Waiting for staff to check it in.</p>
-        {% elif item.step == "code_blocked" %}
-          <p class="notice notice--error">This return code is blocked after too many wrong tries. Please speak to the loan desk staff.</p>
-        {% elif item.step == "code_expired" %}
-          <p class="next">That return code expired. You can request a new one.</p>
-          <button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/return-request">Request a new code</button>
-        {% endif %}
-      </div>
-    </section>
-    {% endfor %}
-    {% endif %}
+    {% include "locker_borrower.html" %}
     {% endif %}
   </main>
 </body>

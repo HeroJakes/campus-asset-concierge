@@ -1,0 +1,108 @@
+{% macro when(value) -%}
+<time datetime="{{ value }}">{{ 'Today' if value[:10] == current_time[:10] else value[:10] }}, {{ hhmm(value) }}</time>
+{%- endmacro %}
+
+{% macro identity(asset_id, location, needs=None) -%}
+<div class="borrower-item">
+  {{ equipment(asset_id) }}
+  <div><h3>{{ name(asset_id) }}</h3><p>{{ icon('pin', 16) }} {{ location }}</p>
+  {% if needs is not none %}<span class="borrower-tag">{{ icon('tag', 15) }} <span>Requirements: {{ requirements_text(needs) }}</span></span>{% endif %}</div>
+</div>
+{%- endmacro %}
+
+{% macro locker(compartment, opened=False) -%}
+<div class="mini-locker{% if opened %} is-open{% endif %}{% if not compartment %} is-unassigned{% endif %}" role="img" aria-label="{{ 'Compartment ' ~ (compartment | upper) ~ (' is open' if opened else ' is locked') if compartment else 'Compartment not assigned yet' }}">
+  <div class="mini-locker-side"></div><div class="mini-locker-front"><div class="mini-locker-neighbour"></div><div class="mini-locker-interior"><div class="mini-locker-door">{{ icon('cube', 29) }}<strong>{{ compartment | upper if compartment else '—' }}</strong></div></div></div>
+</div>
+{%- endmacro %}
+
+{% macro code_form(url, key, label) -%}
+<form class="borrower-code-form" data-unlock="{{ url }}">
+  <div class="field"><label class="sr-only" for="{{ key }}">{{ label }} (six digits)</label>
+    <div class="code-entry">
+      <input class="code-input" id="{{ key }}" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="6-digit code" required data-code-input>
+      <div class="code-cells" aria-hidden="true" hidden>{% for digit in range(6) %}<span>–</span>{% endfor %}</div>
+    </div>
+  </div>
+  <button class="button button--primary" type="submit">{{ icon('lock', 18) }} Unlock compartment</button>
+</form>
+{%- endmacro %}
+
+{% set pickup_states = {
+  'waiting_for_loading': ('Waiting for loading', "Staff haven't loaded this item yet.", 'clock', 'amber'),
+  'code_not_open': ('Code not active yet', 'Your code works from the pickup time shown below.', 'calendar', 'purple'),
+  'enter_code': ('Enter your pickup code', 'Enter your one-time code to unlock the compartment.', 'key', 'purple'),
+  'confirm_pickup': ('Compartment open', 'Take the item from the compartment, then confirm pickup.', 'open', 'green'),
+  'collected': ('Collected', 'You have collected this item.', 'check', 'green'),
+  'code_blocked': ('Pickup code blocked', 'Too many wrong tries. Please contact the loan desk staff.', 'alert', 'red'),
+  'code_expired': ('Pickup code expired', 'The code window has closed. Please contact the loan desk staff.', 'alert', 'red'),
+  'pickup_missed': ('Pickup window closed', 'This item was not loaded in time. Please contact the loan desk staff.', 'alert', 'red')
+} %}
+
+<section class="borrower-section" aria-labelledby="pickups-title">
+  <header class="borrower-section-heading"><span class="section-symbol">{{ icon('cube', 28) }}</span><div><h2 id="pickups-title">My pickups <span>({{ pickups | length }})</span></h2><p>Items ready to collect or waiting to be loaded.</p></div></header>
+  <div class="borrower-rows">
+  {% for pickup in pickups %}
+    {% set title, description, symbol, tone = pickup_states[pickup.step] %}
+    <article class="borrower-row tone-{{ tone }}{% if pickup.step == 'enter_code' %} needs-code{% endif %}" aria-label="{{ name(pickup.asset_id) }} pickup">
+      {{ identity(pickup.asset_id, pickup.pickup_location, pickup) }}
+      <div class="borrower-state">
+        <div class="state-heading"><span class="state-symbol">{{ icon(symbol, 24) }}</span><div><h3>{{ 'Compartment ' ~ (pickup.compartment | upper) ~ ' is open' if pickup.step == 'confirm_pickup' else title }}</h3><p>{{ description }}</p></div></div>
+        {% if pickup.step == 'enter_code' %}
+          {{ code_form('/reservations/' ~ pickup.id ~ '/unlock', 'pickup-code-' ~ loop.index, 'Pickup code for ' ~ name(pickup.asset_id)) }}
+        {% else %}
+          <div class="borrower-times"><p>{{ icon('calendar', 17) }} <span>Pickup: {{ when(pickup.pickup_at) }}</span></p><p>{{ icon('calendar', 17) }} <span>Return by: {{ when(pickup.due_at) }}</span></p></div>
+        {% endif %}
+      </div>
+      <div class="borrower-handover">
+        {% if pickup.step == 'collected' %}<span class="loan-pill">{{ icon('check', 23) }} On loan</span>
+        {% else %}{{ locker(pickup.compartment, pickup.step == 'confirm_pickup') }}{% endif %}
+      </div>
+      <div class="borrower-action">
+        {% if pickup.step == 'confirm_pickup' %}<button class="button button--success" type="button" data-post="/reservations/{{ pickup.id }}/confirm-pickup">{{ icon('check', 19) }} Confirm pickup</button><small>I have taken the item</small>
+        {% elif pickup.step == 'waiting_for_loading' %}<button class="button" disabled>Collect</button>
+        {% elif pickup.step == 'code_not_open' %}<span class="opens-at">{{ icon('clock', 18) }} Opens at {{ hhmm(pickup.pickup_at) }}</span>
+        {% elif tone == 'red' %}<span class="contact-staff">Contact staff</span>{% endif %}
+      </div>
+    </article>
+  {% else %}
+    <p class="borrower-empty">You have no bookings to collect. Reserve equipment first, and it appears here.</p>
+  {% endfor %}
+  </div>
+</section>
+
+{% set return_states = {
+  'can_return': ('Ready to return', 'Reserve a compartment to return this item.', 'return', 'green'),
+  'enter_code': ('Enter your return code', 'Enter your one-time return code to unlock the compartment.', 'key', 'purple'),
+  'confirm_drop': ('Compartment open', 'Place the item inside, then confirm the drop-off.', 'open', 'green'),
+  'awaiting_check': ('Waiting for staff check', 'Your drop-off is recorded. Staff will check the item in.', 'clock', 'amber'),
+  'code_blocked': ('Return code blocked', 'Too many wrong tries. Please contact the loan desk staff.', 'alert', 'red'),
+  'code_expired': ('Return code expired', 'Request a new code to return this item.', 'refresh', 'amber')
+} %}
+<section class="borrower-section" aria-labelledby="returns-title">
+  <header class="borrower-section-heading"><span class="section-symbol">{{ icon('return', 28) }}</span><div><h2 id="returns-title">My returns <span>({{ returns | length }})</span></h2><p>Items you have on loan or waiting for a return check.</p></div></header>
+  <div class="borrower-rows">
+  {% for item in returns %}
+    {% set title, description, symbol, tone = return_states[item.step] %}
+    <article class="borrower-row tone-{{ tone }}{% if item.step == 'enter_code' %} needs-code{% endif %}" aria-label="{{ name(item.asset_id) }} return">
+      {{ identity(item.asset_id, pickup_location) }}
+      <div class="borrower-state">
+        <div class="state-heading"><span class="state-symbol">{{ icon(symbol, 24) }}</span><div><h3>{{ 'Compartment ' ~ (item.compartment | upper) ~ ' is open' if item.step == 'confirm_drop' else title }}</h3><p>{{ description }}</p></div></div>
+        {% if item.step == 'enter_code' %}
+          {{ code_form('/assets/' ~ item.asset_id ~ '/return-unlock', 'return-code-' ~ loop.index, 'Return code for ' ~ name(item.asset_id)) }}
+        {% else %}
+          <div class="borrower-times"><p>{{ icon('calendar', 17) }} <span>Due back: <span{% if item.due_at < current_time and item.step != 'awaiting_check' %} class="overdue-time"{% endif %}>{{ when(item.due_at) }}</span></span></p></div>
+        {% endif %}
+      </div>
+      <div class="borrower-handover">{{ locker(item.compartment if item.step != 'code_expired' else none, item.step == 'confirm_drop') }}</div>
+      <div class="borrower-action">
+        {% if item.step in ['can_return', 'code_expired'] %}<button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/return-request">{{ 'Request a new code' if item.step == 'code_expired' else 'Return this item' }} {{ icon('arrow', 18) }}</button>
+        {% elif item.step == 'confirm_drop' %}<button class="button button--success" type="button" data-post="/assets/{{ item.asset_id }}/return-drop">{{ icon('check', 19) }} Confirm drop-off</button>
+        {% elif item.step == 'awaiting_check' %}<span class="contact-staff">Drop-off recorded</span>
+        {% elif item.step == 'code_blocked' %}<span class="contact-staff">Contact staff</span>{% endif %}
+      </div>
+    </article>
+  {% else %}<p class="borrower-empty">Nothing to return right now. Your active loans will appear here.</p>{% endfor %}
+  </div>
+</section>
+<p class="borrower-help">Need help? Ask the equipment team for your pickup or return code.</p>

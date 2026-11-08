@@ -32,20 +32,6 @@ h1, h2, p { margin: 0; }
 h1 { font-size: 24px; line-height: 32px; font-weight: 500; }
 h2 { font-size: 16px; line-height: 24px; font-weight: 500; }
 
-.bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  max-width: 1152px;
-  margin: 0 auto;
-  padding: 12px 24px;
-}
-
-.brand { display: flex; align-items: center; gap: 8px; font-weight: 500; }
-.mark { flex: none; }
-.session { display: flex; align-items: center; gap: 12px; color: var(--muted); }
-
 /* 1152 column - 2 x 24 padding = 1104 of content, the same left and right edge for every panel. */
 .canvas {
   display: grid;
@@ -55,18 +41,6 @@ h2 { font-size: 16px; line-height: 24px; font-weight: 500; }
   padding: 12px 24px 48px;
 }
 
-.title-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 12px;
-}
-
-.subtitle { margin-top: 4px; font-size: 16px; line-height: 24px; color: var(--muted); }
-.clock { flex: none; color: var(--muted); }
-.clock strong { font-size: 16px; font-weight: 500; color: var(--text); }
-
 .panel {
   padding: var(--pad);
   background: var(--surface);
@@ -75,53 +49,6 @@ h2 { font-size: 16px; line-height: 24px; font-weight: 500; }
 }
 
 .panel > h2 { margin-bottom: 16px; }
-
-/* The locker itself: each door shows its real state. */
-.doors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); }
-
-.door {
-  position: relative;
-  display: grid;
-  align-content: start;
-  gap: 2px;
-  min-height: 120px;
-  padding: 16px 40px 16px 16px;
-  border-radius: var(--radius-control);
-}
-
-.door-name { font-weight: 500; }
-.door-label { margin-top: 12px; font-size: 16px; line-height: 24px; font-weight: 500; }
-
-.door--empty { background: var(--ground); color: var(--muted); }
-.door--empty .door-name { color: var(--text); }
-
-.door--loaded { background: var(--door); color: #fff; }
-.door--loaded::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  right: 16px;
-  width: 6px;
-  height: 32px;
-  margin-top: -16px;
-  border-radius: 3px;
-  background: #fff;
-}
-
-/* An open door: the panel swung to the left edge, the inside showing. */
-.door--unlocked {
-  padding-left: 40px;
-  background: var(--ground);
-  box-shadow: inset 0 0 0 2px var(--door);
-}
-.door--unlocked::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 24px;
-  border-radius: var(--radius-control) 0 0 var(--radius-control);
-  background: var(--door);
-}
 
 .table-scroll { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
@@ -165,35 +92,13 @@ th:last-child, td:last-child { padding-right: 0; text-align: right; }
 .button--secondary { background: var(--raised); color: var(--text); }
 .button--quiet { height: 32px; background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px var(--control); }
 
-.activity { margin: 0; padding: 0; list-style: none; }
-.activity li {
-  display: grid;
-  grid-template-columns: 48px 1fr auto;
-  gap: 8px;
-  padding: 10px 0;
-  border-top: 1px solid var(--rule);
-}
-.activity li:first-child { border-top: 0; padding-top: 0; }
-.time, .booking-id { color: var(--muted); }
-.booking-id { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; }
+.booking-id { color: var(--muted); font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; }
 
 .empty, .meta { color: var(--muted); }
 
 .notice { padding: 12px 16px; border-radius: var(--radius-control); background: var(--surface); }
 .notice--error { background: var(--negative-bg); color: var(--negative-ink); }
-.pickup .notice { margin-top: 16px; }
 
-.pickup { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: var(--pad); align-items: start; }
-.pickup:not(:has(.pickup-door)) { grid-template-columns: minmax(0, 1fr); }
-.pickup .button { margin-top: 16px; }
-.next { margin-top: 16px; font-size: 16px; line-height: 24px; }
-
-.code-block { margin-top: 20px; }
-.code-label { font-weight: 500; }
-.code { margin: 4px 0; font-size: 30px; line-height: 40px; font-weight: 500; letter-spacing: 0.08em; }
-
-.code-form { display: flex; align-items: flex-end; flex-wrap: wrap; gap: var(--gap); margin-top: 20px; }
-.code-form .button { margin-top: 0; }
 .field { display: grid; gap: 8px; }
 label { font-weight: 500; }
 input {
@@ -218,13 +123,9 @@ input {
 }
 
 @media (max-width: 720px) {
-  .bar, .canvas { padding-left: 16px; padding-right: 16px; }
-  .brand span { display: none; }
-  .title-row { display: grid; gap: 8px; }
+  .canvas { padding-left: 16px; padding-right: 16px; }
   .panel { padding: 16px; }
-  .pickup { grid-template-columns: minmax(0, 1fr); }
-  .pickup-door { order: -1; }
-  .code-form .field, input, .code-form .button { width: 100%; }
+  input { width: 100%; }
 
   /* Each booking becomes its own stack, so nothing scrolls sideways on a phone. */
   table, tbody, tr, td { display: block; width: 100%; }

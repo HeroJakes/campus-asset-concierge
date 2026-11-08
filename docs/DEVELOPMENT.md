@@ -72,6 +72,13 @@ Codes are separate from reservations and never appear in ADK/MCP status tools.
 The current locker asks the borrower to enter a code but does not display it:
 the borrower-owned `GET /pickups` supplies the demo stand-in until email is wired.
 
+The borrower UI groups real API states into pickup and return cards. Unassigned
+compartments stay unassigned; open doors appear only after a successful unlock.
+Six visual code cells share one labelled text input, so paste, leading zeros,
+backspace, mobile keyboards, and screen readers use normal input behavior.
+The server still checks ownership, time windows, attempts, and one-time use.
+Borrower styles and code-entry behavior are separate from the staff workspace.
+
 ### Return and compartments
 
 Return uses locker drop-off rather than a desk-only handoff to match the pickup
@@ -223,7 +230,7 @@ With an emulator already running:
 ```powershell
 $env:FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080'
 uv run --locked pytest
-node --test tests/booking_search.test.cjs
+node --test tests/booking_search.test.cjs tests/borrower_code.test.cjs
 ```
 
 Or let Firebase start and stop it, as CI does:

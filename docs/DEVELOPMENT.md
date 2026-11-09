@@ -71,6 +71,7 @@ attempt before returning the error. A wrong-owner attempt does not consume tries
 Codes are separate from reservations and never appear in ADK/MCP status tools.
 The current locker asks the borrower to enter a code but does not display it:
 the borrower-owned `GET /pickups` supplies the demo stand-in until email is wired.
+The borrower page labels this stand-in and links to `GET /pickups` and `GET /returns`.
 
 The borrower UI groups real API states into pickup and return cards. Unassigned
 compartments stay unassigned; open doors appear only after a successful unlock.

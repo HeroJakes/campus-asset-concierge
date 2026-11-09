@@ -49,7 +49,8 @@ six-box code entry. An interim Gemini API booking chat reuses the booking rules,
 requires the borrower to confirm an offer, and keeps one-time codes out of model
 status results. Its page includes quick prompts, booking summaries, and tips.
 Gemini availability and quotas can limit chat; API booking remains the fallback.
-Until email is connected, the presenter retrieves codes through the borrower's own API.
+Until email is connected, the borrower page links to the borrower's own status API
+for codes and labels this as a demo stand-in.
 
 ## How we built it (and what we researched)
 

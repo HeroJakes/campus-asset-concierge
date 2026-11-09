@@ -445,6 +445,7 @@ def test_locker_page_hides_the_code_and_supplies_a_code_input(booking_app):
     assert code not in owner.text
     assert "one-time code" in owner.text
     assert f"/reservations/{reservation_id}/unlock" in owner.text
+    assert "Demo stand-in" in owner.text and 'href="/pickups"' in owner.text
     assert reservation_id not in client.get("/locker", auth=BORROWER_B).text
 
     assert unlock(client, reservation_id, code).status_code == 200

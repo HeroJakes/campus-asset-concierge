@@ -69,8 +69,9 @@
 .borrower-action { display: grid; gap: 6px; text-align: center; }
 .borrower-action .button { width: fit-content; max-width: 100%; justify-self: end; white-space: normal; font-size: 12px; }
 .borrower-action small { font-size: 11px; color: var(--muted); }
-.opens-at, .contact-staff { display: inline-flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; font-weight: 650; }
+.opens-at, .loan-pill, .contact-staff { display: inline-flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; font-weight: 650; }
 .opens-at { color: #5131ac; background: #efebfc; padding: 10px; border-radius: 12px; }
+.loan-pill { padding: 11px 18px; border: 1px solid #bde8cb; border-radius: 15px; background: #edfbf1; color: #087832; white-space: nowrap; }
 .contact-staff { color: var(--muted); }
 .borrower-empty { padding: 30px 20px; color: var(--muted); text-align: center; border-radius: 14px; background: #ffffffab; }
 .borrower-help { color: var(--muted); font-size: 12px; line-height: 1.6; }

@@ -30,6 +30,7 @@ checks. The server-rendered locker is a virtual device, not physical hardware.
 | `storage/collection_state.py`, `emulator_collections.py` | Emulator-only collection layout and review app; hosted storage stays unchanged |
 | `api/app.py`, `api/auth.py`, `templates/`, `static/` | Login, shared account checks, role-protected REST, and locker views |
 | `agent/reservations.py` | Existing ADK booking tools and instructions |
+| `code_email.py` | Optional Gmail API code delivery, claimed after lending transactions |
 | `mcp_server.py` | Five tools, stdio or stateless Streamable HTTP |
 | `vercel_demo.py`, `vercel_app.py`, root `main.py` | Hosted guards, MCP lifespan, and Vercel export |
 
@@ -291,6 +292,11 @@ Do not load the private cloud `.env` for tests or emulator rehearsal. That legac
 profile can target hosted `demo/current`; the two databases do not sync.
 
 ## Tests
+
+Optional pickup/return email setup is in [Gmail demo setup](GMAIL_DEMO.md).
+The delivery routes reuse the saved codes. Tests clear Gmail configuration and
+mock the sender; they never send real messages. Delivery status stays inside
+pickup/return access records in both storage layouts.
 
 CI runs the emulator with a fixed demo project and anonymous credentials.
 Integration fixtures use separate test documents; mocked entrypoint tests never

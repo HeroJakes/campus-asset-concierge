@@ -93,6 +93,12 @@ remain documented here and the hosted dev-login guard is unchanged.
 
 ## Environment and secrets
 
+Optional pickup/return email is implemented but not yet verified live. Its separate
+sender authorization, four address/credential settings, test-token expiry, and
+delivery limits are in [Gmail demo setup](GMAIL_DEMO.md). Existing deployments keep
+manual code lookup until those settings and the reviewed code are released.
+Recovery reminders and the Gemini Enterprise Gmail workflow remain separate.
+
 All eleven variables are sensitive and Production-only on the dedicated project:
 
 | Variable | Value |

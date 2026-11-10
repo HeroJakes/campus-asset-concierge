@@ -28,6 +28,20 @@
 </form>
 {%- endmacro %}
 
+{% macro email_status(kind, key) -%}
+{% if code_email_enabled %}
+  {% set status = code_email_statuses[kind].get(key, 'not_sent') %}
+  <p class="borrower-help" role="status">{{ {
+    'sent': 'Code email accepted by Gmail. Check your demo inbox and spam folder.',
+    'sending': 'Code email is being sent. If this persists, contact staff to check the sender inbox.',
+    'unknown': 'Email delivery could not be confirmed. Check your inbox or contact staff.',
+    'failed': 'Code email failed. You can retry below or use your status API.',
+    'not_sent': 'Your code has not been emailed yet.'
+  }[status] }}</p>
+  {% if status in ['failed', 'not_sent'] %}<button class="button button--quiet" type="button" data-post="/code-email/{{ kind }}/{{ key }}">Email my code</button>{% endif %}
+{% endif %}
+{%- endmacro %}
+
 {% set pickup_states = {
   'waiting_for_loading': ('Waiting for loading', "Staff haven't loaded this item yet.", 'clock', 'amber'),
   'code_not_open': ('Code not active yet', 'Your code works from the pickup time shown below.', 'calendar', 'purple'),
@@ -57,9 +71,11 @@
         {{ code_form('/reservations/' ~ pickup.id ~ '/unlock', 'pickup-code-' ~ loop.index, 'Pickup code for ' ~ name(pickup.asset_id)) }}
       {% endif %}
       <div class="borrower-action">
+        {% if pickup.step in ['code_not_open', 'enter_code'] %}{{ email_status('pickup', pickup.id) }}{% endif %}
         {% if pickup.step == 'confirm_pickup' %}<button class="button button--success" type="button" data-post="/reservations/{{ pickup.id }}/confirm-pickup">{{ icon('check', 19) }} Confirm pickup</button><small>I have taken the item</small>
         {% elif pickup.step == 'waiting_for_loading' %}<button class="button" disabled>Collect</button>
         {% elif pickup.step == 'code_not_open' %}<span class="opens-at">{{ icon('clock', 18) }} Opens at {{ hhmm(pickup.pickup_at) }}</span>
+        {% elif pickup.step == 'collected' %}<span class="loan-pill">{{ icon('check', 19) }} On loan</span>
         {% elif tone == 'red' %}<span class="contact-staff">Contact staff</span>{% endif %}
       </div>
     </article>
@@ -78,7 +94,7 @@
   'code_expired': ('Return code expired', 'Request a new code to return this item.', 'refresh', 'amber')
 } %}
 <section class="borrower-section" aria-labelledby="returns-title">
-  <header class="borrower-section-heading returns-heading"><span class="section-symbol">{{ icon('return', 28) }}</span><div><h2 id="returns-title">My returns <span>({{ returns | length }})</span></h2><p>Items you have on loan or waiting for a return check.</p></div><div class="section-locker">{{ locker(none) }}</div></header>
+  <header class="borrower-section-heading returns-heading"><span class="section-symbol">{{ icon('return', 28) }}</span><div><h2 id="returns-title">My returns <span>({{ returns | length }})</span></h2><p>Items you have on loan or waiting for a return check.</p></div><div class="section-locker" aria-hidden="true">{{ locker(none) }}</div></header>
   <div class="borrower-rows">
   {% for item in returns %}
     {% set title, description, symbol, tone = return_states[item.step] %}
@@ -94,6 +110,7 @@
         {{ code_form('/assets/' ~ item.asset_id ~ '/return-unlock', 'return-code-' ~ loop.index, 'Return code for ' ~ name(item.asset_id)) }}
       {% endif %}
       <div class="borrower-action">
+        {% if item.step == 'enter_code' %}{{ email_status('return', item.asset_id) }}{% endif %}
         {% if item.step in ['can_return', 'code_expired'] %}<button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/return-request">{{ 'Request a new code' if item.step == 'code_expired' else 'Return this item' }} {{ icon('arrow', 18) }}</button>
         {% elif item.step == 'confirm_drop' %}<button class="button button--success" type="button" data-post="/assets/{{ item.asset_id }}/return-drop">{{ icon('check', 19) }} Confirm drop-off</button>
         {% elif item.step == 'awaiting_check' %}<span class="contact-staff">Drop-off recorded</span>
@@ -104,4 +121,4 @@
   </div>
 </section>
 </div>
-<p class="borrower-help">Demo stand-in: code email is not connected yet, so no email is sent. Find your code in your own <a href="/pickups">pickup status</a> or <a href="/returns">return status</a>.</p>
+<p class="borrower-help">{% if code_email_enabled %}Code email uses the inbox configured for your demo account. Demo stand-in if delivery fails: find your code in your own {% else %}Demo stand-in: code email is not connected yet, so no email is sent. Find your code in your own {% endif %}<a href="/pickups">pickup status</a> or <a href="/returns">return status</a>.</p>

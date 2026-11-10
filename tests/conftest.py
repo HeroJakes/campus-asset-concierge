@@ -9,6 +9,13 @@ from campus_asset_concierge.storage.local_state import LocalStateStore
 from campus_asset_concierge.storage.collection_state import CollectionStateStore
 
 
+@pytest.fixture(autouse=True)
+def disable_external_email(monkeypatch):
+    # Tests opt in with a mocked sender; never use real Gmail credentials.
+    monkeypatch.delenv("GMAIL_SENDER", raising=False)
+    monkeypatch.delenv("GMAIL_OAUTH_JSON", raising=False)
+
+
 @pytest.fixture(params=[LocalStateStore, CollectionStateStore], ids=["legacy", "collections"])
 def local_app(monkeypatch, request):
     if not os.environ.get("FIRESTORE_EMULATOR_HOST"):

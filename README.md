@@ -42,7 +42,9 @@ The lending backend and virtual locker are live on Vercel with fictional data in
 
 The MCP endpoint exposes these lending tools for the Gemini Enterprise agent.
 **Gemini chat, its workflow, and Gmail delivery are still pending the trial licence
-and integration checks.** Automatic pickup/return-code email is not connected yet.
+and integration checks.** Optional Gmail API pickup/return-code delivery is now
+implemented; sender authorization and real inbox verification are still pending.
+It does not require Gemini Enterprise. See [Gmail demo setup](docs/GMAIL_DEMO.md).
 
 The borrower interface includes responsive side-by-side pickup/return panels,
 compartment states, and six-box code entry. An interim Gemini API booking chat reuses the booking rules,
@@ -52,8 +54,10 @@ Replies show bold text and animated thinking dots. The latest 100 chat entries a
 saved per borrower in the current browser, with a Clear chat button; they do not sync across
 devices. Signing out returns to the login page. Passwordless dev login is removed.
 Gemini availability and quotas can limit chat; API booking remains the fallback.
-Until email is connected, the borrower page links to the borrower's own status API
-for codes and labels this as a demo stand-in.
+Without Gmail configured, the borrower page links to the borrower's own status API
+for codes and labels this as a demo stand-in. With Gmail enabled, loading and
+return requests email the existing code. The page shows delivery status and lets
+the borrower retry a definite failure. Uncertain sends are not retried automatically.
 
 Staff Active bookings includes loans without a reservation record, overdue items,
 and returns awaiting a condition check. Requesting a return reserves a compartment;
@@ -131,6 +135,7 @@ Gemini app and video links will be added after verification and recording.
 | [Development](docs/DEVELOPMENT.md) | Architecture, lending rules, local startup, and emulator tests |
 | [Demo guide](docs/DEMO_GUIDE.md) | Presentation sequence and Gemini/Gmail assembly |
 | [Operations](docs/OPERATIONS.md) | Deployment, credentials, reset, cron, and verification |
+| [Gmail demo setup](docs/GMAIL_DEMO.md) | Authorize a sender and deliver pickup/return codes |
 | [Submission checklist](submission/README.md) | Video, deck, app link, and write-up |
 
 With your local `.env` configured, run `uv run dev` from the repository root and

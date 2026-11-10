@@ -11,6 +11,7 @@ from google.api_core.exceptions import NotFound
 from pydantic import BaseModel, Field
 
 from campus_asset_concierge import assistant
+from campus_asset_concierge.code_email import CodeEmail
 from campus_asset_concierge.api.booking_view import booking_overview
 from campus_asset_concierge.api.auth import (
     Actor, DEMO_PASSWORDS, LOCAL_ACCOUNTS, LocalAccount, Role, SESSION_COOKIE, SESSION_MAX_AGE,
@@ -75,6 +76,7 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
     returns = Returns(local_store)
     recovery = Recovery(local_store)
     reassignment = Reassignment(local_store)
+    code_email = CodeEmail(local_store)
     app = FastAPI(title="Campus Asset Concierge · Local Development")
     app.state.public_demo_accounts = public_demo_accounts
     app.mount("/static", StaticFiles(directory=PACKAGE_DIR / "static"), name="static")
@@ -188,7 +190,10 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
     @app.post("/reservations/{reservation_id}/load")
     def load_reservation(reservation_id: str, actor: Actor) -> dict:
         require_role(actor, Role.STAFF)
-        return pickups.load(actor.username, reservation_id)
+        result = pickups.load(actor.username, reservation_id)
+        if result["step"] in {"code_not_open", "enter_code"}:
+            code_email.deliver("pickup", reservation_id)
+        return result
 
     @app.get("/pickups")
     def my_pickups(actor: Actor) -> list[dict]:
@@ -229,7 +234,15 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
     @app.post("/assets/{asset_id}/return-request")
     def request_return(asset_id: str, actor: Actor) -> dict:
         require_role(actor, Role.BORROWER)
-        return returns.request(actor.username, asset_id)
+        result = returns.request(actor.username, asset_id)
+        if result["step"] == "enter_code":
+            code_email.deliver("return", asset_id, actor.username)
+        return result
+
+    @app.post("/code-email/{kind}/{record_id}")
+    def email_code(kind: Literal["pickup", "return"], record_id: str, actor: Actor) -> dict:
+        require_role(actor, Role.BORROWER)
+        return code_email.deliver(kind, record_id, actor.username)
 
     @app.post("/assets/{asset_id}/return-unlock")
     def unlock_return(asset_id: str, request: UnlockRequest, actor: Actor) -> dict:
@@ -279,6 +292,8 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
             context["pickups"] = pickups.borrower_page(actor.username)
             context["returns"] = returns.borrower_page(actor.username)
             context["pickup_location"] = load_state()["location"]["name"]
+            context["code_email_enabled"] = code_email.enabled
+            context["code_email_statuses"] = code_email.statuses() if code_email.enabled else {}
         return templates.TemplateResponse(request, "locker.html", context)
 
     @app.get("/logout", include_in_schema=False)

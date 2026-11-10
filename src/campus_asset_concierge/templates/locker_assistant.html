@@ -38,7 +38,10 @@
           </div>
         </div>
       </div>
-      <p class="assistant-foot"><span id="assistant-history-status">The latest 100 chat entries are saved for this account in this browser.</span> <button type="button" id="assistant-clear">Clear chat</button></p>
+      <div class="assistant-foot assistant-foot--actions">
+        <span id="assistant-history-status">The latest 100 chat entries are saved for this account in this browser.</span>
+        <button type="button" id="assistant-clear" class="assistant-clear">{{ icon('trash', 15) }} Clear chat</button>
+      </div>
 
       <form class="assistant-form" id="assistant-form" autocomplete="off">
         <label class="sr-only" for="assistant-input">Message the assistant</label>

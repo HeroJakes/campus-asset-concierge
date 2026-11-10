@@ -30,8 +30,13 @@
 .assistant-typing span:nth-child(2) { animation-delay: .2s; }
 .assistant-typing span:nth-child(3) { animation-delay: .4s; }
 @keyframes thinking-dot { 0%, 60%, 100% { opacity: .35; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-4px); } }
-@media (prefers-reduced-motion: reduce) { .assistant-typing span { animation: none; opacity: 1; } .assistant-shortcuts button, .assistant-shortcuts a { transition: none; transform: none; } }
-#assistant-clear { border: 0; background: transparent; color: #5a32bc; text-decoration: underline; font: inherit; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .assistant-typing span { animation: none; opacity: 1; } .assistant-shortcuts button, .assistant-shortcuts a, .assistant-clear { transition: none; transform: none; } }
+.assistant-foot--actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 12px; }
+.assistant-foot--actions #assistant-history-status { min-width: 0; flex: 1; }
+.assistant-clear { display: inline-flex; align-items: center; gap: 6px; flex: none; padding: 6px 11px; border: 1px solid #e0d8f3; border-radius: 10px; background: #ffffffa6; color: #5a32bc; font: inherit; font-size: 11px; font-weight: 650; cursor: pointer; transition: background-color .2s ease, border-color .2s ease, transform .18s ease; }
+.assistant-clear:hover { background: #f3eeff; border-color: #cbb6f4; transform: translateY(-1px); }
+.assistant-clear:active { transform: translateY(0); }
+.assistant-clear:focus-visible { outline: 3px solid #9066ed; outline-offset: 2px; }
 .offer-card { min-width: 0; }
 .offer-summary { display: flex; align-items: center; gap: 12px; padding: 14px; margin: 10px 0 12px; border: 1px solid #e9e0f7; border-radius: 12px; background: #ffffffcb; }
 .offer-summary .equipment-art { flex: none; width: 80px; height: 60px; }

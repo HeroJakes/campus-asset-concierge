@@ -113,7 +113,7 @@
     <div class="panel-heading"><h2 id="activity-title"><span class="panel-heading-icon panel-heading-icon--activity">{{ icon('activity') }}</span>Activity</h2><span class="panel-meta">Latest updates</span></div>
     {% if audit_events %}<ul class="staff-activity">{% for event in audit_events[:3] %}{{ activity_entry(event) }}{% endfor %}</ul>
       {% if audit_events | length > 3 %}<details class="activity-history"><summary class="disclosure-summary"><span class="disclosure-icon">{{ icon('chevron', 20) }}</span>View all activity <span class="summary-meta">{{ audit_events | length }} events</span></summary><ul class="staff-activity">{% for event in audit_events[3:] %}{{ activity_entry(event) }}{% endfor %}</ul></details>{% endif %}
-    {% else %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('activity', 21) }}</span><div><strong>A fresh start</strong><p>Loading, pickups, and returns appear here.</p></div></div>{% endif %}
+    {% else %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('check', 21) }}</span><div><strong>No recent activity</strong><p>Loading, pickups, and returns appear here.</p></div></div>{% endif %}
   </section>
 
 </div>

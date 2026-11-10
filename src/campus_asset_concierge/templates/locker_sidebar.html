@@ -19,9 +19,11 @@
     {{ nav_item('activity', 'Activity', 'activity') }}
   </nav>
   <div class="sidebar-account" aria-label="Signed in as {{ name(username) }}">
-    <span class="account-avatar">{{ icon('user', 21) }}</span>
-    <div class="sidebar-label"><strong>Staff</strong></div>
-    <span class="account-indicator" title="Signed in"></span>
+    <span class="account-avatar">
+      {{ icon('user', 21) }}
+      <span class="account-indicator" title="Signed in" aria-label="Signed in"></span>
+    </span>
+    <div class="sidebar-label"><strong>Staff</strong><span>{{ name(username) }}</span></div>
   </div>
   <a class="sidebar-link sidebar-logout" href="/logout" aria-label="Log out" title="Log out">{{ icon('logout', 20) }}<span class="sidebar-label">Log out</span></a>
 </aside>

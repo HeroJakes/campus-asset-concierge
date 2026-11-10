@@ -35,11 +35,13 @@ p { text-wrap: pretty; }
 .sidebar-link:hover { background: #f0edf9; color: #5030b6; }
 .sidebar-link.is-current { background: linear-gradient(100deg, #eeebfd, #e9e2ff); color: #5431c4; }
 .sidebar-account { display: flex; gap: 10px; align-items: center; min-height: 66px; margin-top: auto; padding: 12px 10px; border: 1px solid var(--border); border-radius: 14px; }
-.account-avatar { width: 34px; height: 34px; border-radius: 50%; background: #ebe8f4; color: #675c86; display: grid; place-items: center; flex: none; }
+.account-avatar { position: relative; width: 34px; height: 34px; border-radius: 50%; background: #ebe8f4; color: #675c86; display: grid; place-items: center; flex: none; }
 .account-avatar svg { display: block; transform: translateY(-1px); }
-.sidebar-account strong { display: block; }
-.account-indicator { width: 6px; height: 6px; background: #54886b; border-radius: 50%; margin-left: auto; }
-.sidebar-collapsed .sidebar-label, .sidebar-collapsed .account-indicator { display: none; }
+.sidebar-account .sidebar-label { min-width: 0; flex: 1; overflow: hidden; white-space: nowrap; }
+.sidebar-account strong, .sidebar-account .sidebar-label > span { display: block; }
+.sidebar-account .sidebar-label > span { color: var(--muted); font-size: 11px; margin-top: 1px; }
+.account-indicator { position: absolute; right: -1px; bottom: -1px; width: 8px; height: 8px; border: 2px solid #fbfaff; border-radius: 50%; background: #4f9a68; }
+.sidebar-collapsed .sidebar-label { display: none; }
 .sidebar-collapsed .sidebar-header { justify-content: center; gap: 0; }
 .sidebar-collapsed .staff-brand { display: none; }
 .sidebar-collapsed .sidebar-account { justify-content: center; padding: 8px 0; border-color: transparent; }

@@ -100,7 +100,7 @@ expiry, and delivery limits are in [Gmail demo setup](GMAIL_DEMO.md). Manual cod
 lookup remains available if delivery fails.
 Recovery reminders and the Gemini Enterprise Gmail workflow remain separate.
 
-All eleven variables are sensitive and Production-only on the dedicated project:
+All fifteen variables are sensitive and Production-only on the dedicated project:
 
 | Variable | Value |
 | --- | --- |
@@ -115,6 +115,10 @@ All eleven variables are sensitive and Production-only on the dedicated project:
 | `LOCAL_OPERATOR_PASSWORD` | Unique generated password, at least 32 characters |
 | `GEMINI_API_KEY` | Gemini API key; never render it into the browser |
 | `GEMINI_MODEL` | `gemini-3.8-flash` |
+| `GMAIL_SENDER` | Authorized demo sender address |
+| `LOCAL_BORROWER_A_EMAIL` | Controlled Borrower A inbox |
+| `LOCAL_BORROWER_B_EMAIL` | Controlled Borrower B inbox |
+| `GMAIL_OAUTH_JSON` | Private sender client ID, client secret, and refresh token |
 
 Do not set `FIRESTORE_EMULATOR_HOST`, `GOOGLE_APPLICATION_CREDENTIALS`,
 `VERCEL_TEST_DOCUMENT_ID`, `PREVIEW_ACCESS_TOKEN`, or OAuth variables in Vercel.

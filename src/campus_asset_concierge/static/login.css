@@ -2,7 +2,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; }
 button, input { font: inherit; }
-.login-page { position: relative; min-height: 100svh; color: var(--ink); font-family: "Segoe UI", Arial, sans-serif; background: #fafaff url("/static/login-background.png") top / 100% 190% no-repeat fixed; }
+.login-page { position: relative; min-height: 100svh; color: var(--ink); font-family: "Geist", Inter, system-ui, sans-serif; background: #fafaff url("/static/login-background.png") top / 100% 190% no-repeat fixed; }
 /* The top of the picture is plain ground, so the locker gets its own layer here. It sits below the copy and scrolls with the page. */
 .login-page::before { content: ""; position: absolute; z-index: -1; left: 0; bottom: 0; height: min(max(100svh - 360px, 280px), 30vw); aspect-ratio: 2.2; background: url("/static/login-background.png") left bottom / auto 200% no-repeat; mask: linear-gradient(#0000, #000 9%), linear-gradient(to right, #000 80%, #0000); mask-composite: intersect; }
 .login-layout { display: grid; grid-template-columns: 1.13fr 1fr; gap: clamp(32px, 5vw, 80px); align-items: center; max-width: 1520px; min-height: 100svh; margin: auto; padding: 24px clamp(30px, 5vw, 76px); }

@@ -35,7 +35,7 @@ def send_gmail(message: EmailMessage) -> str:
         body = urlencode({key: credentials[key] for key in (
             "client_id", "client_secret", "refresh_token",
         )} | {"grant_type": "refresh_token"}).encode()
-        with urlopen(Request("https://oauth2.googleapis.com/token", data=body), timeout=10) as response:
+        with urlopen(Request("https://oauth2.googleapis.com/token", data=body), timeout=5) as response:
             token = json.load(response)["access_token"]
     except Exception:
         raise DeliveryError("failed") from None
@@ -47,7 +47,7 @@ def send_gmail(message: EmailMessage) -> str:
         headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
     )
     try:
-        with urlopen(request, timeout=10) as response:
+        with urlopen(request, timeout=5) as response:
             return json.load(response)["id"]
     except HTTPError as error:
         raise DeliveryError("failed" if 400 <= error.code < 500 and error.code != 408 else "unknown") from None

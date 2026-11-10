@@ -6,20 +6,21 @@ from fastapi.testclient import TestClient
 
 from campus_asset_concierge.api.app import create_app
 from campus_asset_concierge.storage.local_state import LocalStateStore
+from campus_asset_concierge.storage.collection_state import CollectionStateStore
 
 
-@pytest.fixture
-def local_app(monkeypatch):
+@pytest.fixture(params=[LocalStateStore, CollectionStateStore], ids=["legacy", "collections"])
+def local_app(monkeypatch, request):
     if not os.environ.get("FIRESTORE_EMULATOR_HOST"):
         pytest.skip("Start the Firestore emulator to run the Firestore integration tests.")
     for account in ("BORROWER_A", "BORROWER_B", "STAFF", "OPERATOR"):
         monkeypatch.setenv(f"LOCAL_{account}_PASSWORD", f"test-{account.lower()}")
-    store = LocalStateStore(document_id=f"test-{uuid4().hex}")
+    store = request.param(document_id=f"test-{uuid4().hex}")
     try:
         with TestClient(create_app(store)) as client:
             yield client, store
     finally:
-        store.document.delete()
+        store.client.recursive_delete(store.document)
 
 BORROWER_A = ("borrower-a", "test-borrower_a")
 BORROWER_B = ("borrower-b", "test-borrower_b")

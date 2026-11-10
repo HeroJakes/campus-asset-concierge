@@ -62,7 +62,7 @@ def create_demo_app():
     app.title = "Campus Asset Concierge · Hackathon Demo"
     app.router.routes[:] = [
         route for route in app.router.routes
-        if not route.path.startswith(("/local-test/clock", "/dev-login"))
+        if not route.path.startswith("/local-test/clock")
     ]
 
     @app.middleware("http")

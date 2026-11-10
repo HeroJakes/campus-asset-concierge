@@ -27,6 +27,7 @@ checks. The server-rendered locker is a virtual device, not physical hardware.
 | `reservations.py`, `pickups.py`, `returns.py` | Lending transactions |
 | `recovery.py`, `reassignment.py` | Detect conflicts, propose, recheck, and apply substitutes |
 | `storage/local_state.py` | One Firestore state document and transaction helper |
+| `storage/collection_state.py`, `emulator_collections.py` | Emulator-only collection layout and review app; hosted storage stays unchanged |
 | `api/app.py`, `api/auth.py`, `templates/`, `static/` | Login, shared account checks, role-protected REST, and locker views |
 | `agent/reservations.py` | Existing ADK booking tools and instructions |
 | `mcp_server.py` | Five tools, stdio or stateless Streamable HTTP |
@@ -39,6 +40,79 @@ access, recovery records, and audit events. Reservation, custody, compartment, a
 condition are separate states. The store takes an explicit document ID; automated
 tests use emulator-only test documents. See [Operations](OPERATIONS.md#data-boundaries)
 before selecting any cloud profile.
+
+### Collection layout review (emulator only)
+
+The proposed layout puts records under `environments/development`. Each test uses
+its own `environments/test-<random-id>` workspace. The environment document holds
+the scenario, fixed clock, schema version, record-group list, and revision counter.
+These are real collections under that document, rather than maps inside it:
+
+| Collection | Records |
+| --- | --- |
+| `assets` | Equipment units and capabilities |
+| `reservation_offers` | Offers awaiting borrower confirmation |
+| `reservations` | Confirmed bookings and pickup state |
+| `loans` | Equipment custody and return deadlines |
+| `locations` | Loan desk details |
+| `lockers` | Locker identity |
+| `locker_compartments` | Compartment status and locker ID |
+| `pickup_access` | Pickup codes, attempt counts, and unlock state |
+| `return_access` | Return codes, drop-off state, and staff checks |
+| `at_risk_reservations` | Bookings affected by overdue loans |
+| `recovery_proposals` | Substitute proposals and approval state |
+| `recovery_reminders` | Simulated reminder records |
+| `recovery_escalations` | Cases needing staff follow-up |
+| `audit_events` | Ordered action records |
+
+Collection names use lowercase plural nouns and underscores. Existing meaningful
+IDs, such as `projector-a` and `active-projector`, stay stable. Codes stay separate
+from bookings and are still excluded from staff and model status results. Missing
+optional groups have no documents until a workflow creates them.
+
+The adapter reconstructs the existing domain state so the lending rules remain
+shared. Changes update the environment revision and changed child documents in
+one transaction. Reset removes obsolete child records in that environment only.
+Every integration test runs against both the old and proposed layouts, including
+the competing-process booking check.
+
+This is a naming and storage review, not a scalability upgrade. Reads still load
+the workspace, and changes serialize on its revision. Large inventories and long
+audit histories need narrower queries and transactions before production use.
+The adapter refuses to start without a loopback Firestore emulator. It cannot be
+selected by the hosted entrypoint and does not migrate or delete cloud documents.
+
+To inspect it, start the emulator in terminal 1:
+
+```powershell
+npx --yes firebase-tools@15.35.0 emulators:start --only firestore --project demo-campus-asset-concierge
+```
+
+In terminal 2, with your existing local account settings in `.env`:
+
+```powershell
+$env:FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080'
+uv run --env-file .env python -m campus_asset_concierge.seed_demo spare_available --layout collections
+uv run dev-collections
+```
+
+Open `http://127.0.0.1:8001/login`. The login page lists the public borrower and
+staff test passwords; the private account settings still sign browser sessions.
+The seed is create-only and stops if `environments/development` already exists.
+Use a deliberate operator reset in the review app only when you want to replace
+that emulator workspace. Neither these commands nor the review app copy cloud data.
+
+A fictional review export is available on the current development machine at
+`.firebase/collections-review` (ignored by Git). Add
+`--import .firebase/collections-review` to the emulator start command to reopen it,
+and skip the seed command. The export already has the overdue recovery scenario.
+Stop an existing dev server before installing the new console command on Windows.
+
+Cloud migration remains a separate approval step. Before proposing it, compare an
+emulator copy against the source, review auth/rules and queries, plan a create-only
+destination and rollback, and update the hosted document/reset guards together.
+Never overwrite or rename `demo/current` or `demo/hackathon-20261111` as part of
+this emulator review.
 
 ### Booking and matching
 
@@ -198,7 +272,6 @@ Terminal 2, using passwords you choose locally:
 
 ```powershell
 $env:FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080'
-$env:DEV_LOGIN = '0'
 $env:LOCAL_BORROWER_A_PASSWORD = Read-Host 'Borrower A password' -MaskInput
 $env:LOCAL_BORROWER_B_PASSWORD = Read-Host 'Borrower B password' -MaskInput
 $env:LOCAL_STAFF_PASSWORD = Read-Host 'Staff password' -MaskInput
@@ -211,10 +284,8 @@ Open `http://127.0.0.1:8000/docs`, authorize as `local-operator`, and POST
 10:00 MYT; local POST `/local-test/clock/advance` with `{"minutes":61}` runs recovery.
 These are emulator actions; the hosted reset already starts overdue at 11:01.
 
-Optional passwordless local mode: set `DEV_LOGIN=1` and use `/dev-login` to choose
-`borrower_a`, `borrower_b`, or `staff`. Both host and peer must be loopback.
-It grants no operator identity. Keep it off on hosted deployments and never tunnel it.
-Use a separate session without a dev cookie for operator Basic actions.
+For local login, use `uv run dev`. The login page lists borrower and staff test
+accounts. Passwordless `/dev-login` routes have been removed.
 
 Do not load the private cloud `.env` for tests or emulator rehearsal. That legacy
 profile can target hosted `demo/current`; the two databases do not sync.

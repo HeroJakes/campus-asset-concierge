@@ -48,9 +48,16 @@ The borrower interface includes pickup/return cards, compartment states, and
 six-box code entry. An interim Gemini API booking chat reuses the booking rules,
 requires the borrower to confirm an offer, and keeps one-time codes out of model
 status results. Its page includes quick prompts, booking summaries, and tips.
+Replies show bold text and animated thinking dots. The latest 100 chat entries are
+saved per borrower in the current browser, with a Clear chat button; they do not sync across
+devices. Signing out returns to the login page. Passwordless dev login is removed.
 Gemini availability and quotas can limit chat; API booking remains the fallback.
 Until email is connected, the borrower page links to the borrower's own status API
 for codes and labels this as a demo stand-in.
+
+Staff Active bookings includes loans without a reservation record, overdue items,
+and returns awaiting a condition check. Requesting a return reserves a compartment;
+it does not mean the item has been dropped off.
 
 ## How we built it (and what we researched)
 
@@ -126,5 +133,14 @@ Gemini app and video links will be added after verification and recording.
 | [Operations](docs/OPERATIONS.md) | Deployment, credentials, reset, cron, and verification |
 | [Submission checklist](submission/README.md) | Video, deck, app link, and write-up |
 
-For local use, follow [Development](docs/DEVELOPMENT.md#local-setup).
+With your local `.env` configured, run `uv run dev` from the repository root and
+open [the login page](http://127.0.0.1:8000/login). It reloads when code changes.
+The page shows the same borrower and staff test accounts as the hosted demo.
+This uses the database selected in `.env`; it does not seed or reset data.
+For first-time setup, follow [Development](docs/DEVELOPMENT.md#local-setup).
 No cloud account is needed for emulator-based development.
+
+An [emulator-only collection layout](docs/DEVELOPMENT.md#collection-layout-review-emulator-only)
+is available for review with `uv run dev-collections`. It separates equipment,
+bookings, loans, locker access, and recovery records. Hosted Firestore stays on
+the existing layout; no cloud migration has been approved.

@@ -14,7 +14,7 @@
               <td class="figure">{{ hhmm(booking.pickup_at) }}</td>
               <td class="figure">{{ hhmm(booking.due_at) }}</td>
               <td>{% if booking.compartment %}{{ booking.compartment | upper }}{% else %}<span class="dash">–</span>{% endif %}</td>
-              <td>{{ {
+              <td>{% if booking.loan_status == 'returned' %}Returned &amp; checked{% elif booking.loan_status == 'awaiting_check' %}Awaiting return check{% elif booking.loan_status == 'overdue' %}Overdue{% else %}{{ {
                 "waiting_for_loading": "Waiting to be loaded",
                 "pickup_missed": "Pickup window closed, not loaded",
                 "code_not_open": "Loaded, pickup not open yet",
@@ -23,7 +23,7 @@
                 "code_expired": "Code expired, not collected",
                 "confirm_pickup": "Open, waiting for pickup confirmation",
                 "collected": "Collected, loan started",
-              }[booking.step] }}</td>
+              }[booking.step] }}{% endif %}</td>
               <td class="action">
                 {% if booking.step == "waiting_for_loading" %}
                   {% if booking.load_blocker %}

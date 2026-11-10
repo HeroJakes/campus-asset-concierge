@@ -13,8 +13,8 @@ from pydantic import BaseModel, Field
 from campus_asset_concierge import assistant
 from campus_asset_concierge.api.booking_view import booking_overview
 from campus_asset_concierge.api.auth import (
-    Actor, DEMO_PASSWORDS, DEV_ACCOUNTS, LOCAL_ACCOUNTS, LocalAccount, Role, SESSION_COOKIE, SESSION_MAX_AGE,
-    authenticate, browser_account, dev_login_enabled, require_role,
+    Actor, DEMO_PASSWORDS, LOCAL_ACCOUNTS, LocalAccount, Role, SESSION_COOKIE, SESSION_MAX_AGE,
+    authenticate, browser_account, require_role,
     require_same_origin, secure_session_cookie, session_signer,
 )
 from campus_asset_concierge.domain.reservations import (
@@ -123,26 +123,7 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
                 max_age=SESSION_MAX_AGE, httponly=True, samesite="strict",
                 secure=secure_session_cookie(request),
             )
-            response.delete_cookie("dev_account")
         response.headers["Cache-Control"] = "no-store"
-        return response
-
-    @app.get("/dev-login", response_class=HTMLResponse)
-    def dev_login_page(request: Request) -> HTMLResponse:
-        if not dev_login_enabled(request):
-            raise HTTPException(404, "Not found.")
-        return templates.TemplateResponse(request, "dev_login.html", {"accounts": DEV_ACCOUNTS})
-
-    @app.post("/dev-login/{account}")
-    def dev_login(account: str, request: Request) -> RedirectResponse:
-        if not dev_login_enabled(request):
-            raise HTTPException(404, "Not found.")
-        require_same_origin(request)
-        if account not in DEV_ACCOUNTS:
-            raise HTTPException(404, "Unknown dev account.")
-        response = RedirectResponse("/locker", status_code=303)
-        # Deliberately selectable identities for loopback-only demos, never public authentication.
-        response.set_cookie("dev_account", account, httponly=True, samesite="strict")
         return response
 
     @app.exception_handler(ReservationError)
@@ -174,7 +155,6 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
         response = templates.TemplateResponse(request, "locker_assistant.html", {
             "username": actor.username,
             "current_time": pickups.current_time(),
-            "dev_login": dev_login_enabled(request),
         })
         response.headers["Cache-Control"] = "no-store"
         return response
@@ -288,7 +268,6 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
             "is_staff": actor.role == Role.STAFF,
             "returns": [],
             "bookings_page": bookings_page,
-            "dev_login": dev_login_enabled(request),
         }
         if actor.role == Role.STAFF:
             context |= pickups.staff_page()
@@ -305,13 +284,11 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
     @app.get("/logout", include_in_schema=False)
     def logout(request: Request) -> Response:
         require_same_origin(request)
-        target = "/dev-login" if dev_login_enabled(request) else "/login"
-        response = RedirectResponse(target, status_code=303)
+        response = RedirectResponse("/login", status_code=303)
         response.delete_cookie(
             SESSION_COOKIE, httponly=True, samesite="strict",
             secure=secure_session_cookie(request),
         )
-        response.delete_cookie("dev_account")
         response.headers["Cache-Control"] = "no-store"
         return response
 

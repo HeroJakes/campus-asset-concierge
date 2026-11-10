@@ -1,4 +1,4 @@
-// Borrower booking assistant chat. History lives here (stateless server); the
+// Borrower booking assistant chat. History stays in this browser per account; the
 // Confirm button posts straight to the reservation endpoint, never through the model.
 const log = document.getElementById("assistant-log");
 const form = document.getElementById("assistant-form");
@@ -6,6 +6,17 @@ const input = document.getElementById("assistant-input");
 const sendButton = document.getElementById("assistant-send");
 
 const messages = []; // {role: "user"|"model", text}
+const history = [];
+const historyKey = `campus-assistant-v1:${log.dataset.username}`;
+const historyStatus = document.getElementById("assistant-history-status");
+
+function saveHistory() {
+  try {
+    localStorage.setItem(historyKey, JSON.stringify(history.slice(-100)));
+  } catch {
+    historyStatus.textContent = "Chat history could not be saved in this browser.";
+  }
+}
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -33,7 +44,13 @@ function addRow(side) {
 }
 
 function addMessage(side, text) {
-  addRow(side).appendChild(el("p", null, text));
+  const paragraph = el("p");
+  // Render only bold markers; model text is never interpreted as HTML.
+  for (const [index, part] of text.split(/\*\*([^*]+)\*\*/g).entries()) {
+    paragraph.appendChild(el(side === "bot" && index % 2 ? "strong" : "span", null,
+      side === "user" && index % 2 ? `**${part}**` : part));
+  }
+  addRow(side).appendChild(paragraph);
   log.scrollTop = log.scrollHeight;
 }
 
@@ -48,7 +65,7 @@ function requirementsText(offer) {
   return needs.length ? needs.join(", ") : "No extra requirements";
 }
 
-function addOfferCard(offer) {
+function addOfferCard(offer, entry = null, restored = false) {
   const bubble = addRow("bot");
   const card = el("div", "offer-card");
   card.appendChild(el("p", null, "Here's your equipment offer:"));
@@ -104,6 +121,10 @@ function addOfferCard(offer) {
       const link = el("a", null, "View in My Locker");
       link.href = "/locker";
       status.appendChild(link);
+      if (entry) {
+        entry.confirmed = true;
+        saveHistory();
+      }
     } catch {
       status.textContent = "Network error — please try again.";
       confirm.disabled = false;
@@ -114,28 +135,48 @@ function addOfferCard(offer) {
   card.appendChild(actions);
   card.appendChild(status);
   bubble.appendChild(card);
+  if (restored) {
+    confirm.remove();
+    change.remove();
+    status.textContent = entry?.confirmed ? "Booked ✓ — view the current status in My Locker." : "Saved offer. Ask for a fresh offer before confirming.";
+  }
   log.scrollTop = log.scrollHeight;
 }
 
 async function send(text) {
   messages.push({ role: "user", text });
+  history.push({ role: "user", text });
+  saveHistory();
   addMessage("user", text);
   const typing = addRow("bot");
-  typing.appendChild(el("p", "assistant-typing", "…"));
+  const dots = el("p", "assistant-typing");
+  dots.setAttribute("role", "status");
+  dots.setAttribute("aria-label", "Assistant is thinking");
+  for (let i = 0; i < 3; i++) {
+    const dot = el("span", null, ".");
+    dot.setAttribute("aria-hidden", "true");
+    dots.appendChild(dot);
+  }
+  typing.appendChild(dots);
   sendButton.disabled = true;
   try {
+    const recent = messages.slice(-40);
+    if (recent[0]?.role === "model") recent.shift();
     const res = await fetch("/assistant/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ messages: recent.map(message => ({ ...message, text: message.text.slice(0, 2000) })) }),
     });
     const data = res.ok ? await res.json() : { reply: "The assistant hit an error. Please try again.", offer: null };
     const reply = data.reply || "";
+    const entry = { role: "model", text: reply, offer: data.offer || null };
+    history.push(entry);
+    saveHistory();
     if (reply) {
       messages.push({ role: "model", text: reply });
       addMessage("bot", reply);
     }
-    if (data.offer) addOfferCard(data.offer);
+    if (data.offer) addOfferCard(data.offer, entry);
   } catch {
     addMessage("bot", "Network error — please try again.");
   } finally {
@@ -160,6 +201,31 @@ document.querySelectorAll("[data-prompt]").forEach((button) => {
     input.value = button.dataset.prompt;
     input.focus();
   });
+});
+
+try {
+  const saved = JSON.parse(localStorage.getItem(historyKey) || "[]");
+  if (Array.isArray(saved)) {
+    for (const entry of saved.slice(-100)) {
+      if (!entry || !["user", "model"].includes(entry.role) || typeof entry.text !== "string") continue;
+      history.push(entry);
+      if (entry.text) {
+        messages.push({ role: entry.role, text: entry.text });
+        addMessage(entry.role === "user" ? "user" : "bot", entry.text);
+      }
+      if (entry.role === "model" && entry.offer && typeof entry.offer.id === "string") addOfferCard(entry.offer, entry, true);
+    }
+  }
+} catch {
+  historyStatus.textContent = "Chat history could not be loaded in this browser.";
+}
+
+document.getElementById("assistant-clear").addEventListener("click", () => {
+  if (sendButton.disabled) return;
+  history.length = 0;
+  messages.length = 0;
+  saveHistory();
+  log.querySelectorAll(".assistant-row:not([data-greeting])").forEach(row => row.remove());
 });
 
 input.addEventListener("input", () => {

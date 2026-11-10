@@ -27,6 +27,8 @@ def booking_overview(reservations: list[dict], query: str, status: str) -> dict:
             )
         elif reservation["loan_status"] == "overdue":
             tone, label, description = "blocked", "Overdue", "The loan needs staff follow-up."
+        elif reservation["loan_status"] == "awaiting_check":
+            tone, label, description = "waiting", "Awaiting return check", "Dropped off; staff must check the item before closing the loan."
         bookings.append(reservation | {
             "group": group, "tone": tone, "label": label,
             "description": reservation["load_blocker"] or description,

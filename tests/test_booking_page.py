@@ -35,9 +35,9 @@ def test_search_filters_and_counts_follow_saved_bookings(booking_app):
     assert row(reservation_id) in html
     assert row("next-projector") not in html
     assert "Loaded &amp; locked" in html
-    assert "All bookings<strong>2</strong>" in html
+    assert "All bookings<strong>3</strong>" in html
     assert "To load<strong>1</strong>" in html
-    assert "Active<strong>1</strong>" in html
+    assert "Active<strong>2</strong>" in html
     assert "Completed<strong>0</strong>" in html
     assert row(reservation_id) in page(client, q=reservation_id)
     assert row(reservation_id) in page(client, q="borrower a")
@@ -82,3 +82,24 @@ def test_recovery_review_uses_existing_guarded_approval(booking_app):
     assert proposal["id"] in html
     assert "Approve and apply" in html
     assert "Review proposal" in html
+
+
+def test_loan_without_reservation_stays_active_until_staff_checks_return(booking_app):
+    client, _ = booking_app
+    assert row("active-projector") in page(client, status="active")
+    assert "Collected" in page(client, status="active")
+    advance(client, 61)
+    assert "Overdue" in page(client, status="active")
+    assert return_request(client, "projector-a").status_code == 200
+    staff = client.get("/locker", auth=STAFF).text
+    assert "Reserved for return — awaiting code" in staff
+    assert "Returned, awaiting check" not in staff
+    assert return_drop(client, "projector-a").status_code == 409
+    assert verify(client, "projector-a").status_code == 409
+    assert row("active-projector") in page(client, status="active")
+    assert return_unlock(client, "projector-a", return_code_for(client, "projector-a")).status_code == 200
+    assert return_drop(client, "projector-a").status_code == 200
+    assert "Awaiting return check" in page(client, status="active")
+    assert verify(client, "projector-a").status_code == 200
+    assert row("active-projector") not in page(client, status="active")
+    assert row("active-projector") in page(client, status="completed")

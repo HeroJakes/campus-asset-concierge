@@ -140,16 +140,29 @@ class Pickups:
     def staff_page(self) -> dict:
         state = _required(self.store.load())
         now = local_clock(state)
+        reservations = [
+            _view(state, reservation_id, reservation, now)
+            | {
+                "load_blocker": _load_blocker(state, reservation_id, reservation, now),
+                "loan_status": state["loans"].get(f"loan-{reservation_id}", {}).get("status"),
+            }
+            for reservation_id, reservation in _by_pickup_time(state)
+        ]
+        linked_loans = {f"loan-{reservation_id}" for reservation_id in state["reservations"]}
+        # Seeded or imported loans may predate the reservation records.
+        for loan_id, loan in sorted(state["loans"].items()):
+            if loan_id not in linked_loans:
+                reservations.append(_loan_view(loan_id, loan) | {
+                    "status": "collected", "step": "collected",
+                    "pickup_at": _malaysia_iso(loan["picked_up_at"]),
+                    "compartment": None,
+                    "loan_status": loan["status"], "load_blocker": None,
+                    "pickup_location": state["location"]["name"],
+                    **equipment_requirements(loan),
+                })
         return {
             "compartments": state["locker"]["compartments"],
-            "reservations": [
-                _view(state, reservation_id, reservation, now)
-                | {
-                    "load_blocker": _load_blocker(state, reservation_id, reservation, now),
-                    "loan_status": state["loans"].get(f"loan-{reservation_id}", {}).get("status"),
-                }
-                for reservation_id, reservation in _by_pickup_time(state)
-            ],
+            "reservations": sorted(reservations, key=lambda row: row["pickup_at"]),
             "audit_events": [
                 event | {"at": _malaysia_iso(event["at"])}
                 for event in reversed(state.get("audit_events", []))

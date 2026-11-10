@@ -128,6 +128,7 @@ Gemini app and video links will be added after verification and recording.
 
 With your local `.env` configured, run `uv run dev` from the repository root and
 open [the login page](http://127.0.0.1:8000/login). It reloads when code changes.
+The page shows the same borrower and staff test accounts as the hosted demo.
 This uses the database selected in `.env`; it does not seed or reset data.
 For first-time setup, follow [Development](docs/DEVELOPMENT.md#local-setup).
 No cloud account is needed for emulator-based development.

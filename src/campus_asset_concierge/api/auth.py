@@ -33,7 +33,7 @@ LOCAL_ACCOUNTS = {
     "local-operator": (Role.OPERATOR, "LOCAL_OPERATOR_PASSWORD"),
 }
 DEV_ACCOUNTS = {"borrower_a": BORROWER_A, "borrower_b": BORROWER_B, "staff": "equipment-staff"}
-# Public judging credentials, accepted only by the isolated hackathon entrypoint.
+# Public test credentials for the hackathon and loopback development entrypoints.
 DEMO_PASSWORDS = {
     BORROWER_A: "BorrowerA2026!",
     BORROWER_B: "BorrowerB2026!",

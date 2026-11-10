@@ -198,7 +198,6 @@ Terminal 2, using passwords you choose locally:
 
 ```powershell
 $env:FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080'
-$env:DEV_LOGIN = '0'
 $env:LOCAL_BORROWER_A_PASSWORD = Read-Host 'Borrower A password' -MaskInput
 $env:LOCAL_BORROWER_B_PASSWORD = Read-Host 'Borrower B password' -MaskInput
 $env:LOCAL_STAFF_PASSWORD = Read-Host 'Staff password' -MaskInput

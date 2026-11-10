@@ -123,7 +123,6 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
                 max_age=SESSION_MAX_AGE, httponly=True, samesite="strict",
                 secure=secure_session_cookie(request),
             )
-            response.delete_cookie("dev_account")
         response.headers["Cache-Control"] = "no-store"
         return response
 
@@ -290,7 +289,6 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
             SESSION_COOKIE, httponly=True, samesite="strict",
             secure=secure_session_cookie(request),
         )
-        response.delete_cookie("dev_account")
         response.headers["Cache-Control"] = "no-store"
         return response
 

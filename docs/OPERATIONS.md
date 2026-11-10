@@ -114,14 +114,14 @@ All fifteen variables are sensitive and Production-only on the dedicated project
 | `LOCAL_BORROWER_B_PASSWORD` | Unique generated password, at least 32 characters |
 | `LOCAL_OPERATOR_PASSWORD` | Unique generated password, at least 32 characters |
 | `GEMINI_API_KEY` | Gemini API key; never render it into the browser |
-| `GEMINI_MODEL` | `gemini-3.8-flash` |
+| `GEMINI_MODEL` | Configured borrower assistant model ID |
 | `GMAIL_SENDER` | Authorized demo sender address |
 | `LOCAL_BORROWER_A_EMAIL` | Controlled Borrower A inbox |
 | `LOCAL_BORROWER_B_EMAIL` | Controlled Borrower B inbox |
 | `GMAIL_OAUTH_JSON` | Private sender client ID, client secret, and refresh token |
 
 Do not set `FIRESTORE_EMULATOR_HOST`, `GOOGLE_APPLICATION_CREDENTIALS`,
-`VERCEL_TEST_DOCUMENT_ID`, `PREVIEW_ACCESS_TOKEN`, or OAuth variables in Vercel.
+`VERCEL_TEST_DOCUMENT_ID`, `PREVIEW_ACCESS_TOKEN`, or Gemini Enterprise OAuth variables in Vercel.
 The entrypoint rejects the wrong project/document, emulator configuration,
 `DEV_LOGIN=1`, short passwords, and an invalid HTTPS base URL.
 

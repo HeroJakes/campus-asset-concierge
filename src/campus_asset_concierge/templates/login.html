@@ -67,8 +67,8 @@
         <ul>
           {% for account in demo_accounts %}
           <li>
-            <div><strong>{{ account.username }}</strong><br><span>Password: <code>{{ account.password }}</code></span></div>
-            <button type="button" class="account-fill" data-username="{{ account.username }}" data-password="{{ account.password }}" data-role="{{ account.role }}" aria-label="Use {{ account.username }}" hidden>Use account</button>
+            <div><strong>{{ account.username }}</strong><br><span><span class="visually-hidden">Password: </span><code>{{ account.password }}</code></span></div>
+            <button type="button" class="account-fill" data-username="{{ account.username }}" data-password="{{ account.password }}" data-role="{{ account.role }}" aria-label="Use {{ account.username }}" hidden></button>
           </li>
           {% endfor %}
         </ul>

@@ -18,6 +18,7 @@ dependencies = [
 
 [project.scripts]
 dev = "campus_asset_concierge.dev:main"
+dev-collections = "campus_asset_concierge.emulator_collections:main"
 
 [dependency-groups]
 dev = ["pytest"]

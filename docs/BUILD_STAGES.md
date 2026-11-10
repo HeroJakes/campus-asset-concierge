@@ -42,6 +42,10 @@ Stage numbers stay stable. "Done" describes the scope shown, not a complete univ
   borrower, and logout to `/login`. Passwordless dev login is removed. Staff
   bookings include seeded loans and show returns awaiting a check; reserving a
   return compartment is labelled separately from dropping an item off.
+- Firestore naming review in PR #30 on `chore/short-dev-command`: separate
+  collections under emulator-only environment workspaces, with the existing
+  workflows tested against both layouts. Cloud migration and deployment remain
+  unapproved; the hosted single-document layout stays in use.
 
 - Reservation, pickup, return, and recovery: PRs #2, #5, #6, and #7.
 - MCP tools, substitute approval, capability matching, and local container: PRs #9, #10, #12, and #13.

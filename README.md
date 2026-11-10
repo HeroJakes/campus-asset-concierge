@@ -46,8 +46,8 @@ and integration checks.** Optional Gmail API pickup/return-code delivery is now
 implemented; sender authorization and real inbox verification are still pending.
 It does not require Gemini Enterprise. See [Gmail demo setup](docs/GMAIL_DEMO.md).
 
-The borrower interface includes pickup/return cards, compartment states, and
-six-box code entry. An interim Gemini API booking chat reuses the booking rules,
+The borrower interface includes responsive side-by-side pickup/return panels,
+compartment states, and six-box code entry. An interim Gemini API booking chat reuses the booking rules,
 requires the borrower to confirm an offer, and keeps one-time codes out of model
 status results. Its page includes quick prompts, booking summaries, and tips.
 Replies show bold text and animated thinking dots. The latest 100 chat entries are

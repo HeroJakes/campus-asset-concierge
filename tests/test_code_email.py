@@ -150,7 +150,7 @@ def test_gmail_transport_sends_mime_and_never_retries(monkeypatch):
 
     def open_request(request, timeout):
         calls.append(request)
-        assert timeout == 10
+        assert timeout == 5
         if len(calls) == 1:
             return BytesIO(b'{"access_token":"access"}')
         raw = json.loads(request.data)["raw"]

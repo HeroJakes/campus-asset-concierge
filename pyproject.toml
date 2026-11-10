@@ -16,6 +16,9 @@ dependencies = [
     "uvicorn",
 ]
 
+[project.scripts]
+dev = "campus_asset_concierge.dev:main"
+
 [dependency-groups]
 dev = ["pytest"]
 

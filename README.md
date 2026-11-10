@@ -126,5 +126,8 @@ Gemini app and video links will be added after verification and recording.
 | [Operations](docs/OPERATIONS.md) | Deployment, credentials, reset, cron, and verification |
 | [Submission checklist](submission/README.md) | Video, deck, app link, and write-up |
 
-For local use, follow [Development](docs/DEVELOPMENT.md#local-setup).
+With your local `.env` configured, run `uv run dev` from the repository root and
+open [the login page](http://127.0.0.1:8000/login). It reloads when code changes.
+This uses the database selected in `.env`; it does not seed or reset data.
+For first-time setup, follow [Development](docs/DEVELOPMENT.md#local-setup).
 No cloud account is needed for emulator-based development.

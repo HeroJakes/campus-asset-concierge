@@ -44,8 +44,8 @@ The MCP endpoint exposes these lending tools for the Gemini Enterprise agent.
 **Gemini chat, its workflow, and Gmail delivery are still pending the trial licence
 and integration checks.** Automatic pickup/return-code email is not connected yet.
 
-The borrower interface includes pickup/return cards, compartment states, and
-six-box code entry. An interim Gemini API booking chat reuses the booking rules,
+The borrower interface includes responsive side-by-side pickup/return panels,
+compartment states, and six-box code entry. An interim Gemini API booking chat reuses the booking rules,
 requires the borrower to confirm an offer, and keeps one-time codes out of model
 status results. Its page includes quick prompts, booking summaries, and tips.
 Replies show bold text and animated thinking dots. The latest 100 chat entries are

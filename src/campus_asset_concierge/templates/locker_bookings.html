@@ -7,7 +7,7 @@
       </a>
       {% endfor %}
     </nav>
-    <p class="booking-definitions">To load: awaiting staff loading. Active: pickup or loan in progress, including overdue loans, returns awaiting a staff check, and missed pickups. Completed: returned and checked.</p>
+    <p class="booking-definitions">To load: awaiting staff loading · Active: pickup or loan in progress, including overdue loans, returns awaiting a staff check, and missed pickups · Completed: returned and checked.</p>
     {% for proposal in pending %}
       {% set affected = reservations | selectattr('id', 'equalto', proposal.reservation_id) | first %}
       <article class="booking-recovery">
@@ -30,7 +30,7 @@
         <div class="search-field">{{ icon('search', 19) }}<input id="booking-search" name="q" type="search" value="{{ booking_query }}" placeholder="Search by item, borrower, or ID…"></div>
         <label class="sr-only" for="booking-status">Filter by status</label>
         <div class="booking-filter-control"><select id="booking-status" name="status">{% for key, label in [('all', 'All statuses'), ('to_load', 'To load'), ('active', 'Active'), ('completed', 'Completed')] %}<option value="{{ key }}"{% if booking_filter == key %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>{{ icon('chevron', 18) }}</div>
-        <button class="button button--secondary" type="submit">Search / filter</button>
+        <button class="button button--secondary" type="submit">Search</button>
       </form>
     </div>
     <p id="booking-search-feedback" class="sr-only" role="status"></p>

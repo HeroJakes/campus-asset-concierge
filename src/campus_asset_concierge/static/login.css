@@ -2,15 +2,15 @@
 * { box-sizing: border-box; }
 body { margin: 0; }
 button, input { font: inherit; }
-.login-page { position: relative; min-height: 100svh; color: var(--ink); font-family: "Segoe UI", Arial, sans-serif; background: #fafaff url("/static/login-background.png") top / 100% 190% no-repeat fixed; }
+.login-page { position: relative; min-height: 100svh; color: var(--ink); font-family: "Geist", Inter, system-ui, sans-serif; background: #fafaff url("/static/login-background.png") top / 100% 190% no-repeat fixed; }
 /* The top of the picture is plain ground, so the locker gets its own layer here. It sits below the copy and scrolls with the page. */
 .login-page::before { content: ""; position: absolute; z-index: -1; left: 0; bottom: 0; height: min(max(100svh - 360px, 280px), 30vw); aspect-ratio: 2.2; background: url("/static/login-background.png") left bottom / auto 200% no-repeat; mask: linear-gradient(#0000, #000 9%), linear-gradient(to right, #000 80%, #0000); mask-composite: intersect; }
 .login-layout { display: grid; grid-template-columns: 1.13fr 1fr; gap: clamp(32px, 5vw, 80px); align-items: center; max-width: 1520px; min-height: 100svh; margin: auto; padding: 24px clamp(30px, 5vw, 76px); }
 .login-hero { align-self: stretch; position: relative; }
-.login-brand { display: inline-flex; align-items: center; gap: 15px; color: var(--ink); text-decoration: none; font-weight: 750; font-size: 18px; letter-spacing: -.6px; line-height: 1.15; }
+.login-brand { display: inline-flex; align-items: center; gap: 15px; color: var(--ink); text-decoration: none; font-weight: 700; font-size: 18px; letter-spacing: -.6px; line-height: 1.15; }
 .login-brand > svg { width: 36px; height: 36px; color: var(--purple); flex: none; }
 .hero-copy { position: relative; z-index: 1; margin-top: clamp(20px, 4vh, 40px); }
-.hero-copy h1 { margin: 0; font-size: clamp(32px, 3.2vw, 48px); font-weight: 760; line-height: 1.13; letter-spacing: -1.5px; }
+.hero-copy h1 { margin: 0; font-size: clamp(32px, 3.2vw, 48px); font-weight: 700; line-height: 1.13; letter-spacing: -1.5px; }
 .hero-copy h1 span { color: #5934d7; }
 .hero-copy > p { margin: 16px 0 0; max-width: 530px; color: var(--muted); font-size: clamp(15px, 1.15vw, 17px); line-height: 1.55; }
 .login-benefits { display: flex; flex-wrap: wrap; gap: 12px 0; list-style: none; padding: 0; margin: 24px 0 0; }
@@ -20,9 +20,9 @@ button, input { font: inherit; }
 .login-benefits svg { color: var(--purple); flex: none; }
 .login-card { position: relative; width: 100%; max-width: 460px; justify-self: center; border: 1px solid #e7e2f8; border-radius: 22px; padding: 24px 28px; background: #ffffffdb; box-shadow: 0 24px 70px #4b358217, 0 2px 4px #4b358209; }
 .login-card-heading { text-align: center; }
-.login-card h2 { margin: 0; font-size: 28px; letter-spacing: -1px; font-weight: 750; }
+.login-card h2 { margin: 0; font-size: 28px; letter-spacing: -1px; font-weight: 700; }
 .login-card-heading > p { margin: 4px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
-.login-roles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border: 0; padding: 0; margin: 16px 0 14px; min-width: 0; }
+.login-roles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border: 0; padding: 0; margin: 16px 0 26px; min-width: 0; }
 .login-role { position: relative; cursor: pointer; }
 .login-role > input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .login-role > span { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 8px; border: 1.5px solid #e0e1ed; border-radius: 12px; color: #49516c; font-size: 14px; font-weight: 650; text-align: center; transition: border-color .15s, background-color .15s; }
@@ -39,8 +39,10 @@ button, input { font: inherit; }
 .login-input > input[aria-invalid="true"] { border-color: #ba425d; }
 .password-toggle { display: grid; place-items: center; position: absolute; right: 4px; top: 4px; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 8px; background: none; color: #58617c; cursor: pointer; }
 .password-toggle[hidden] { display: none; }
+.password-toggle-icon { display: inline-flex; }
+.password-toggle-icon[hidden] { display: none; }
 .password-toggle:hover { background: #f0ebff; }
-.login-submit { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 46px; margin-top: 16px; border: 0; border-radius: 12px; background: linear-gradient(110deg, #7650e8, #5132bd); color: white; font-weight: 650; font-size: 16px; cursor: pointer; box-shadow: 0 5px 12px #6741cc15; }
+.login-submit { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 46px; margin-top: 30px; border: 0; border-radius: 12px; background: linear-gradient(110deg, #7650e8, #5132bd); color: white; font-weight: 650; font-size: 16px; cursor: pointer; box-shadow: 0 5px 12px #6741cc15; }
 .login-submit:hover { background: linear-gradient(110deg, #6741db, #4527ac); }
 .login-submit:active { transform: translateY(1px); }
 .login-help { margin: 24px 0 0; color: #646c84; font-size: 13px; line-height: 1.5; text-align: center; }

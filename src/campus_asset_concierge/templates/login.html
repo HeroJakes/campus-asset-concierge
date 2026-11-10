@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sign in · Campus Asset Concierge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/login.css">
   <script src="/static/login.js" defer></script>
 </head>
@@ -55,7 +58,7 @@
           <div class="login-input">
             {{ icon('lock', 21) }}
             <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" maxlength="256" required {% if error %}aria-invalid="true" aria-describedby="login-error"{% endif %}>
-            <button class="password-toggle" type="button" aria-label="Show password" aria-controls="password" aria-pressed="false" hidden>{{ icon('eye', 22) }}</button>
+            <button class="password-toggle" type="button" aria-label="Show password" aria-controls="password" aria-pressed="false" hidden><span class="password-toggle-icon password-toggle-icon--eye">{{ icon('eye', 22) }}</span><span class="password-toggle-icon password-toggle-icon--eye-off" hidden>{{ icon('eye-off', 22) }}</span></button>
           </div>
         </div>
         <button class="login-submit" type="submit">Sign in {{ icon('arrow', 19) }}</button>

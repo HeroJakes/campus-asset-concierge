@@ -1,20 +1,29 @@
 <a class="skip-link" href="#main-content">Skip to locker content</a>
 <aside class="staff-sidebar" id="staff-sidebar" aria-label="Staff navigation">
-  <a class="staff-brand" href="/locker" aria-label="Campus Asset Concierge locker">
-    <span class="brand-symbol">{{ icon('cube', 34) }}</span>
-    <span class="sidebar-label">Campus Asset<br>Concierge</span>
-  </a>
-  <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-controls="staff-navigation" aria-expanded="true" aria-label="Collapse sidebar" title="Collapse sidebar">{{ icon('chevron', 22) }}</button>
-  <nav id="staff-navigation" aria-label="Locker sections">
-    {% for target, label, symbol in [('locker', 'Locker', 'home'), ('bookings', 'Bookings', 'calendar'), ('returns', 'Returns to check', 'cube'), ('activity', 'Activity', 'activity'), ('recovery', 'Overdue & recovery', 'alert')] %}
+  <div class="sidebar-header">
+    <a class="staff-brand" href="/locker" aria-label="Campus Asset Concierge locker">
+      <span class="brand-symbol">{{ icon('cube', 34) }}</span>
+      <span class="sidebar-label">Campus Asset<br>Concierge</span>
+    </a>
+    <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-controls="staff-navigation" aria-expanded="true" aria-label="Collapse sidebar" title="Collapse sidebar">{{ icon('chevron', 22) }}</button>
+  </div>
+  {% macro nav_item(target, label, symbol) -%}
     {% set selected = (target == 'bookings' and bookings_page) or (target == 'locker' and not bookings_page) %}
     <a class="sidebar-link{% if selected %} is-current{% endif %}" href="{{ '/locker/bookings' if target == 'bookings' else '/locker' if target == 'locker' else '/locker#' ~ target }}" aria-label="{{ label }}" title="{{ label }}"{% if selected %} aria-current="location"{% endif %}>{{ icon(symbol) }}<span class="sidebar-label">{{ label }}</span></a>
-    {% endfor %}
+  {%- endmacro %}
+  <nav id="staff-navigation" aria-label="Locker sections">
+    {{ nav_item('locker', 'Locker', 'home') }}
+    {{ nav_item('bookings', 'Bookings', 'calendar') }}
+    {{ nav_item('returns', 'Returns to check', 'cube') }}
+    {{ nav_item('recovery', 'Overdue & recovery', 'alert') }}
+    {{ nav_item('activity', 'Activity', 'activity') }}
   </nav>
   <div class="sidebar-account" aria-label="Signed in as {{ name(username) }}">
-    <span class="account-avatar">{{ icon('user', 21) }}</span>
+    <span class="account-avatar">
+      {{ icon('user', 21) }}
+      <span class="account-indicator" title="Signed in" aria-label="Signed in"></span>
+    </span>
     <div class="sidebar-label"><strong>Staff</strong><span>{{ name(username) }}</span></div>
-    <span class="account-indicator" title="Signed in"></span>
   </div>
-  <a class="sidebar-link sidebar-logout" href="/logout" aria-label="Log out" title="Log out">{{ icon('arrow', 20) }}<span class="sidebar-label">Log out</span></a>
+  <a class="sidebar-link sidebar-logout" href="/logout" aria-label="Log out" title="Log out">{{ icon('logout', 20) }}<span class="sidebar-label">Log out</span></a>
 </aside>

@@ -167,6 +167,12 @@ array positions identify related records.
 
 ### Pickup and return email gap
 
+The optional direct Gmail API implementation can deliver these codes without
+Gemini Enterprise. Follow [Gmail setup](GMAIL_DEMO.md), authorize the sender, and
+verify receipt before claiming this is live. When enabled, the borrower sees
+delivery status and can retry a definite failure. The manual API lookup remains
+the fallback. Recovery workflow email below is still planned.
+
 The intended Gmail message contains the borrower's code, compartment, and valid
 time, addressed to their controlled test inbox. Subject:
 `Your pickup code for {asset_name}` or `Your return code for {asset_name}`.

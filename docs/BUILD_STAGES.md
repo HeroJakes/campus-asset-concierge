@@ -37,6 +37,12 @@ Stage numbers stay stable. "Done" describes the scope shown, not a complete univ
 
 ## Implemented milestones
 
+- Stage 1.5 Gmail API code delivery: automatic email after loading/return requests,
+  borrower delivery status, and guarded retries. Uses a separately authorized
+  sender without Gemini Enterprise. Local implementation is awaiting review;
+  sender authorization, real receipt, and hosted release remain pending. See
+  [Gmail setup](GMAIL_DEMO.md). Recovery reminders still do not send email.
+
 - On `chore/short-dev-command` (PR #30, awaiting review): `uv run dev`, local test
   account hints, animated assistant dots, bold replies, browser-saved chat per
   borrower, and logout to `/login`. Passwordless dev login is removed. Staff

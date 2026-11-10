@@ -58,8 +58,8 @@ are the main presentation.
 
 Until Gmail is connected, say: "I am reading the code from the borrower's own
 status API as a demo stand-in." Neither the current locker nor chat displays the
-code, and no email is actually sent. Prepare a full rehearsal, then shorten the
-recording to the event's 3–4 minute video.
+code, and no email is actually sent. Prepare a full rehearsal, then record the
+preliminary video within the event's 10-minute maximum.
 
 ## API booking fallback
 

@@ -1,6 +1,6 @@
 # Build stages and progress
 
-This is the single progress record. Updated November 8, 2026.
+This is the single progress record. Updated November 10, 2026.
 The live backend is ready; the Gemini Enterprise app and final submission are not yet complete.
 
 | Read next | Purpose |
@@ -36,6 +36,11 @@ Stage numbers stay stable. "Done" describes the scope shown, not a complete univ
 | 4.3 | Pilot measurements and commercial offering | Deferred |
 
 ## Implemented milestones
+
+- Firestore naming review on `feat/firestore-collections-emulator`: separate
+  collections under emulator-only environment workspaces, with the existing
+  workflows tested against both layouts. Cloud migration and deployment remain
+  unapproved; the hosted single-document layout stays in use.
 
 - Reservation, pickup, return, and recovery: PRs #2, #5, #6, and #7.
 - MCP tools, substitute approval, capability matching, and local container: PRs #9, #10, #12, and #13.

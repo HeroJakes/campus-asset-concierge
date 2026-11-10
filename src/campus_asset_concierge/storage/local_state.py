@@ -1,5 +1,6 @@
 import os
 from collections.abc import Callable
+from copy import deepcopy
 from threading import Lock
 
 from google.auth.credentials import AnonymousCredentials, Credentials
@@ -52,6 +53,9 @@ class LocalStateStore:
             raise ValueError("Advance minutes must be between 0 and 1440.")
         state = starting_state(scenario)
         state["elapsed_minutes"] = advance_minutes
+        self._seed_state(state, replace=replace)
+
+    def _seed_state(self, state: dict, *, replace: bool) -> None:
         with _local_write_lock:
             if replace:
                 self.document.set(state)
@@ -59,24 +63,33 @@ class LocalStateStore:
                 self.document.create(state)
 
     def load(self) -> dict | None:
-        return self.document.get().to_dict()
+        return self._read_state()
+
+    def _read_state(self, transaction: firestore.Transaction | None = None) -> dict | None:
+        return self.document.get(transaction=transaction).to_dict()
+
+    def _write_state(self, transaction: firestore.Transaction, state: dict, previous: dict | None) -> None:
+        transaction.set(self.document, state)
 
     def advance(self, minutes: int) -> None:
         with _local_write_lock:
             self.document.update({"elapsed_minutes": firestore.Increment(minutes)})
 
     def change[T](self, apply: Callable[[dict | None], T]) -> T:
-        @firestore.transactional
         def update(transaction: firestore.Transaction) -> T:
-            state = self.document.get(transaction=transaction).to_dict()
+            state = self._read_state(transaction)
+            previous = deepcopy(state)
             result = apply(state)
             if state is not None:
-                transaction.set(self.document, state)
+                self._write_state(transaction, state, previous)
             return result
 
+        return self._transact(update)
+
+    def _transact[T](self, apply: Callable[[firestore.Transaction], T]) -> T:
         with _local_write_lock:
             try:
-                return update(self.client.transaction())
+                return firestore.transactional(apply)(self.client.transaction())
             except (Aborted, ValueError) as error:
                 if isinstance(error, Aborted) or isinstance(error.__cause__, Aborted):
                     raise ReservationError(409, "State changed during this action. Please try again.") from error

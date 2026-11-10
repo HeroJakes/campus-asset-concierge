@@ -128,3 +128,8 @@ Gemini app and video links will be added after verification and recording.
 
 For local use, follow [Development](docs/DEVELOPMENT.md#local-setup).
 No cloud account is needed for emulator-based development.
+
+An [emulator-only collection layout](docs/DEVELOPMENT.md#collection-layout-review-emulator-only)
+is available for review with `uv run dev-collections`. It separates equipment,
+bookings, loans, locker access, and recovery records. Hosted Firestore stays on
+the existing layout; no cloud migration has been approved.

@@ -125,9 +125,11 @@ def test_module_defaults_to_stdio_without_http_port(booking_app):
     asyncio.run(exercise())
 
 
-def confirm_in_process(emulator, document_id, borrower, offer_id, start, results):
+def confirm_in_process(emulator, document_id, borrower, offer_id, start, results, collections):
     os.environ["FIRESTORE_EMULATOR_HOST"] = emulator
-    reservations = Reservations(LocalStateStore(document_id))
+    from campus_asset_concierge.storage.collection_state import CollectionStateStore
+
+    reservations = Reservations((CollectionStateStore if collections else LocalStateStore)(document_id))
     start.wait(timeout=15)
     try:
         reservations.confirm(borrower, offer_id)
@@ -146,6 +148,7 @@ def test_transactions_protect_last_unit_across_processes(booking_app):
     start, results = context.Barrier(2), context.Queue()
     workers = [context.Process(target=confirm_in_process, args=(
         os.environ["FIRESTORE_EMULATOR_HOST"], store.document.id, borrower, offer["id"], start, results,
+        store.document.parent.id == "environments",
     )) for borrower, offer in zip(borrowers, offers, strict=True)]
     try:
         for worker in workers:

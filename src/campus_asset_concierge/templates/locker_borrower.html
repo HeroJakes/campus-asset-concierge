@@ -39,6 +39,7 @@
   'pickup_missed': ('Pickup window closed', 'This item was not loaded in time. Please contact the loan desk staff.', 'alert', 'red')
 } %}
 
+<div class="borrower-sections">
 <section class="borrower-section" aria-labelledby="pickups-title">
   <header class="borrower-section-heading"><span class="section-symbol">{{ icon('cube', 28) }}</span><div><h2 id="pickups-title">My pickups <span>({{ pickups | length }})</span></h2><p>Items ready to collect or waiting to be loaded.</p></div></header>
   <div class="borrower-rows">
@@ -105,4 +106,5 @@
   {% else %}<p class="borrower-empty">Nothing to return right now. Your active loans will appear here.</p>{% endfor %}
   </div>
 </section>
+</div>
 <p class="borrower-help">Demo stand-in: code email is not connected yet, so no email is sent. Find your code in your own <a href="/pickups">pickup status</a> or <a href="/returns">return status</a>.</p>

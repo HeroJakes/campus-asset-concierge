@@ -32,7 +32,6 @@ LOCAL_ACCOUNTS = {
     "equipment-staff": (Role.STAFF, "LOCAL_STAFF_PASSWORD"),
     "local-operator": (Role.OPERATOR, "LOCAL_OPERATOR_PASSWORD"),
 }
-DEV_ACCOUNTS = {"borrower_a": BORROWER_A, "borrower_b": BORROWER_B, "staff": "equipment-staff"}
 # Public test credentials for the hackathon and loopback development entrypoints.
 DEMO_PASSWORDS = {
     BORROWER_A: "BorrowerA2026!",
@@ -102,25 +101,11 @@ def secure_session_cookie(request: Request) -> bool:
             or os.environ.get("PUBLIC_BASE_URL", "").startswith("https://"))
 
 
-def dev_login_enabled(request: Request) -> bool:
-    return (
-        os.environ.get("DEV_LOGIN") == "1"
-        and request.client is not None
-        and request.client.host in {"127.0.0.1", "::1"}
-        and request.url.hostname in {"127.0.0.1", "localhost", "::1"}
-    )
-
-
 def signed_in(
     request: Request, credentials: Annotated[HTTPBasicCredentials | None, Depends(basic)],
 ) -> LocalAccount:
     if request.method not in {"GET", "HEAD", "OPTIONS"}:
         require_same_origin(request)
-    dev_mode = dev_login_enabled(request)
-    if dev_mode:
-        username = DEV_ACCOUNTS.get(request.cookies.get("dev_account", ""))
-        if username is not None:
-            return LocalAccount(username, LOCAL_ACCOUNTS[username][0])
     account = browser_account(request)
     if account is not None:
         return account
@@ -132,10 +117,10 @@ def signed_in(
         if account is not None:
             return account
     if credentials is None and request.url.path.startswith("/locker"):
-        raise HTTPException(303, headers={"Location": "/dev-login" if dev_mode else "/login"})
+        raise HTTPException(303, headers={"Location": "/login"})
     raise HTTPException(
-        401, "Choose a dev account." if dev_mode else "Invalid credentials.",
-        headers={} if dev_mode else {"WWW-Authenticate": "Basic"},
+        401, "Invalid credentials.",
+        headers={"WWW-Authenticate": "Basic"},
     )
 
 

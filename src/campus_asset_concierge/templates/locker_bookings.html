@@ -7,7 +7,7 @@
       </a>
       {% endfor %}
     </nav>
-    <p class="booking-definitions">To load: awaiting staff loading. Active: pickup or loan in progress, including missed pickups. Completed: returned and checked.</p>
+    <p class="booking-definitions">To load: awaiting staff loading. Active: pickup or loan in progress, including overdue loans, returns awaiting a staff check, and missed pickups. Completed: returned and checked.</p>
     {% for proposal in pending %}
       {% set affected = reservations | selectattr('id', 'equalto', proposal.reservation_id) | first %}
       <article class="booking-recovery">

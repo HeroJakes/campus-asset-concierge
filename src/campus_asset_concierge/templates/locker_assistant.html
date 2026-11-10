@@ -23,7 +23,6 @@
 
   <main class="canvas assistant-canvas" id="main-content">
     <noscript><p class="notice">The assistant needs JavaScript. Use the My Locker page to collect and return items.</p></noscript>
-    {% if dev_login %}<p class="notice">Dev login · {{ request.cookies.get('dev_account') }} · No password · <a href="/logout">Switch account</a></p>{% endif %}
 
     <section class="assistant" aria-labelledby="assistant-title">
       <header class="assistant-heading">
@@ -31,7 +30,7 @@
         <div><h2 id="assistant-title">AI Assistant</h2><p>Find and book equipment with a quick chat.</p></div>
         <div class="assistant-illustration" aria-hidden="true"><div class="assistant-checklist"><i></i><span>✓ ━━━━━</span><span>✓ ━━━</span><span>✓ ━━━━━</span></div><div class="assistant-robot"><span>⌒ ⌒</span><i></i></div></div>
       </header>
-      <div class="assistant-log" id="assistant-log" role="log" aria-live="polite" aria-label="Conversation">
+      <div class="assistant-log" id="assistant-log" data-username="{{ username }}" role="log" aria-live="polite" aria-label="Conversation">
         <div class="conversation-date"><span>New conversation</span></div>
         <div class="assistant-row assistant-row--bot">
           <span class="assistant-avatar">{{ icon('sparkles', 23) }}</span>
@@ -41,6 +40,7 @@
           </div>
         </div>
       </div>
+      <p class="assistant-foot"><span id="assistant-history-status">The latest 100 chat entries are saved for this account in this browser.</span> <button type="button" id="assistant-clear">Clear chat</button></p>
 
       <form class="assistant-form" id="assistant-form" autocomplete="off">
         <label class="sr-only" for="assistant-input">Message the assistant</label>

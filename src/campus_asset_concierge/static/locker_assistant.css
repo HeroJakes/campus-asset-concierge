@@ -29,6 +29,12 @@
 .message-time { display: block; margin: 4px 2px 0; color: #7d7692; font-size: 10px; }
 .assistant-row--user .message-time { text-align: right; }
 .assistant-typing { letter-spacing: 3px; color: var(--muted); }
+.assistant-typing span { display: inline-block; animation: thinking-dot 1.2s infinite; }
+.assistant-typing span:nth-child(2) { animation-delay: .2s; }
+.assistant-typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes thinking-dot { 0%, 60%, 100% { opacity: .35; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .assistant-typing span { animation: none; opacity: 1; } }
+#assistant-clear { border: 0; background: transparent; color: #5a32bc; text-decoration: underline; font: inherit; cursor: pointer; }
 .offer-card { min-width: 0; }
 .offer-summary { display: flex; align-items: center; gap: 12px; padding: 14px; margin: 10px 0 12px; border: 1px solid #e9e0f7; border-radius: 12px; background: #ffffffcb; }
 .offer-summary .equipment-art { flex: none; width: 80px; height: 60px; }

@@ -62,7 +62,7 @@
         {% set who = held or back %}
         <article class="compartment-card compartment-card--{{ state }}" aria-label="Compartment {{ compartment | upper }}" data-compartment="{{ compartment }}">
           <div class="compartment-state-icon">{{ icon('open' if state == 'unlocked' else 'lock', 25) }}</div>
-          <div><h3>{{ compartment | upper }}</h3><p class="compartment-state">{{ {'empty': 'Empty', 'loaded': 'Loaded & locked', 'unlocked': 'Open', 'return_reserved': 'Return, locked', 'returned': 'Returned, awaiting check'}.get(state, state) }}</p></div>
+          <div><h3>{{ compartment | upper }}</h3><p class="compartment-state">{{ {'empty': 'Empty', 'loaded': 'Loaded & locked', 'unlocked': 'Open', 'return_reserved': 'Reserved for return — awaiting code', 'returned': 'Returned, awaiting check'}.get(state, state) }}</p></div>
           {% if who %}<div class="compartment-item">{{ equipment(who.asset_id) }}<div><strong>{{ name(who.asset_id) }}</strong><span>{{ name(who.borrower_id) }}</span></div></div>
           {% else %}<p class="compartment-placeholder">Available for the next item</p>{% endif %}
         </article>

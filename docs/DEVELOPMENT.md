@@ -211,10 +211,8 @@ Open `http://127.0.0.1:8000/docs`, authorize as `local-operator`, and POST
 10:00 MYT; local POST `/local-test/clock/advance` with `{"minutes":61}` runs recovery.
 These are emulator actions; the hosted reset already starts overdue at 11:01.
 
-Optional passwordless local mode: set `DEV_LOGIN=1` and use `/dev-login` to choose
-`borrower_a`, `borrower_b`, or `staff`. Both host and peer must be loopback.
-It grants no operator identity. Keep it off on hosted deployments and never tunnel it.
-Use a separate session without a dev cookie for operator Basic actions.
+For local login, use `uv run dev`. The login page lists borrower and staff test
+accounts. Passwordless `/dev-login` routes have been removed.
 
 Do not load the private cloud `.env` for tests or emulator rehearsal. That legacy
 profile can target hosted `demo/current`; the two databases do not sync.

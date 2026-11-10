@@ -72,7 +72,7 @@
   </section>
 
   <section class="panel returns-panel" id="returns" aria-labelledby="returns-title">
-    <div class="panel-heading"><h2 id="returns-title">{{ icon('cube') }} Returns to check <span class="count-badge">{{ to_check | length }}</span></h2></div>
+    <div class="panel-heading"><h2 id="returns-title"><span class="panel-heading-icon panel-heading-icon--returns">{{ icon('cube') }}</span>Returns to check <span class="count-badge">{{ to_check | length }}</span></h2></div>
     {% for item in to_check %}
       <div class="return-summary">{{ equipment(item.asset_id) }}<div><h3>{{ name(item.asset_id) }}</h3><p>{{ name(item.borrower_id) }} · {{ item.compartment | upper }}</p><span class="panel-meta">Awaiting condition check</span></div><button class="button button--secondary" type="button" data-open-dialog="return-{{ item.asset_id }}">Check return</button></div>
       <dialog class="review-dialog" id="return-{{ item.asset_id }}" aria-labelledby="return-title-{{ item.asset_id }}">
@@ -85,7 +85,7 @@
   </section>
 
   <section class="panel recovery-panel" id="recovery" aria-labelledby="recovery-title">
-    <div class="panel-heading"><h2 id="recovery-title"><span class="recovery-symbol">{{ icon('alert') }}</span> Overdue recovery</h2></div>
+    <div class="panel-heading"><h2 id="recovery-title"><span class="panel-heading-icon panel-heading-icon--recovery">{{ icon('alert') }}</span>Overdue recovery</h2></div>
     {% for proposal in pending %}
       {% set affected = reservations | selectattr('id', 'equalto', proposal.reservation_id) | first %}
       <article class="recovery-summary">
@@ -110,7 +110,7 @@
   {% include 'locker_bookings_summary.html' %}
 
   <section class="panel activity-panel" id="activity" aria-labelledby="activity-title">
-    <div class="panel-heading"><h2 id="activity-title"><span class="activity-symbol">{{ icon('activity') }}</span> Activity</h2><span class="panel-meta">Latest updates</span></div>
+    <div class="panel-heading"><h2 id="activity-title"><span class="panel-heading-icon panel-heading-icon--activity">{{ icon('activity') }}</span>Activity</h2><span class="panel-meta">Latest updates</span></div>
     {% if audit_events %}<ul class="staff-activity">{% for event in audit_events[:3] %}{{ activity_entry(event) }}{% endfor %}</ul>
       {% if audit_events | length > 3 %}<details class="activity-history"><summary class="disclosure-summary"><span class="disclosure-icon">{{ icon('chevron', 20) }}</span>View all activity <span class="summary-meta">{{ audit_events | length }} events</span></summary><ul class="staff-activity">{% for event in audit_events[3:] %}{{ activity_entry(event) }}{% endfor %}</ul></details>{% endif %}
     {% else %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('activity', 21) }}</span><div><strong>A fresh start</strong><p>Loading, pickups, and returns appear here.</p></div></div>{% endif %}

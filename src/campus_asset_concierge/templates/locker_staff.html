@@ -20,7 +20,7 @@
   <div><span>{{ name(event.actor) }} {{ action_labels.get(event.action, event.action | replace('_', ' ')) }}</span> <span class="event-asset">— {{ name(event.asset_id) }}</span></div>
 </li>
 {%- endmacro %}
-{% from "locker_reviews.html" import dialog_close with context %}
+{% from "locker_reviews.html" import dialog_close, return_review_dialog with context %}
 
 <header class="staff-page-header" id="locker">
   <div><p class="eyebrow page-eyebrow">Your workspace</p><h1>{{ "Bookings" if bookings_page else "Locker A" }}</h1><p class="subtitle">{{ "Manage bookings, pickups, and returns at Locker A." if bookings_page else "Load items, manage bookings, and process returns." }}</p></div>
@@ -75,12 +75,7 @@
     <div class="panel-heading"><h2 id="returns-title"><span class="panel-heading-icon panel-heading-icon--returns">{{ icon('cube') }}</span>Returns to check <span class="count-badge">{{ to_check | length }}</span></h2></div>
     {% for item in to_check %}
       <div class="return-summary">{{ equipment(item.asset_id) }}<div><h3>{{ name(item.asset_id) }}</h3><p>{{ name(item.borrower_id) }} · {{ item.compartment | upper }}</p><span class="panel-meta">Awaiting condition check</span></div><button class="button button--secondary" type="button" data-open-dialog="return-{{ item.asset_id }}">Check return</button></div>
-      <dialog class="review-dialog" id="return-{{ item.asset_id }}" aria-labelledby="return-title-{{ item.asset_id }}">
-        {{ dialog_close() }}<span class="dialog-symbol">{{ icon('cube', 30) }}</span><p class="eyebrow">Return review</p><h2 id="return-title-{{ item.asset_id }}">{{ name(item.asset_id) }}</h2>
-        <p class="dialog-description">{{ name(item.borrower_id) }} dropped this item in compartment {{ item.compartment | upper }}. Check its condition before closing the loan.</p>
-        <p class="review-explanation">A pass makes the unit available again. A failed check closes the loan and places the unit on hold.</p>
-        <div class="dialog-actions"><button class="button button--primary" type="button" data-post="/assets/{{ item.asset_id }}/verify-return" data-body='{"result":"pass"}'>{{ icon('check', 18) }} Pass</button><button class="button button--secondary" type="button" data-post="/assets/{{ item.asset_id }}/verify-return" data-body='{"result":"fail"}'>Fail</button></div>
-      </dialog>
+      {{ return_review_dialog(item.asset_id, item.borrower_id, item.compartment) }}
     {% else %}<div class="panel-empty"><span class="empty-state-icon">{{ icon('check', 21) }}</span><div><strong>Nothing waiting for a check</strong><p>Returned items will appear here.</p></div></div>{% endfor %}
   </section>
 

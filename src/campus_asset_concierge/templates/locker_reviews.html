@@ -2,3 +2,14 @@
 <form method="dialog" class="dialog-close-form"><button class="icon-button" aria-label="Close review" title="Close review">{{ icon('close') }}</button></form>
 <p class="notice notice--error" role="alert" data-dialog-error hidden></p>
 {%- endmacro %}
+
+{# Shared return condition-check dialog. compartment is optional: pass it only when the real
+   drop-off compartment is known (the bookings view only has the pickup compartment). #}
+{% macro return_review_dialog(asset_id, borrower_id, compartment=None) -%}
+<dialog class="review-dialog" id="return-{{ asset_id }}" aria-labelledby="return-title-{{ asset_id }}">
+  {{ dialog_close() }}<span class="dialog-symbol">{{ icon('cube', 30) }}</span><p class="eyebrow">Return review</p><h2 id="return-title-{{ asset_id }}">{{ name(asset_id) }}</h2>
+  <p class="dialog-description">{{ name(borrower_id) }} dropped this item {% if compartment %}in compartment {{ compartment | upper }}{% else %}off{% endif %}. Check its condition before closing the loan.</p>
+  <p class="review-explanation">A pass makes the unit available again. A failed check closes the loan and places the unit on hold.</p>
+  <div class="dialog-actions"><button class="button button--primary" type="button" data-post="/assets/{{ asset_id }}/verify-return" data-body='{"result":"pass"}'>{{ icon('check', 18) }} Pass</button><button class="button button--secondary" type="button" data-post="/assets/{{ asset_id }}/verify-return" data-body='{"result":"fail"}'>Fail</button></div>
+</dialog>
+{%- endmacro %}

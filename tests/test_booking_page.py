@@ -65,6 +65,9 @@ def test_completed_requires_return_check_not_just_collection(booking_app, result
     assert return_unlock(client, asset_id, return_code).status_code == 200
     assert return_drop(client, asset_id).status_code == 200
     assert row(reservation_id) not in page(client, status="completed")
+    active = page(client, status="active")  # bookings page offers the staff return check directly
+    assert f'data-open-dialog="return-{asset_id}"' in active
+    assert f'/assets/{asset_id}/verify-return' in active
     assert verify(client, asset_id, result=result).status_code == 200
     html = page(client, status="completed")
     assert row(reservation_id) in html

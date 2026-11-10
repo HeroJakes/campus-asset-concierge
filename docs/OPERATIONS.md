@@ -93,13 +93,14 @@ remain documented here and the hosted dev-login guard is unchanged.
 
 ## Environment and secrets
 
-Optional pickup/return email is implemented but not yet verified live. Its separate
-sender authorization, four address/credential settings, test-token expiry, and
-delivery limits are in [Gmail demo setup](GMAIL_DEMO.md). Existing deployments keep
-manual code lookup until those settings and the reviewed code are released.
+Optional pickup/return email is deployed and configured as of November 10. Sender
+authorization and direct test-email receipt are verified; automatic code delivery
+still needs a live rehearsal. Its four address/credential settings, test-token
+expiry, and delivery limits are in [Gmail demo setup](GMAIL_DEMO.md). Manual code
+lookup remains available if delivery fails.
 Recovery reminders and the Gemini Enterprise Gmail workflow remain separate.
 
-All eleven variables are sensitive and Production-only on the dedicated project:
+All fifteen variables are sensitive and Production-only on the dedicated project:
 
 | Variable | Value |
 | --- | --- |
@@ -113,10 +114,14 @@ All eleven variables are sensitive and Production-only on the dedicated project:
 | `LOCAL_BORROWER_B_PASSWORD` | Unique generated password, at least 32 characters |
 | `LOCAL_OPERATOR_PASSWORD` | Unique generated password, at least 32 characters |
 | `GEMINI_API_KEY` | Gemini API key; never render it into the browser |
-| `GEMINI_MODEL` | `gemini-3.8-flash` |
+| `GEMINI_MODEL` | Configured borrower assistant model ID |
+| `GMAIL_SENDER` | Authorized demo sender address |
+| `LOCAL_BORROWER_A_EMAIL` | Controlled Borrower A inbox |
+| `LOCAL_BORROWER_B_EMAIL` | Controlled Borrower B inbox |
+| `GMAIL_OAUTH_JSON` | Private sender client ID, client secret, and refresh token |
 
 Do not set `FIRESTORE_EMULATOR_HOST`, `GOOGLE_APPLICATION_CREDENTIALS`,
-`VERCEL_TEST_DOCUMENT_ID`, `PREVIEW_ACCESS_TOKEN`, or OAuth variables in Vercel.
+`VERCEL_TEST_DOCUMENT_ID`, `PREVIEW_ACCESS_TOKEN`, or Gemini Enterprise OAuth variables in Vercel.
 The entrypoint rejects the wrong project/document, emulator configuration,
 `DEV_LOGIN=1`, short passwords, and an invalid HTTPS base URL.
 
@@ -189,6 +194,31 @@ not advance the fixed clock, reset activity, approve substitutes, or send Gmail.
 The later Gemini/Gmail workflow needs its own integration and delivery checks.
 
 ## Release evidence
+
+### November 10 release
+
+- Deployed reviewed `main` commit `703ea98ede876bb3431e3b4b7ede710f14b6b966`.
+- Deployment: `dpl_AeThWUpjw75QsWfusgyKw7eGjfCc`, Python 3.12, Singapore `sin1`.
+- [Build and deployment](https://vercel.com/ivan-lees-projects-7028786e/campus-asset-concierge-demo/AeThWUpjw75QsWfusgyKw7eGjfCc).
+- Added `GMAIL_SENDER`, `LOCAL_BORROWER_A_EMAIL`, `LOCAL_BORROWER_B_EMAIL`, and
+  `GMAIL_OAUTH_JSON` as Production secrets. Synced `GEMINI_API_KEY` and
+  `GEMINI_MODEL` from the local configuration. Existing hosted account, database,
+  and scheduler credentials were preserved. Local `.env` was not uploaded.
+- All 421 Python tests passed on the local Firestore emulator across both storage
+  layouts; all 16 browser interaction tests passed.
+- Staged production passed 23 HTTPS checks before promotion. The public domain
+  passed 32 checks, covering borrower/staff login and logout, role restrictions,
+  locker and assistant pages, enabled Gmail UI, MCP discovery/status without codes,
+  and a real Gemini status reply.
+- Deployment and verification sent no emails and did not reset or mutate demo
+  state. Both document update timestamps matched the pre-release reads:
+  `demo/current` at `2026-11-10T01:12:43.022115+00:00` and
+  `demo/hackathon-20261111` at `2026-11-09T03:56:04.992188+00:00`.
+- A separate direct Gmail test earlier reached Borrower A's inbox. This confirms
+  sender authorization and receipt, not the deployed automatic code flow. Rehearse
+  loading, code email, and return email before recording the demo.
+
+### November 8 login release
 
 The login release passed 38 live HTTPS checks on November 8:
 

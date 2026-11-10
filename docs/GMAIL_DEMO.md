@@ -4,8 +4,9 @@ Optional Gmail API delivery uses one authorized sender account. Gemini Enterpris
 is not required. Borrowers only receive email; they do not connect their accounts.
 Use controlled team inboxes with the fictional borrower accounts.
 
-The implementation is on the Stage 1.5 feature branch. It is not a verified live
-integration until the sender is authorized and an actual message is received.
+The implementation is merged and deployed as of November 10. Sender authorization
+and receipt of a direct test email by Borrower A are verified. Automatic pickup and
+return code delivery still needs a live rehearsal. See [release evidence](OPERATIONS.md#november-10-release).
 
 ## Authorize the sender
 
@@ -71,7 +72,7 @@ Do not deploy or change hosted secrets as part of local testing.
 - Code lookup through the borrower's `/pickups` or `/returns` remains available.
   Codes and recipient addresses are not included in model status results.
 
-This is synchronous delivery for a handful of demo messages, with ten-second
+This is synchronous delivery for a handful of demo messages, with five-second
 timeouts on token refresh and sending. A production rollout needs a durable email
 worker and a reviewed recovery process for uncertain delivery. Do not reset demo
 state while an email is sending: a reset can invalidate its saved code.

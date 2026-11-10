@@ -41,10 +41,12 @@ The lending backend and virtual locker are live on Vercel with fictional data in
 - Run recovery daily through cron-job.org at 09:00 Malaysia time; the job is verified working.
 
 The MCP endpoint exposes these lending tools for the Gemini Enterprise agent.
-**Gemini chat, its workflow, and Gmail delivery are still pending the trial licence
-and integration checks.** Optional Gmail API pickup/return-code delivery is now
-implemented; sender authorization and real inbox verification are still pending.
-It does not require Gemini Enterprise. See [Gmail demo setup](docs/GMAIL_DEMO.md).
+**Gemini Enterprise chat, its workflow, and recovery email remain pending.**
+The Gemini API borrower chat is deployed; a live status query passed on November 10.
+Gmail API pickup/return-code delivery is enabled on the hosted demo. Sender
+authorization and a direct test email to Borrower A's inbox are verified; the
+automatic code flow still needs a live rehearsal. It does not require Gemini
+Enterprise. See [Gmail demo setup](docs/GMAIL_DEMO.md).
 
 The borrower interface includes responsive side-by-side pickup/return panels,
 compartment states, and six-box code entry. An interim Gemini API booking chat reuses the booking rules,

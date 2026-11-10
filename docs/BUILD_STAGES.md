@@ -17,7 +17,7 @@ Stage numbers stay stable. "Done" describes the scope shown, not a complete univ
 | --- | --- | --- |
 | 0.1 | Package, lockfile, and CI scaffold | Done |
 | 1.0 | Shared state, roles, fixtures, and test clock | Done |
-| 1.1 | Find and reserve equipment | Done: API and ADK tools; live MCP booking verified. Gemini chat pending. |
+| 1.1 | Find and reserve equipment | Done: API, ADK tools, and Gemini API borrower chat. Live MCP booking and Gemini status query verified; Enterprise chat pending. |
 | 1.2 | Staff loading, one-time code, and confirmed pickup | Done: locker and API, with emulator coverage |
 | 1.3 | Borrower drop-off and staff condition check | Done: pass returns equipment to service; fail puts it on hold |
 | 1.4 | Overdue recovery | Done: verified substitute proposal or staff-owned escalation |
@@ -39,8 +39,9 @@ Stage numbers stay stable. "Done" describes the scope shown, not a complete univ
 
 - Stage 1.5 Gmail API code delivery: automatic email after loading/return requests,
   borrower delivery status, and guarded retries. Uses a separately authorized
-  sender without Gemini Enterprise. Local implementation is awaiting review;
-  sender authorization, real receipt, and hosted release remain pending. See
+  sender without Gemini Enterprise. Merged in PR #34 and deployed November 10;
+  sender authorization and direct test-email receipt are verified. Automatic code
+  delivery still needs a live rehearsal. See
   [Gmail setup](GMAIL_DEMO.md). Recovery reminders still do not send email.
 
 - On `chore/short-dev-command` (PR #30, awaiting review): `uv run dev`, local test
@@ -96,7 +97,7 @@ when `GEMINI_API_KEY` is absent, so the rest of the app is unaffected.
 
 1. Rehearse the hosted Borrower A and staff sequence in the [demo guide](DEMO_GUIDE.md#presentation-sequence).
 2. When the licence arrives, register MCP and build the Gemini agent, recovery workflow, and Gmail connector.
-3. Choose and test code delivery: automatic pickup/return email is not wired. Until then, label the borrower-owned API lookup as a demo stand-in.
+3. Rehearse automatic pickup/return email on the hosted demo. Gmail is configured; the borrower-owned API lookup remains the demo fallback.
 4. Record both recovery outcomes, the return check, the video, and judge access instructions.
 5. Fill the [submission checklist](../submission/README.md). Report measured results rather than presenting the earlier 80% target as evidence.
 

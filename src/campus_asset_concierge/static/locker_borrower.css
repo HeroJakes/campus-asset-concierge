@@ -34,10 +34,11 @@
 .borrower-section-heading p { color: var(--muted); margin-top: 3px; }
 .section-symbol { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; color: var(--accent); background: #eee8ff; }
 .borrower-rows { display: grid; flex: 1; align-content: start; gap: 11px; }
-.borrower-row { display: grid; grid-template-columns: minmax(0, 1fr) 126px; align-items: center; gap: 18px; min-height: 145px; padding: 22px; border: 1px solid #ece9fa; border-radius: 16px; background: linear-gradient(105deg, #fff, #fbfaff); box-shadow: 0 3px 6px #3123690b; }
-.borrower-sections .borrower-item { grid-column: 1 / -1; border-right: 0; border-bottom: 1px solid #e0dcef; padding: 0 0 16px; }
-.borrower-sections .borrower-action { grid-column: 1 / -1; }
-.borrower-sections .borrower-code-form, .borrower-sections .borrower-times { margin-left: 0; }
+.borrower-row { display: grid; grid-template-columns: minmax(0, 1fr) max-content; grid-template-areas: "item item" "state action"; align-items: center; gap: 18px; min-height: 145px; padding: 22px; border: 1px solid #ece9fa; border-radius: 16px; background: linear-gradient(105deg, #fff, #fbfaff); box-shadow: 0 3px 6px #3123690b; }
+.borrower-sections .borrower-item { grid-area: item; border-right: 0; border-bottom: 1px solid #e0dcef; padding: 0 0 16px; }
+.borrower-sections .borrower-state { grid-area: state; }
+.borrower-sections .borrower-action { grid-area: action; justify-self: end; }
+.borrower-sections .borrower-code-form { margin-left: 0; }
 .borrower-row.needs-code { border-color: #b19af3; background: linear-gradient(110deg, #fff, #f5f0ff); }
 .borrower-item { display: flex; align-items: center; gap: 20px; min-width: 0; padding-right: 18px; border-right: 1px solid #e0dcef; }
 .borrower-item .equipment-art { width: 90px; height: 70px; flex: none; }
@@ -59,13 +60,11 @@
 .borrower-times { display: flex; align-items: center; flex-wrap: wrap; gap: 7px 20px; margin: 12px 0 0 54px; font-size: 12px; }
 .borrower-times p { display: flex; align-items: center; gap: 7px; }
 .overdue-time { color: #c72d43; font-weight: 700; }
-.borrower-handover { display: flex; align-items: center; justify-content: center; }
 .borrower-action { display: grid; gap: 6px; text-align: center; }
 .borrower-action .button { width: fit-content; max-width: 100%; justify-self: end; white-space: normal; font-size: 12px; }
 .borrower-action small { font-size: 11px; color: var(--muted); }
-.opens-at, .loan-pill, .contact-staff { display: inline-flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; font-weight: 650; }
+.opens-at, .contact-staff { display: inline-flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; font-weight: 650; }
 .opens-at { color: #5131ac; background: #efebfc; padding: 10px; border-radius: 12px; }
-.loan-pill { padding: 11px 18px; border: 1px solid #bde8cb; border-radius: 15px; background: #edfbf1; color: #087832; white-space: nowrap; }
 .contact-staff { color: var(--muted); }
 .borrower-empty { padding: 30px 20px; color: var(--muted); text-align: center; border-radius: 14px; background: #ffffffab; }
 .borrower-help { color: var(--muted); font-size: 12px; line-height: 1.6; }
@@ -80,25 +79,12 @@
 .code-cells span { display: grid; place-items: center; height: 45px; border: 1px solid #cbc3eb; border-radius: 10px; background: #ffffffd9; color: #343053; font-size: 23px; font-weight: 650; }
 .code-entry:focus-within .code-cells span.is-current { border-color: #7444ec; box-shadow: 0 0 0 2px #7444ec22; }
 .code-entry:focus-within { outline: 2px solid #7444ec; outline-offset: 5px; border-radius: 10px; }
-/* Decorative compartment drawing; labels and open/locked state come from the API. */
-.mini-locker { position: relative; width: 156px; height: 90px; padding: 8px 15px 0 0; }
-.mini-locker-front { position: relative; display: grid; grid-template-columns: 1fr 1fr; height: 82px; border: 2px solid #a49ac9; border-radius: 5px; background: #cac4e2; transform: skewY(-4deg); box-shadow: 0 5px 8px #33305915; }
-.mini-locker-side { position: absolute; inset: 5px 0 0 auto; width: 22px; border-radius: 0 12px 0 0; background: linear-gradient(90deg, #8c7eb7, #b3a7d0); transform: skewY(13deg); }
-.mini-locker-neighbour { position: relative; border: 2px solid #e5e0f4; border-radius: 3px; background: linear-gradient(110deg, #e2ddf0, #b5a9d4); }
-.mini-locker-neighbour::after { content: ''; position: absolute; top: 27px; right: 7px; width: 3px; height: 20px; border-radius: 3px; background: #8e81ad; }
-.mini-locker-interior { position: relative; margin: 1px; background: #6d5877; perspective: 200px; }
-.mini-locker-door { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #faf5ff; border: 2px solid #d5bee8; border-radius: 3px; background: linear-gradient(120deg, #bba9d2, #72618e); box-shadow: 0 -2px 4px #ffd3a5; transform-origin: right; }
-.mini-locker-door strong { font-size: 12px; }
-.mini-locker.is-open .mini-locker-door { transform: rotateY(55deg); }
-.mini-locker.is-open .mini-locker-interior { box-shadow: inset 0 0 10px #ffc28b; background: linear-gradient(90deg, #b88357, #f8c58c); }
-.mini-locker.is-unassigned { opacity: .5; }
 .borrower-shell .button:focus-visible, .borrower-brand:focus-visible, .borrower-help a:focus-visible { outline: 3px solid #8155e5; outline-offset: 3px; }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .borrower-row, .assistant-row { animation: rise .3s ease both; }
 @media (max-width: 1350px) {
   .borrower-bar { flex-wrap: wrap; gap: 18px; }
   .borrower-session { gap: 10px; }
-  .mini-locker { transform: scale(.85); }
 }
 @media (max-width: 900px) {
   .borrower-sections { grid-template-columns: 1fr; }
@@ -106,9 +92,9 @@
 @media (max-width: 900px) {
   .borrower-session { justify-content: flex-start; width: 100%; margin: 0; }
   .borrower-clock { margin-right: auto; }
-  .borrower-row { grid-template-columns: minmax(0, 1fr) 150px; }
+  .borrower-row { grid-template-columns: minmax(0, 1fr) 150px; grid-template-areas: "item item" "state action"; }
   .borrower-item { grid-column: 1 / -1; border-right: 0; border-bottom: 1px solid #e5dfef; padding: 0 0 16px; }
-  .borrower-action { grid-column: 1 / -1; }
+  .borrower-sections .borrower-action { justify-self: stretch; }
   .borrower-code-form, .borrower-times { margin-left: 0; }
 }
 @media (max-width: 560px) {
@@ -122,13 +108,12 @@
   .borrower-section-heading { gap: 10px; }
   .borrower-section-heading h2 { font-size: 19px; }
   .borrower-section-heading p { font-size: 12px; }
-  .borrower-row, .borrower-sections .borrower-row { grid-template-columns: minmax(0, 1fr); padding: 18px 14px; gap: 18px; }
+  .borrower-row, .borrower-sections .borrower-row { grid-template-columns: minmax(0, 1fr); grid-template-areas: "item" "state" "action"; padding: 18px 14px; gap: 18px; }
   .borrower-item, .borrower-action { grid-column: 1; }
+  .borrower-sections .borrower-action { justify-self: stretch; }
   .borrower-item { gap: 14px; }
   .borrower-item .equipment-art { width: 72px; }
   .borrower-state h3 { font-size: 16px; }
-  .borrower-handover { justify-content: flex-start; }
-  .mini-locker { transform: none; margin-left: 5px; }
   .borrower-action { justify-self: stretch; }
   .borrower-action .button { width: 100%; justify-self: stretch; }
   .borrower-code-form .button { width: 100%; }

@@ -58,7 +58,7 @@
           <div class="login-input">
             {{ icon('lock', 21) }}
             <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" maxlength="256" required {% if error %}aria-invalid="true" aria-describedby="login-error"{% endif %}>
-            <button class="password-toggle" type="button" aria-label="Show password" aria-controls="password" aria-pressed="false" hidden>{{ icon('eye', 22) }}</button>
+            <button class="password-toggle" type="button" aria-label="Show password" aria-controls="password" aria-pressed="false" hidden><span class="password-toggle-icon password-toggle-icon--eye" hidden>{{ icon('eye', 22) }}</span><span class="password-toggle-icon password-toggle-icon--eye-off">{{ icon('eye-off', 22) }}</span></button>
           </div>
         </div>
         <button class="login-submit" type="submit">Sign in {{ icon('arrow', 19) }}</button>

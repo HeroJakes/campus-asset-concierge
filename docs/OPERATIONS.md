@@ -93,10 +93,11 @@ remain documented here and the hosted dev-login guard is unchanged.
 
 ## Environment and secrets
 
-Optional pickup/return email is implemented but not yet verified live. Its separate
-sender authorization, four address/credential settings, test-token expiry, and
-delivery limits are in [Gmail demo setup](GMAIL_DEMO.md). Existing deployments keep
-manual code lookup until those settings and the reviewed code are released.
+Optional pickup/return email is deployed and configured as of November 10. Sender
+authorization and direct test-email receipt are verified; automatic code delivery
+still needs a live rehearsal. Its four address/credential settings, test-token
+expiry, and delivery limits are in [Gmail demo setup](GMAIL_DEMO.md). Manual code
+lookup remains available if delivery fails.
 Recovery reminders and the Gemini Enterprise Gmail workflow remain separate.
 
 All eleven variables are sensitive and Production-only on the dedicated project:
@@ -189,6 +190,31 @@ not advance the fixed clock, reset activity, approve substitutes, or send Gmail.
 The later Gemini/Gmail workflow needs its own integration and delivery checks.
 
 ## Release evidence
+
+### November 10 release
+
+- Deployed reviewed `main` commit `703ea98ede876bb3431e3b4b7ede710f14b6b966`.
+- Deployment: `dpl_AeThWUpjw75QsWfusgyKw7eGjfCc`, Python 3.12, Singapore `sin1`.
+- [Build and deployment](https://vercel.com/ivan-lees-projects-7028786e/campus-asset-concierge-demo/AeThWUpjw75QsWfusgyKw7eGjfCc).
+- Added `GMAIL_SENDER`, `LOCAL_BORROWER_A_EMAIL`, `LOCAL_BORROWER_B_EMAIL`, and
+  `GMAIL_OAUTH_JSON` as Production secrets. Synced `GEMINI_API_KEY` and
+  `GEMINI_MODEL` from the local configuration. Existing hosted account, database,
+  and scheduler credentials were preserved. Local `.env` was not uploaded.
+- All 421 Python tests passed on the local Firestore emulator across both storage
+  layouts; all 16 browser interaction tests passed.
+- Staged production passed 23 HTTPS checks before promotion. The public domain
+  passed 32 checks, covering borrower/staff login and logout, role restrictions,
+  locker and assistant pages, enabled Gmail UI, MCP discovery/status without codes,
+  and a real Gemini status reply.
+- Deployment and verification sent no emails and did not reset or mutate demo
+  state. Both document update timestamps matched the pre-release reads:
+  `demo/current` at `2026-11-10T01:12:43.022115+00:00` and
+  `demo/hackathon-20261111` at `2026-11-09T03:56:04.992188+00:00`.
+- A separate direct Gmail test earlier reached Borrower A's inbox. This confirms
+  sender authorization and receipt, not the deployed automatic code flow. Rehearse
+  loading, code email, and return email before recording the demo.
+
+### November 8 login release
 
 The login release passed 38 live HTTPS checks on November 8:
 

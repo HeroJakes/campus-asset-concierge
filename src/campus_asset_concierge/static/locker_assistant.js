@@ -225,7 +225,7 @@ document.getElementById("assistant-clear").addEventListener("click", () => {
   history.length = 0;
   messages.length = 0;
   saveHistory();
-  log.querySelectorAll(".assistant-row").forEach(row => row.remove());
+  log.querySelectorAll(".assistant-row:not([data-greeting])").forEach(row => row.remove());
 });
 
 input.addEventListener("input", () => {

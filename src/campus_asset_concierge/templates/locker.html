@@ -21,8 +21,6 @@
   {% if is_staff %}
     {% include "locker_sidebar.html" %}
   {% else %}
-  {% set bar_title = "My Locker" %}
-  {% set bar_subtitle = "Collect and return your booked equipment." %}
   {% set bar_active = "locker" %}
   {% include "locker_borrower_bar.html" %}
   {% endif %}

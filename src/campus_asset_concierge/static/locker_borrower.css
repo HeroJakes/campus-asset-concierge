@@ -1,20 +1,16 @@
 .borrower-shell { --text: #111332; --muted: #525c7e; --accent: #5930d7; --door: #6b40e6; --radius-control: 12px; min-height: 100svh; background: radial-gradient(ellipse at 100% 0, #eee7ff, transparent 60%), #f8f8ff; background-repeat: no-repeat; color: var(--text); }
-.borrower-shell h1, .borrower-shell h2, .borrower-shell h3 { font-weight: 700; letter-spacing: -.6px; }
+.borrower-shell h2, .borrower-shell h3 { font-weight: 700; letter-spacing: -.6px; }
 .borrower-shell h3 { margin: 0; font-size: 17px; line-height: 1.4; }
 .borrower-shell svg { flex: none; }
-.borrower-bar { display: flex; align-items: center; gap: 28px; padding: 22px clamp(22px, 3.5vw, 60px); background: linear-gradient(115deg, #ffffffd9, #e9dfffaa); border-bottom: 1px solid #eeebf9; }
-.borrower-brand { display: flex; align-items: center; gap: 12px; padding-right: 28px; border-right: 1px solid #d9d4ed; color: var(--text); text-decoration: none; font-size: 17px; font-weight: 700; line-height: 1.2; letter-spacing: -.5px; }
+.borrower-bar { display: flex; align-items: center; gap: 24px; padding: 14px clamp(22px, 3.5vw, 60px); background: linear-gradient(115deg, #ffffffd9, #e9dfffaa); border-bottom: 1px solid #eeebf9; }
+.borrower-brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-size: 16px; font-weight: 700; line-height: 1.2; letter-spacing: -.5px; white-space: nowrap; }
 .borrower-brand > svg { color: var(--accent); }
-.borrower-title { min-width: 220px; }
-.borrower-title h1 { font-size: 28px; line-height: 1.2; }
-.borrower-title p { margin-top: 5px; }
 .borrower-session { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 14px; margin-left: auto; }
 .borrower-clock, .borrower-user { display: flex; align-items: center; gap: 10px; }
-.borrower-clock { padding: 10px 14px; border: 1px solid #e6dff8; border-radius: 16px; background: #ffffffa6; box-shadow: 0 3px 5px #35226d08; }
 .borrower-clock span, .borrower-user span { display: block; font-size: 11px; color: var(--muted); line-height: 1.5; }
 .borrower-clock time, .borrower-user strong { display: block; font-weight: 700; }
 .borrower-user { padding: 0 14px; border-left: 1px solid #d9d4ed; }
-.borrower-user > svg { color: var(--accent); }
+.borrower-clock > svg, .borrower-user > svg { color: var(--accent); }
 .borrower-nav { display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 14px; background: #efeafb; border: 1px solid #e3dcf7; box-shadow: inset 0 1px 2px #35226d0d; }
 .borrower-nav-link { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 10px; color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 650; transition: color .2s ease, background-color .2s ease, box-shadow .25s ease, transform .18s cubic-bezier(.16, 1, .3, 1); }
 .borrower-nav-link svg { transition: transform .2s cubic-bezier(.16, 1, .3, 1); }
@@ -93,6 +89,8 @@
 .mini-locker.is-open .mini-locker-interior { box-shadow: inset 0 0 10px #ffc28b; background: linear-gradient(90deg, #b88357, #f8c58c); }
 .mini-locker.is-unassigned { opacity: .5; }
 .borrower-shell .button:focus-visible, .borrower-brand:focus-visible, .borrower-help a:focus-visible { outline: 3px solid #8155e5; outline-offset: 3px; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.borrower-row, .assistant-row { animation: rise .3s ease both; }
 @media (max-width: 1350px) {
   .borrower-bar { flex-wrap: wrap; gap: 18px; }
   .borrower-session { gap: 10px; }
@@ -111,11 +109,8 @@
 }
 @media (max-width: 560px) {
   .borrower-bar { padding: 20px; gap: 18px; }
-  .borrower-brand { font-size: 14px; padding-right: 0; border: 0; }
-  .borrower-brand > svg { width: 32px; }
-  .borrower-title { min-width: 0; }
-  .borrower-title h1 { font-size: 24px; }
-  .borrower-title p { font-size: 12px; }
+  .borrower-brand { font-size: 14px; }
+  .borrower-brand > svg { width: 26px; }
   .borrower-user { border: 0; padding: 0; }
   .borrower-session { gap: 12px; }
   .borrower-clock { width: 100%; }
@@ -137,4 +132,5 @@
 @media (prefers-reduced-motion: reduce) {
   .borrower-nav-link, .borrower-nav-link svg { transition: none; }
   .borrower-nav-link:hover, .borrower-nav-link:active, .borrower-nav-link:hover svg { transform: none; }
+  .borrower-row, .assistant-row { animation: none; }
 }

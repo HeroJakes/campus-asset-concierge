@@ -22,7 +22,7 @@ button, input { font: inherit; }
 .login-card-heading { text-align: center; }
 .login-card h2 { margin: 0; font-size: 28px; letter-spacing: -1px; font-weight: 700; }
 .login-card-heading > p { margin: 4px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
-.login-roles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border: 0; padding: 0; margin: 16px 0 35px; min-width: 0; }
+.login-roles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border: 0; padding: 0; margin: 16px 0 26px; min-width: 0; }
 .login-role { position: relative; cursor: pointer; }
 .login-role > input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .login-role > span { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 8px; border: 1.5px solid #e0e1ed; border-radius: 12px; color: #49516c; font-size: 14px; font-weight: 650; text-align: center; transition: border-color .15s, background-color .15s; }
@@ -42,7 +42,7 @@ button, input { font: inherit; }
 .password-toggle-icon { display: inline-flex; }
 .password-toggle-icon[hidden] { display: none; }
 .password-toggle:hover { background: #f0ebff; }
-.login-submit { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 46px; margin-top: 35px; border: 0; border-radius: 12px; background: linear-gradient(110deg, #7650e8, #5132bd); color: white; font-weight: 650; font-size: 16px; cursor: pointer; box-shadow: 0 5px 12px #6741cc15; }
+.login-submit { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 46px; margin-top: 30px; border: 0; border-radius: 12px; background: linear-gradient(110deg, #7650e8, #5132bd); color: white; font-weight: 650; font-size: 16px; cursor: pointer; box-shadow: 0 5px 12px #6741cc15; }
 .login-submit:hover { background: linear-gradient(110deg, #6741db, #4527ac); }
 .login-submit:active { transform: translateY(1px); }
 .login-help { margin: 24px 0 0; color: #646c84; font-size: 13px; line-height: 1.5; text-align: center; }

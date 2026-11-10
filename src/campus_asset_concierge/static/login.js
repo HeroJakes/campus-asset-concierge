@@ -11,8 +11,8 @@ if (passwordToggle && passwordInput) {
     passwordToggle.setAttribute("aria-pressed", String(reveal));
     passwordToggle.setAttribute("aria-label", reveal ? "Hide password" : "Show password");
     if (passwordEye && passwordEyeOff) {
-      passwordEye.hidden = !reveal;
-      passwordEyeOff.hidden = reveal;
+      passwordEye.hidden = reveal;
+      passwordEyeOff.hidden = !reveal;
     }
   });
 }

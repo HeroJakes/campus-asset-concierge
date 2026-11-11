@@ -1,6 +1,6 @@
 # Demo script
 
-Live demo only, about 4 minutes. It follows the `presentation` data on the hosted site.
+Live demo only, about 3.5–4 minutes. It shows live what the slides explain. It follows the `presentation` data on the hosted site.
 
 **Say** = read this out. **Do** = what to click.
 
@@ -13,17 +13,17 @@ Live demo only, about 4 minutes. It follows the `presentation` data on the hoste
 
 ---
 
-## 1. The problem (about 35 s)
+## 1. The problem, live (about 20 s)
 
 **Do:** Show the staff Locker page. Point at **Overdue recovery**.
 
 **Say:**
-> "This is the staff dashboard. Borrower A still has Projector A. It was due at 11:00,
-> but Borrower B has booked it for 12:00. Our system spotted this conflict before
-> Borrower B arrives, and found that Projector B is free and meets their needs.
-> It is only a proposal. Staff stay in control."
+> "Here is the problem from our slides, live. Projector A is overdue, and Borrower B needs it
+> at 12:00. The system has already found Projector B as a spare. We will come back to it."
 
 ## 2. Book with MiMi (about 1 min)
+
+*Use the same messages as the Run Log slide, so judges see the logged trace happen live.*
 
 **Do:** Switch to Borrower A. Click **MiMi**. Type an incomplete request:
 `Book a Raspberry Pi kit`
@@ -70,7 +70,7 @@ click **Unlock compartment**, then **Confirm pickup**.
 > "The recovery check found the problem and picked the spare, but it cannot change a booking
 > on its own. Staff approve, and the system checks the spare again before applying it.
 > Borrower B's 12:00 booking now uses Projector B, so they still get a projector.
-> If no spare fits, it creates a staff-owned escalation instead."
+> When no spare fits, it hands the case to staff instead. That case is in our test results."
 
 ## 5. Return and check (about 35 s)
 

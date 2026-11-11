@@ -191,11 +191,19 @@ flow is implemented.
 - Staff recheck retains an unchanged proposal without another event. Changed stock creates a fresh proposal ID, or replaces the pending proposal with an escalation.
 - A stale proposal ID returns conflict; concurrent recheck/approval cannot silently apply an unreviewed substitute.
 - Recovery is idempotent. It does not send email, approve proposals, advance time, or reset state.
+- Each run saves `last_recovery_run`: real run time, test-clock time, and the number of new audit events. A rerun changes only this record.
 
 Only the next booking is considered. Proposals do not hold inventory, so separate
 pending proposals can compete for one spare; approval must revalidate. Global
 allocation, reopening escalations, offer expiry/pruning, and bookings skipped by
 large clock jumps are outside this prototype.
+
+### Staff visibility
+
+- The staff dashboard shows next to load, compartments, returns to check, overdue recovery, bookings, equipment use, and activity.
+- The recovery panel shows when recovery last ran in real time, so staff can tell whether the daily job ran.
+- Equipment use lists each unit's current state, loan count, time on loan, and upcoming bookings. Loan time runs from pickup to drop-off on the test clock.
+- The Bookings page searches and filters bookings and offers loading and return checks.
 
 Audit events record time, actor, action, and asset. Reservation IDs may be null
 for returns. UI rendering must handle that and unknown action labels safely.

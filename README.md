@@ -39,9 +39,12 @@ The lending backend and virtual locker are live on Vercel with fictional data in
 - Load, collect, and return equipment using one-time codes and a staff condition check.
 - Detect overdue loans, propose a substitute, and apply it only after staff approval.
 - Run recovery daily through cron-job.org at 09:00 Malaysia time; the job is verified working.
+- Give staff one dashboard: next item to load, compartments, returns to check,
+  overdue recovery with its last run time, bookings, equipment use per unit, and activity.
 
-The MCP endpoint exposes these lending tools for the Gemini Enterprise agent.
-**Gemini Enterprise chat, its workflow, and recovery email remain pending.**
+The MCP endpoint exposes these lending tools to Gemini and other tool clients.
+**Gemini Enterprise access was not provided**, so the borrower chat uses the Gemini
+API and code emails use the Gmail API. Recovery reminders stay simulated (no email).
 The Gemini API borrower chat is deployed; a live status query passed on November 10.
 Gmail API pickup/return-code delivery is enabled on the hosted demo. Sender
 authorization and a direct test email to Borrower A's inbox are verified; the

@@ -68,7 +68,7 @@ def test_reset_removes_old_records_and_preserves_audit_order(collection_store):
     store.seed(Scenario.SPARE_AVAILABLE)
 
     def add_records(state):
-        state["offers"] = {"old-offer": {"borrower_id": "borrower-a"}}
+        state["reservation_offers"] = {"old-offer": {"borrower_id": "borrower-a"}}
         state["audit_events"] = [{"action": "first"}, {"action": "second"}]
 
     store.change(add_records)

@@ -116,11 +116,13 @@ def signed_in(
         )
         if account is not None:
             return account
-    if credentials is None and request.url.path.startswith("/locker"):
+    if credentials is None and (request.url.path.startswith("/locker") or request.url.path == "/assistant"):
         raise HTTPException(303, headers={"Location": "/login"})
+    # Challenge only clients that already use Basic. A browser challenge would cache the
+    # password, and the cached login would outlive the Log out button.
     raise HTTPException(
         401, "Invalid credentials.",
-        headers={"WWW-Authenticate": "Basic"},
+        headers={"WWW-Authenticate": "Basic"} if credentials is not None else None,
     )
 
 

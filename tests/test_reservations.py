@@ -167,3 +167,18 @@ def test_only_one_borrower_can_confirm_the_last_unit(booking_app):
     assert offer(client, BORROWER_A).status_code == 409
     bookings = [client.get("/reservations", auth=auth).json() for auth in auths]
     assert sum(item["asset_id"] == "projector-b" for items in bookings for item in items) == 1
+
+
+def test_open_offers_per_borrower_are_capped_but_confirmed_ones_stay(booking_app):
+    client, store = booking_app
+    confirmed = offer(client, BORROWER_A, pickup="2026-11-07T14:00").json()["id"]
+    assert confirm(client, BORROWER_A, confirmed).status_code == 200
+    ids = [offer(client, BORROWER_A).json()["id"] for _ in range(7)]
+    other = offer(client, BORROWER_B).json()["id"]
+
+    offers = store.load()["reservation_offers"]
+    assert [offer_id in offers for offer_id in ids] == [False, False, True, True, True, True, True]
+    assert other in offers and confirmed in offers
+    assert confirm(client, BORROWER_A, ids[0]).status_code == 404
+    assert confirm(client, BORROWER_A, confirmed).status_code == 200  # repeat confirm still works
+    assert "offered_at" not in confirm(client, BORROWER_A, ids[-1]).json()

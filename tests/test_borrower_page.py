@@ -36,6 +36,12 @@ def test_borrower_pickup_cards_follow_the_real_workflow(booking_app):
     assert 'Confirm pickup' in page(client)
     assert pick_up(client, reservation).status_code == 200
     assert 'Collected' in page(client) and 'On loan' in page(client)
+    assert return_request(client, 'raspberry-pi-kit').status_code == 200
+    assert return_unlock(client, 'raspberry-pi-kit', return_code_for(client, 'raspberry-pi-kit')).status_code == 200
+    assert return_drop(client, 'raspberry-pi-kit').status_code == 200
+    assert verify(client, 'raspberry-pi-kit').status_code == 200
+    html = page(client)
+    assert 'Returned</span>' in html and 'On loan' not in html
 
 
 def test_borrower_return_cards_follow_the_real_workflow(booking_app):

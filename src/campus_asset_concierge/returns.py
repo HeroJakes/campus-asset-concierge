@@ -5,7 +5,9 @@ from campus_asset_concierge.domain.reservations import (
     MALAYSIA_TIME,
     RETURN_CODE_WINDOW,
     ReservationError,
+    claim_free_compartment,
     local_clock,
+    return_live,
 )
 from campus_asset_concierge.pickups import MAX_WRONG_TRIES
 from campus_asset_concierge.storage.local_state import LocalStateStore
@@ -39,11 +41,14 @@ class Returns:
                 raise ReservationError(404, "You have no item to return for that unit.")
 
             access = state.get("return_access", {}).get(asset_id)
-            if access is not None and _return_live(access, now):
+            if access is not None and return_live(access, now):
                 # Idempotent before the drop: keep the existing code and compartment.
                 return _view(asset_id, loan, access, now)
+            if access is not None and access["checked_at"] is None:
+                # An expired, unused code: free its compartment so it is not orphaned.
+                state["locker"]["compartments"][access["compartment"]] = "empty"
 
-            compartment = _first_free_compartment(state, now)
+            compartment = claim_free_compartment(state, now)
             # shortcut: plain text code suits fictional local data, replace before real use.
             access = {
                 "loan_id": loan_id,
@@ -193,37 +198,6 @@ def _code_closes_at(access: dict) -> datetime:
     return access["issued_at"] + RETURN_CODE_WINDOW
 
 
-def _return_live(access: dict, now: datetime) -> bool:
-    """True while a return is in progress: not yet checked, and either dropped or unexpired."""
-    if access["checked_at"] is not None:
-        return False
-    return access["dropped_at"] is not None or now <= _code_closes_at(access)
-
-
-def _first_free_compartment(state: dict, now: datetime) -> str:
-    compartments = state["locker"]["compartments"]
-    returns = state.get("return_access", {})
-    for compartment in sorted(compartments):
-        if compartments[compartment] == "empty":
-            return compartment
-        # Reclaim a compartment held by an expired, undropped return.
-        stale = next(
-            (
-                asset_id
-                for asset_id, access in returns.items()
-                if access["compartment"] == compartment
-                and access["dropped_at"] is None
-                and now > _code_closes_at(access)
-            ),
-            None,
-        )
-        if stale is not None:
-            del returns[stale]
-            compartments[compartment] = "empty"
-            return compartment
-    raise ReservationError(409, "Both compartments are full.")
-
-
 def _step(loan: dict, access: dict | None, now: datetime) -> str:
     if loan["status"] == "returned":
         return "returned"
@@ -231,12 +205,13 @@ def _step(loan: dict, access: dict | None, now: datetime) -> str:
         return "can_return"
     if access["dropped_at"] is not None:
         return "awaiting_check"
+    # Once unlocked, the borrower can finish the drop even after the code window.
+    if access["used_at"] is not None:
+        return "confirm_drop"
     if access["failed_tries"] >= MAX_WRONG_TRIES:
         return "code_blocked"
     if now > _code_closes_at(access):
         return "code_expired"
-    if access["used_at"] is not None:
-        return "confirm_drop"
     return "enter_code"
 
 

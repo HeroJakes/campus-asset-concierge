@@ -1,7 +1,11 @@
 from datetime import timedelta
 
+import pytest
+
 from campus_asset_concierge.agent.reservations import create_reservation_agent
-from campus_asset_concierge.domain.reservations import eligible_unit, local_clock
+from campus_asset_concierge.domain.reservations import (
+    ReservationError, eligible_unit, find_free_compartment, local_clock,
+)
 from campus_asset_concierge.domain.scenarios import BORROWER_A as BORROWER_A_ID
 from campus_asset_concierge.reservations import Reservations
 from conftest import BORROWER_A, BORROWER_B, OPERATOR, STAFF
@@ -336,3 +340,57 @@ def test_staff_page_renders_with_a_return_audit_event(booking_app):
     assert '/assets/projector-a/verify-return' in page.text
     assert 'data-body=\'{"result":"pass"}\'' in page.text
     assert 'data-body=\'{"result":"fail"}\'' in page.text
+
+
+# --- compartment reuse: expired, unlocked, and abandoned returns --------------
+
+
+def _load_booking(client, category, pickup):
+    offer = client.post("/reservation-offers", auth=BORROWER_A,
+                        json={"category": category, "pickup_at": pickup, "duration_minutes": 60})
+    reservation_id = client.post(f"/reservation-offers/{offer.json()['id']}/confirm", auth=BORROWER_A).json()["id"]
+    loaded = client.post(f"/reservations/{reservation_id}/load", auth=STAFF)
+    assert loaded.status_code == 200
+    return reservation_id, loaded.json()["compartment"]
+
+
+def test_new_return_code_frees_the_old_compartment(booking_app):
+    client, store = booking_app
+    pickup_id, pickup_compartment = _load_booking(client, "raspberry_pi_kit", "2026-11-07T10:30")
+    first = return_request(client).json()["compartment"]
+    advance(client, 30)
+    code = next(item for item in client.get("/pickups", auth=BORROWER_A).json() if item["id"] == pickup_id)["code"]
+    assert client.post(f"/reservations/{pickup_id}/unlock", auth=BORROWER_A, json={"code": code}).status_code == 200
+    assert client.post(f"/reservations/{pickup_id}/confirm-pickup", auth=BORROWER_A).status_code == 200
+    advance(client, 1)  # the first return code has expired, unused
+
+    second = return_request(client).json()["compartment"]
+
+    assert second == pickup_compartment != first
+    assert state(store)["locker"]["compartments"] == {second: "return_reserved", first: "empty"}
+
+
+def test_unlocked_return_can_still_be_dropped_after_the_code_window(booking_app):
+    client, store = booking_app
+    _load_booking(client, "raspberry_pi_kit", "2026-11-07T10:30")
+    assert return_request(client).status_code == 200
+    advance(client, 29)
+    assert return_unlock(client, PA, code_for(client)).status_code == 200
+    advance(client, 2)
+
+    assert my_return(client)["step"] == "confirm_drop"
+    saved = state(store)
+    with pytest.raises(ReservationError):  # the open compartment is not reclaimed
+        find_free_compartment(saved, local_clock(saved))
+    assert return_drop(client).status_code == 200
+
+
+def test_loading_reclaims_a_compartment_from_an_abandoned_return(booking_app):
+    client, _ = booking_app
+    abandoned = return_request(client).json()["compartment"]
+    _load_booking(client, "projector", "2026-11-07T10:30")
+    advance(client, 31)
+
+    _, compartment = _load_booking(client, "raspberry_pi_kit", "2026-11-07T10:45")
+
+    assert compartment == abandoned

@@ -112,14 +112,13 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
         require_same_origin(request)
         username = username.strip()
         account = authenticate(username, password, public_demo_accounts=public_demo_accounts)
-        if account is None or account.role != role:
+        signer = session_signer(account.username) if account is not None else None
+        if account is None or account.role != role or signer is None:
             response = templates.TemplateResponse(request, "login.html", {
                 "role": role, "username": username,
                 "error": "Check your username, password, and account type.",
             }, status_code=401)
         else:
-            signer = session_signer(account.username)
-            assert signer is not None
             response = RedirectResponse("/locker", status_code=303)
             response.set_cookie(
                 SESSION_COOKIE, f"{account.username}:{signer.dumps(account.username)}",

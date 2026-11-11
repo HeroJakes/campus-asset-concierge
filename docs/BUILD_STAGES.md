@@ -102,6 +102,8 @@ A full code review rechecked every stage. Fixed with tests:
 - Borrower pickups show "Returned" after the return check.
 - Each borrower keeps at most five unconfirmed offers in the shared document.
 - The emulator collection layout now stores offers in their own collection.
+- The locker now has six compartments (A1 to A6) instead of two, shown three per
+  row on desktop and two per row on phones, with an "in use · free" summary.
 
 Known limits, not fixed (need a team decision):
 
@@ -124,7 +126,7 @@ Known limits, not fixed (need a team decision):
 
 ## What to do next
 
-1. Deploy this release and rehearse the hosted Borrower A and staff sequence in the [demo guide](DEMO_GUIDE.md#presentation-sequence).
+1. Deploy this release, run the protected operator reset so the hosted locker gets six compartments, and rehearse the hosted Borrower A and staff sequence in the [demo guide](DEMO_GUIDE.md#presentation-sequence).
 2. Rehearse automatic pickup/return email on the hosted demo. Gmail is configured; the borrower-owned API lookup remains the demo fallback.
 3. Record both recovery outcomes, the return check, the equipment use panel, the video, and judge access instructions.
 4. Fill the [submission checklist](../submission/README.md). Report measured results rather than presenting the earlier 80% target as evidence.
@@ -145,4 +147,4 @@ or a new cloud deployment needs approval.
 - Record the real Gemini integration result or the approved fallback, and finish submission materials.
 
 Current limits remain deliberate: one item per booking, one location, three asset
-units, two virtual compartments, a fixed demo clock, and no physical locker hardware.
+units, six virtual compartments, a fixed demo clock, and no physical locker hardware.

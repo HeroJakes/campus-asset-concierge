@@ -158,8 +158,8 @@ Borrower styles and code-entry behavior are separate from the staff workspace.
 ### Return and compartments
 
 Return uses locker drop-off rather than a desk-only handoff to match the pickup
-story. Pickup and return share two compartments; both being occupied rejects a
-new allocation. Collecting an item frees its compartment.
+story. Pickup and return share six compartments (A1 to A6); when all are occupied, a
+new allocation is rejected. Collecting an item frees its compartment.
 
 | Action | Loan | Compartment |
 | --- | --- | --- |

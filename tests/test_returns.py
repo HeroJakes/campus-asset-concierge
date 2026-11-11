@@ -8,7 +8,7 @@ from campus_asset_concierge.domain.reservations import (
 )
 from campus_asset_concierge.domain.scenarios import BORROWER_A as BORROWER_A_ID
 from campus_asset_concierge.reservations import Reservations
-from conftest import BORROWER_A, BORROWER_B, OPERATOR, STAFF
+from conftest import BORROWER_A, BORROWER_B, EMPTY_LOCKER, OPERATOR, STAFF, use_two_compartments
 
 # The seeded active loan is projector-a for borrower-a, and it has NO reservation,
 # so returning it exercises the asset-keyed path the spec calls out.
@@ -195,8 +195,9 @@ def test_five_wrong_tries_block_the_return_code(booking_app):
 # --- compartments: full, idempotent request, reclaim --------------------------
 
 
-def test_request_rejected_when_both_compartments_are_full(booking_app):
-    client, _ = booking_app
+def test_request_rejected_when_all_compartments_are_full(booking_app):
+    client, store = booking_app
+    use_two_compartments(store)
     # Occupy both compartments with pickups, not returns.
     first = client.post("/reservation-offers", auth=BORROWER_A,
                         json={"category": "projector", "pickup_at": "2026-11-07T10:30", "duration_minutes": 60})
@@ -367,11 +368,13 @@ def test_new_return_code_frees_the_old_compartment(booking_app):
     second = return_request(client).json()["compartment"]
 
     assert second == pickup_compartment != first
-    assert state(store)["locker"]["compartments"] == {second: "return_reserved", first: "empty"}
+    compartments = state(store)["locker"]["compartments"]
+    assert (compartments[second], compartments[first]) == ("return_reserved", "empty")
 
 
 def test_unlocked_return_can_still_be_dropped_after_the_code_window(booking_app):
     client, store = booking_app
+    use_two_compartments(store)
     _load_booking(client, "raspberry_pi_kit", "2026-11-07T10:30")
     assert return_request(client).status_code == 200
     advance(client, 29)
@@ -386,7 +389,8 @@ def test_unlocked_return_can_still_be_dropped_after_the_code_window(booking_app)
 
 
 def test_loading_reclaims_a_compartment_from_an_abandoned_return(booking_app):
-    client, _ = booking_app
+    client, store = booking_app
+    use_two_compartments(store)
     abandoned = return_request(client).json()["compartment"]
     _load_booking(client, "projector", "2026-11-07T10:30")
     advance(client, 31)

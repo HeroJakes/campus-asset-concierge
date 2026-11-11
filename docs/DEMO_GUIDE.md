@@ -18,7 +18,7 @@ instructions on Vercel.
 | Projector A | HDMI and built-in speakers; still with Borrower A |
 | Projector B | HDMI, no built-in speakers; free in `spare_available` |
 | Raspberry Pi kit | Free for a new Borrower A booking |
-| Two compartments | Both empty after reset; temporary handover spaces |
+| Six compartments (A1 to A6) | All empty after reset; temporary handover spaces |
 
 `spare_available` prepares a Projector B proposal awaiting staff approval.
 `spare_unavailable` also books Projector B for noon, so recovery prepares an

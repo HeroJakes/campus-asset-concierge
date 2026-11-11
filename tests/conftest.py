@@ -29,6 +29,17 @@ def local_app(monkeypatch, request):
     finally:
         store.client.recursive_delete(store.document)
 
+EMPTY_LOCKER = {f"a{number}": "empty" for number in range(1, 7)}
+
+
+def use_two_compartments(store):
+    """Only three demo items exist, so tests of a full locker shrink it to two compartments."""
+    def shrink(state):
+        state["locker"]["compartments"] = {"a1": "empty", "a2": "empty"}
+
+    store.change(shrink)
+
+
 BORROWER_A = ("borrower-a", "test-borrower_a")
 BORROWER_B = ("borrower-b", "test-borrower_b")
 STAFF = ("equipment-staff", "test-staff")

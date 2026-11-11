@@ -54,7 +54,7 @@
   </section>
 
   <section class="panel compartment-panel" aria-labelledby="compartments-title">
-    <div class="panel-heading"><h2 id="compartments-title">Compartments</h2><span class="panel-meta">{{ compartments | length }} compartments</span></div>
+    <div class="panel-heading"><h2 id="compartments-title">Compartments</h2>{% set in_use = compartments.values() | reject('equalto', 'empty') | list | length %}<span class="panel-meta">{{ in_use }} in use · {{ compartments | length - in_use }} free</span></div>
     <div class="staff-doors">
       {% for compartment, state in compartments | dictsort %}
         {% set held = reservations | selectattr('compartment', 'equalto', compartment) | rejectattr('status', 'equalto', 'collected') | first %}

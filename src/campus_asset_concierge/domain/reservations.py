@@ -123,7 +123,7 @@ def find_free_compartment(state: dict, now: datetime) -> tuple[str, str | None]:
         ), None)
         if stale is not None:
             return compartment, stale
-    raise ReservationError(409, "Both compartments are full.")
+    raise ReservationError(409, "All compartments are full.")
 
 
 def claim_free_compartment(state: dict, now: datetime) -> str:

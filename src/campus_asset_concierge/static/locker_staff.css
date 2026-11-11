@@ -107,11 +107,12 @@ p { text-wrap: pretty; }
 .booking-summary-link svg { display: block; flex: none; transition: transform 160ms ease; }
 .booking-summary-link:hover svg { transform: translateX(2px); }
 .count-badge { display: inline-flex; justify-content: center; align-items: center; min-width: 26px; height: 26px; padding-inline: 7px; border-radius: 50%; background: #eae3ff; color: #5d39cb; font-size: 12px; font-weight: 600; }
-.staff-doors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.compartment-card { display: grid; grid-template-columns: 26px minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 4px 12px; min-height: 200px; padding: 21px 18px; border: 1px solid #e6e2ef; border-radius: 14px; background: linear-gradient(135deg, #f6f5fa, #efedf5); transition: transform 180ms ease, box-shadow 180ms ease; }
+.staff-doors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.compartment-card { display: grid; grid-template-columns: 22px minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 4px 10px; min-height: 148px; padding: 16px 14px; border: 1px solid #e6e2ef; border-radius: 14px; background: linear-gradient(135deg, #f6f5fa, #efedf5); transition: transform 180ms ease, box-shadow 180ms ease; }
 .compartment-card:hover { transform: translateY(-2px); box-shadow: 0 6px 14px #30225e09; }
-.compartment-card h3 { font-size: 20px; line-height: 1.2; }
-.compartment-state { margin-top: 5px; color: #5e5570; font-size: 13px; }
+.compartment-card h3 { font-size: 18px; line-height: 1.2; }
+.compartment-state-icon svg { width: 22px; height: 22px; }
+.compartment-state { margin-top: 4px; color: #5e5570; font-size: 12px; line-height: 1.4; }
 .compartment-state-icon { color: #6f667e; }
 .compartment-card--loaded { background: linear-gradient(135deg, #f0faf3, #e9f5ee); border-color: #d4eadb; }
 .compartment-card--loaded .compartment-state-icon { color: #2f7547; }
@@ -121,11 +122,12 @@ p { text-wrap: pretty; }
 .compartment-card--return_reserved .compartment-state-icon { color: #976323; }
 .compartment-card--returned { background: linear-gradient(135deg, #f3efff, #eae4fb); border-color: #e1d6f8; }
 .compartment-card--returned .compartment-state-icon { color: #6c4ca7; }
-.compartment-item { grid-column: 1 / -1; display: flex; align-items: center; gap: 5px; margin-top: 18px; min-width: 0; }
+.compartment-item { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 10px; min-width: 0; }
+.compartment-item .equipment-art { width: 54px; height: 39px; }
 .equipment-art { flex: none; filter: drop-shadow(0 3px 3px #3b2f4d0b); }
 .compartment-item strong, .compartment-item span { display: block; font-size: 13px; }
 .compartment-item span { margin-top: 3px; color: #70667e; font-size: 12px; }
-.compartment-placeholder { grid-column: 1 / -1; align-self: end; color: #756781; font-size: 12px; padding-top: 34px; }
+.compartment-placeholder { grid-column: 1 / -1; align-self: end; color: #756781; font-size: 12px; padding-top: 16px; }
 .section-footnote { display: flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 11px; color: #756781; }
 .section-footnote svg { flex: none; }
 .return-summary { display: flex; gap: 9px; align-items: center; padding-block: 9px; }
@@ -214,9 +216,8 @@ details[open] > .disclosure-summary .disclosure-icon { transform: rotate(270deg)
   .panel { padding: 18px; }
   .loading-hero { padding: 24px; }
   .hero-location { display: none; }
-  .compartment-card { padding: 16px 12px; }
-  .compartment-item { flex-direction: column; align-items: flex-start; }
-  .compartment-card h3 { font-size: 17px; }
+  .compartment-card { padding: 14px 10px; }
+  .compartment-card h3 { font-size: 16px; }
   .return-summary { flex-wrap: wrap; }
   .return-summary .button { margin-left: auto; }
   .panel-heading h2 { font-size: 17px; }
@@ -263,9 +264,8 @@ details[open] > .disclosure-summary .disclosure-icon { transform: rotate(270deg)
   .loading-content { max-width: 90%; }
   .hero-cabinet { right: -100px; opacity: .23; }
   .hero-location { display: none; }
-  .compartment-card { min-height: 180px; padding: 17px 13px; gap: 4px 8px; grid-template-columns: 22px minmax(0, 1fr); }
-  .compartment-state-icon svg { width: 22px; height: 22px; }
-  .compartment-item { flex-direction: column; align-items: flex-start; margin-top: 12px; }
+  .staff-doors { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .compartment-card { min-height: 136px; padding: 14px 12px; gap: 4px 8px; }
   .booking-summary table { display: table; }
   .booking-summary thead { display: table-header-group; }
   .booking-summary tbody { display: table-row-group; }

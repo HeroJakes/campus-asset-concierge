@@ -13,7 +13,7 @@ from campus_asset_concierge.storage.local_state import LocalStateStore
 RECORD_COLLECTIONS = {
     "assets": "assets",
     "reservations": "reservations",
-    "offers": "reservation_offers",
+    "reservation_offers": "reservation_offers",
     "loans": "loans",
     "pickup_access": "pickup_access",
     "return_access": "return_access",

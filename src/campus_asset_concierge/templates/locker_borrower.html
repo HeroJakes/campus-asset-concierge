@@ -75,7 +75,7 @@
         {% if pickup.step == 'confirm_pickup' %}<button class="button button--success" type="button" data-post="/reservations/{{ pickup.id }}/confirm-pickup">{{ icon('check', 19) }} Confirm pickup</button><small>I have taken the item</small>
         {% elif pickup.step == 'waiting_for_loading' %}<button class="button" disabled>Collect</button>
         {% elif pickup.step == 'code_not_open' %}<span class="opens-at">{{ icon('clock', 18) }} Opens at {{ hhmm(pickup.pickup_at) }}</span>
-        {% elif pickup.step == 'collected' %}<span class="loan-pill">{{ icon('check', 19) }} On loan</span>
+        {% elif pickup.step == 'collected' %}<span class="loan-pill">{{ icon('check', 19) }} {{ 'Returned' if pickup.loan_status == 'returned' else 'On loan' }}</span>
         {% elif tone == 'red' %}<span class="contact-staff">Contact staff</span>{% endif %}
       </div>
     </article>

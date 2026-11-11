@@ -100,6 +100,48 @@ def reassignment_applicable(
     )
 
 
+def return_live(access: dict, now: datetime) -> bool:
+    """A return holds its unit and compartment until checked: once unlocked or dropped, or while its code works."""
+    if access["checked_at"] is not None:
+        return False
+    return (
+        access["dropped_at"] is not None or access["used_at"] is not None
+        or now <= access["issued_at"] + RETURN_CODE_WINDOW
+    )
+
+
+def find_free_compartment(state: dict, now: datetime) -> tuple[str, str | None]:
+    """Pick an empty compartment, or one held by an expired, unused return (its asset ID is returned too)."""
+    compartments = state["locker"]["compartments"]
+    for compartment in sorted(compartments):
+        if compartments[compartment] == "empty":
+            return compartment, None
+        stale = next((
+            asset_id for asset_id, access in state.get("return_access", {}).items()
+            if access["compartment"] == compartment and access["checked_at"] is None
+            and not return_live(access, now)
+        ), None)
+        if stale is not None:
+            return compartment, stale
+    raise ReservationError(409, "All compartments are full.")
+
+
+def claim_free_compartment(state: dict, now: datetime) -> str:
+    compartment, stale = find_free_compartment(state, now)
+    if stale is not None:
+        del state["return_access"][stale]
+        state["locker"]["compartments"][compartment] = "empty"
+    return compartment
+
+
+def uncollected_pickups(state: dict, asset_id: str) -> list[dict]:
+    """Pickup access for a unit that is loaded in a compartment and not yet collected."""
+    return [
+        access for access in state.get("pickup_access", {}).values()
+        if access["asset_id"] == asset_id and access["collected_at"] is None
+    ]
+
+
 def eligible_unit(
     state: dict, asset_id: str, category: str, pickup: datetime, due: datetime, now: datetime,
     require_hdmi: bool = False, require_built_in_speakers: bool = False,
@@ -122,19 +164,12 @@ def eligible_unit(
             return False
 
     # A loaded unit cannot serve any window that starts before its booking ends.
-    for access in state.get("pickup_access", {}).values():
-        if (
-            access["asset_id"] == asset_id
-            and access["collected_at"] is None
-            and pickup < access["due_at"]
-        ):
-            return False
+    if any(pickup < access["due_at"] for access in uncollected_pickups(state, asset_id)):
+        return False
 
     # A return in progress (code issued, not yet verified) holds the unit entirely.
     access = state.get("return_access", {}).get(asset_id)
-    if access is not None and access["checked_at"] is None and (
-        access["dropped_at"] is not None or now <= access["issued_at"] + RETURN_CODE_WINDOW
-    ):
+    if access is not None and return_live(access, now):
         return False
 
     return not any(

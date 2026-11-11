@@ -151,7 +151,7 @@ async function send(text) {
   const typing = addRow("bot");
   const dots = el("p", "assistant-typing");
   dots.setAttribute("role", "status");
-  dots.setAttribute("aria-label", "Assistant is thinking");
+  dots.setAttribute("aria-label", "MiMi is thinking");
   for (let i = 0; i < 3; i++) {
     const dot = el("span", null, ".");
     dot.setAttribute("aria-hidden", "true");
@@ -167,7 +167,7 @@ async function send(text) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ messages: recent.map(message => ({ ...message, text: message.text.slice(0, 2000) })) }),
     });
-    const data = res.ok ? await res.json() : { reply: "The assistant hit an error. Please try again.", offer: null };
+    const data = res.ok ? await res.json() : { reply: "MiMi hit an error. Please try again.", offer: null };
     const reply = data.reply || "";
     const entry = { role: "model", text: reply, offer: data.offer || null };
     history.push(entry);

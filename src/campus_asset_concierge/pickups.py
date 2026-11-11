@@ -7,6 +7,9 @@ from campus_asset_concierge.domain.reservations import (
     ReservationError,
     local_clock,
     malaysia_times,
+    claim_free_compartment,
+    find_free_compartment,
+    uncollected_pickups,
 )
 from campus_asset_concierge.storage.local_state import LocalStateStore
 
@@ -31,7 +34,7 @@ class Pickups:
             access_records = state.setdefault("pickup_access", {})
             if reservation_id not in access_records:
                 _check_can_load(state, reservation_id, reservation, now)
-                compartment = _first_empty_compartment(state)
+                compartment = claim_free_compartment(state, now)
                 # shortcut: plain text suits fictional local data, replace before real use.
                 access_records[reservation_id] = {
                     "code": code,
@@ -144,7 +147,7 @@ class Pickups:
             _view(state, reservation_id, reservation, now)
             | {
                 "load_blocker": _load_blocker(state, reservation_id, reservation, now),
-                "loan_status": state["loans"].get(f"loan-{reservation_id}", {}).get("status"),
+                "loan_status": _loan_status(state, reservation_id),
             }
             for reservation_id, reservation in _by_pickup_time(state)
         ]
@@ -204,10 +207,7 @@ def _check_can_load(state: dict, reservation_id: str, reservation: dict, now: da
         for loan in state["loans"].values()
     ):
         raise ReservationError(409, "This unit is still on loan.")
-    if any(
-        access["asset_id"] == asset_id and access["collected_at"] is None
-        for access in state.get("pickup_access", {}).values()
-    ):
+    if uncollected_pickups(state, asset_id):
         raise ReservationError(409, "This unit is already in a compartment.")
     if any(
         other_id != reservation_id
@@ -224,7 +224,7 @@ def _load_blocker(state: dict, reservation_id: str, reservation: dict, now: date
     """Tell staff why a booking can't be loaded, so the page can say so before they try."""
     try:
         _check_can_load(state, reservation_id, reservation, now)
-        _first_empty_compartment(state)
+        find_free_compartment(state, now)
     except ReservationError as error:
         return str(error)
     return None
@@ -232,14 +232,6 @@ def _load_blocker(state: dict, reservation_id: str, reservation: dict, now: date
 
 def _by_pickup_time(state: dict) -> list[tuple[str, dict]]:
     return sorted(state["reservations"].items(), key=lambda item: item[1]["pickup_at"])
-
-
-def _first_empty_compartment(state: dict) -> str:
-    compartments = state["locker"]["compartments"]
-    for compartment in sorted(compartments):
-        if compartments[compartment] == "empty":
-            return compartment
-    raise ReservationError(409, "Both compartments are full.")
 
 
 def _step(reservation: dict, access: dict | None, now: datetime) -> str:
@@ -280,10 +272,14 @@ def _view(state: dict, reservation_id: str, reservation: dict, now: datetime) ->
 def _borrower_views(state: dict, borrower_id: str) -> list[dict]:
     now = local_clock(state)
     return [
-        _view(state, reservation_id, reservation, now)
+        _view(state, reservation_id, reservation, now) | {"loan_status": _loan_status(state, reservation_id)}
         for reservation_id, reservation in _by_pickup_time(state)
         if reservation["borrower_id"] == borrower_id
     ]
+
+
+def _loan_status(state: dict, reservation_id: str) -> str | None:
+    return state["loans"].get(f"loan-{reservation_id}", {}).get("status")
 
 
 def _loan_view(loan_id: str, loan: dict) -> dict:
@@ -292,7 +288,7 @@ def _loan_view(loan_id: str, loan: dict) -> dict:
         **loan,
         "picked_up_at": _malaysia_iso(loan["picked_up_at"]),
         "due_at": _malaysia_iso(loan["due_at"]),
-    }
+    } | ({"dropped_at": _malaysia_iso(loan["dropped_at"])} if loan.get("dropped_at") else {})
 
 
 def _audit(

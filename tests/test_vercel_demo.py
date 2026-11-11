@@ -175,7 +175,10 @@ def test_demo_reset_restores_the_showcase_only_on_the_emulator(monkeypatch):
             assert restored["substitution_proposals"]["next-projector"]["status"] == "pending_staff_approval"
             assert restored["elapsed_minutes"] == 61
             assert client.post("/recovery/run", auth=staff).status_code == 200
-            assert store.load() == restored
+            rerun = store.load()
+            # Only the run record changes on a rerun; the lending state must not.
+            assert rerun.pop("last_recovery_run")["new_events"] == 0
+            assert rerun == {key: value for key, value in restored.items() if key != "last_recovery_run"}
             current_after = current.get()
             assert current_after.to_dict() == current_before.to_dict()
             assert current_after.update_time == current_before.update_time

@@ -92,7 +92,7 @@ test('thinking has three animated dots and model bold stays safe', async () => {
   const ui = setup(); ui.submit('Hello');
   const dots = ui.all().find(node => node.className === 'assistant-typing');
   assert.equal(dots.children.length, 3);
-  assert.equal(dots['aria-label'], 'Assistant is thinking');
+  assert.equal(dots['aria-label'], 'MiMi is thinking');
   ui.requests[0].resolve({ ok: true, json: async () => ({ reply: '**Projector A** <img src=x onerror=alert(1)>', offer: null }) });
   await flush();
   assert.ok(ui.all().some(node => node.tag === 'strong' && node.textContent === 'Projector A'));

@@ -255,7 +255,7 @@ def test_assistant_page_renders_for_borrower_only(booking_app):
     assert "Assistant" in page.text
     assert "/static/locker_assistant.js" in page.text
     assert 'href="/locker"' in page.text  # nav back to My Locker
-    for text in ('AI Assistant', 'Quick actions', 'Check my pickups', 'Check my returns',
+    for text in ('MiMi', 'Quick actions', 'Check my pickups', 'Check my returns',
                  'Tips for a quick booking', 'aria-label="Send message"'):
         assert text in page.text
     assert 'Change or Cancel' not in page.text

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from campus_asset_concierge.domain.reservations import (
@@ -35,6 +35,7 @@ class Recovery:
             state.setdefault("at_risk_reservations", {})
             state.setdefault("substitution_proposals", {})
             state.setdefault("escalations", {})
+            events_before = len(state.get("audit_events", []))
 
             for loan_id, loan in state["loans"].items():
                 if loan["status"] == "active" and loan["due_at"] < now:
@@ -60,6 +61,12 @@ class Recovery:
                     _find_substitute(state, now, reservation),
                 )
 
+            # Real time as well as the test clock, so staff can see whether the daily job ran.
+            state["last_recovery_run"] = {
+                "ran_at": datetime.now(UTC),
+                "clock_at": now,
+                "new_events": len(state.get("audit_events", [])) - events_before,
+            }
             return _result(state, now)
 
         return self.store.change(recover)
@@ -243,6 +250,8 @@ def _result(state: dict, now: datetime) -> dict:
             for record in state.get("escalations", {}).values()
         ],
         "audit_events": [_times(event, "at") for event in reversed(state.get("audit_events", []))],
+        "last_run": _times(state["last_recovery_run"], "ran_at", "clock_at")
+        if "last_recovery_run" in state else None,
     }
 
 

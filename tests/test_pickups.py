@@ -3,7 +3,7 @@ import pytest
 from campus_asset_concierge.agent.reservations import create_reservation_agent
 from campus_asset_concierge.domain.scenarios import BORROWER_A as BORROWER_A_ID
 from campus_asset_concierge.reservations import Reservations
-from conftest import BORROWER_A, BORROWER_B, OPERATOR, STAFF
+from conftest import BORROWER_A, BORROWER_B, EMPTY_LOCKER, OPERATOR, STAFF, use_two_compartments
 
 PICKUP = "2026-11-07T10:30"  # 30 minutes after the seeded clock starts
 # The kit has one unit, so a booking can't quietly land on another one.
@@ -185,11 +185,12 @@ def test_cannot_load_a_unit_already_in_a_compartment(booking_app):
     response = load(client, later)
     assert response.status_code == 409
     assert "already in a compartment" in response.json()["detail"]
-    assert state(store)["locker"]["compartments"] == {"a1": "loaded", "a2": "empty"}
+    assert state(store)["locker"]["compartments"] == EMPTY_LOCKER | {"a1": "loaded"}
 
 
-def test_rejects_loading_when_both_compartments_are_full(booking_app):
+def test_rejects_loading_when_all_compartments_are_full(booking_app):
     client, store = booking_app
+    use_two_compartments(store)
     assert load(client, book(client)).status_code == 200
     assert load(client, book(client, category="raspberry_pi_kit")).status_code == 200
     assert state(store)["locker"]["compartments"] == {"a1": "loaded", "a2": "loaded"}
@@ -212,7 +213,7 @@ def test_repeated_loading_keeps_one_code_and_one_compartment(booking_app):
     assert second.status_code == 200
     assert second.json() == first.json()
     assert state(store)["pickup_access"][reservation_id]["code"] == code
-    assert state(store)["locker"]["compartments"] == {"a1": "loaded", "a2": "empty"}
+    assert state(store)["locker"]["compartments"] == EMPTY_LOCKER | {"a1": "loaded"}
     assert actions(store) == ["loaded"]
 
 
@@ -413,7 +414,7 @@ def test_reset_clears_pickup_records(booking_app):
     saved = state(store)
     assert "pickup_access" not in saved
     assert "audit_events" not in saved
-    assert saved["locker"]["compartments"] == {"a1": "empty", "a2": "empty"}
+    assert saved["locker"]["compartments"] == EMPTY_LOCKER
 
 
 def test_locker_page_shows_staff_their_actions_without_any_code(booking_app):
@@ -467,7 +468,7 @@ def test_locker_overview_has_real_compartments_and_staff_only_navigation(booking
     staff_page = client.get("/locker", auth=STAFF).text
     assert 'id="sidebar-toggle"' in staff_page
     assert 'aria-controls="staff-navigation"' in staff_page
-    assert staff_page.count('data-compartment="') == 2
+    assert staff_page.count('data-compartment="') == 6
     assert 'href="#bookings"' in staff_page
     assert 'id="returns"' in staff_page
     assert 'id="recovery"' in staff_page

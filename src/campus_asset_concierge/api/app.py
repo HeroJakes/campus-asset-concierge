@@ -32,6 +32,7 @@ from campus_asset_concierge.recovery import Recovery
 from campus_asset_concierge.reservations import Reservations
 from campus_asset_concierge.returns import Returns
 from campus_asset_concierge.storage.local_state import LocalStateStore
+from campus_asset_concierge.usage import equipment_usage
 
 PACKAGE_DIR = Path(__file__).resolve().parent.parent
 logger = logging.getLogger(__name__)
@@ -111,14 +112,13 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
         require_same_origin(request)
         username = username.strip()
         account = authenticate(username, password, public_demo_accounts=public_demo_accounts)
-        if account is None or account.role != role:
+        signer = session_signer(account.username) if account is not None else None
+        if account is None or account.role != role or signer is None:
             response = templates.TemplateResponse(request, "login.html", {
                 "role": role, "username": username,
                 "error": "Check your username, password, and account type.",
             }, status_code=401)
         else:
-            signer = session_signer(account.username)
-            assert signer is not None
             response = RedirectResponse("/locker", status_code=303)
             response.set_cookie(
                 SESSION_COOKIE, f"{account.username}:{signer.dumps(account.username)}",
@@ -288,6 +288,8 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
             context["recovery"] = recovery.staff_page()
             if bookings_page:
                 context |= booking_overview(context["reservations"], q, status)
+            else:
+                context["usage"] = equipment_usage(load_state())
         else:
             context["pickups"] = pickups.borrower_page(actor.username)
             context["returns"] = returns.borrower_page(actor.username)

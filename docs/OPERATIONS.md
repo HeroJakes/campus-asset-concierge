@@ -189,6 +189,9 @@ The coding agent has not independently inspected its execution history.
 | Expected response | HTTP 200; repeat runs do not duplicate recovery records |
 
 Keep the job enabled through November 11–14 judging and check failure history.
+The staff dashboard's Overdue recovery panel shows the last real run time, so a
+missed daily run is visible without opening cron-job.org. An operator reset also
+runs recovery, so it updates that time too.
 There is no keep-awake job and no Vercel Cron configuration. The daily POST does
 not advance the fixed clock, reset activity, approve substitutes, or send Gmail.
 The later Gemini/Gmail workflow needs its own integration and delivery checks.

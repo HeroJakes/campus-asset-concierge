@@ -165,3 +165,23 @@ def test_browser_session_drives_real_locker_views_on_emulator(booking_app):
     assert client.get("/locker/bookings").status_code == 200
     assert client.get("/reservations").status_code == 403
     assert store.load()["scenario"] == "spare_available"
+
+
+def test_signed_out_browser_never_gets_a_basic_password_prompt(login_client):
+    page = login_client.get("/assistant", follow_redirects=False)
+    assert (page.status_code, page.headers["location"]) == (303, "/login")
+    api = login_client.get("/pickups")
+    assert api.status_code == 401
+    assert "www-authenticate" not in api.headers
+    # Clients that already use Basic still get the standard challenge.
+    wrong = login_client.get("/pickups", auth=("borrower-a", "wrong"))
+    assert wrong.headers["www-authenticate"] == "Basic"
+
+
+def test_demo_login_without_a_session_secret_is_refused_not_crashed(monkeypatch):
+    monkeypatch.delenv("LOCAL_BORROWER_A_PASSWORD", raising=False)
+    monkeypatch.delenv("PUBLIC_BASE_URL", raising=False)
+    with TestClient(create_app(store=object(), public_demo_accounts=True), base_url="https://campus.example") as client:
+        response = sign_in(client, password="BorrowerA2026!", headers={"Origin": "https://campus.example"})
+    assert response.status_code == 401
+    assert SESSION_COOKIE not in response.cookies

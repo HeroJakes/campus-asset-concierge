@@ -1,3 +1,5 @@
+from conftest import EMPTY_LOCKER
+
 def test_local_sign_in_and_operator_permissions(local_app):
     client, _ = local_app
     assert client.get("/me").status_code == 401
@@ -39,7 +41,7 @@ def test_reset_restores_clock_and_booking_data(local_app):
         state = store.load()
         assert state is not None
         assert set(state["assets"]) == {"projector-a", "projector-b", "raspberry-pi-kit"}
-        assert state["locker"]["compartments"] == {"a1": "empty", "a2": "empty"}
+        assert state["locker"]["compartments"] == EMPTY_LOCKER
         assert state["loans"]["active-projector"]["status"] == "active"
         next_booking = client.get("/reservations", auth=borrower_b).json()
         assert [booking["asset_id"] for booking in next_booking] == ["projector-a"]

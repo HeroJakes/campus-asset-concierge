@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from campus_asset_concierge.domain.reservations import (
@@ -11,6 +11,25 @@ from campus_asset_concierge.domain.reservations import (
 )
 from campus_asset_concierge.domain.scenarios import BORROWER_A, BORROWER_B
 from campus_asset_concierge.storage.local_state import LocalStateStore
+
+
+# Public demo logins can create offers freely; cap what one borrower can store in the shared document.
+MAX_OPEN_OFFERS = 5
+
+
+def _drop_old_offers(state: dict, offers: dict, borrower_id: str) -> None:
+    """Keep room for one more unconfirmed offer; confirmed offers stay so a repeat confirm still works."""
+    open_offers = sorted(
+        (offer.get("offered_at", datetime.min.replace(tzinfo=UTC)), offer_id)
+        for offer_id, offer in offers.items()
+        if offer["borrower_id"] == borrower_id and f"reservation-{offer_id}" not in state["reservations"]
+    )
+    for _, offer_id in open_offers[: max(0, len(open_offers) - MAX_OPEN_OFFERS + 1)]:
+        del offers[offer_id]
+
+
+def _offer_terms(offer: dict) -> dict:
+    return {key: value for key, value in offer.items() if key != "offered_at"}
 
 
 class Reservations:
@@ -44,7 +63,9 @@ class Reservations:
                         "due_at": due,
                         **requirements,
                     }
-                    state.setdefault("reservation_offers", {})[offer_id] = offer
+                    offers = state.setdefault("reservation_offers", {})
+                    _drop_old_offers(state, offers, borrower_id)
+                    offers[offer_id] = offer | {"offered_at": datetime.now(UTC)}
                     return {"id": offer_id, **malaysia_times(offer)}
             raise ReservationError(409, "No eligible unit is available for that window.")
 
@@ -69,7 +90,7 @@ class Reservations:
                 **equipment_requirements(offer),
             ):
                 raise ReservationError(409, "Availability changed. Check again for a fresh offer.")
-            reservation = {**offer, "status": "confirmed"}
+            reservation = {**_offer_terms(offer), "status": "confirmed"}
             state["reservations"][reservation_id] = reservation
             return {"id": reservation_id, **malaysia_times(reservation)}
 
@@ -80,7 +101,7 @@ class Reservations:
         state = self.store.load()
         if state is None:
             raise ReservationError(409, "Load a local test scenario first.")
-        return malaysia_times(self._owned_offer(state, borrower_id, offer_id))
+        return malaysia_times(_offer_terms(self._owned_offer(state, borrower_id, offer_id)))
 
     @staticmethod
     def _owned_offer(state: dict, borrower_id: str, offer_id: str) -> dict:

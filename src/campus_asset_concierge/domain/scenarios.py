@@ -39,7 +39,7 @@ def starting_state(scenario: TestScenario) -> dict:
         "location": {"id": "campus-loan-desk", "name": "Campus Loan Desk"},
         "locker": {
             "id": "locker-a",
-            "compartments": {"a1": "empty", "a2": "empty"},
+            "compartments": {f"a{number}": "empty" for number in range(1, 7)},
         },
         "assets": {
             "projector-a": {

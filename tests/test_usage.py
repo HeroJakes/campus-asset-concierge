@@ -96,7 +96,7 @@ def test_recovery_records_its_last_run_for_staff(booking_app):
     second = client.post("/recovery/run", auth=STAFF).json()["last_run"]
     assert second["new_events"] == 0
     assert second["ran_at"] >= first["ran_at"]
-    assert "0 new activity events" in client.get("/locker", auth=STAFF).text
+    assert "0 new events" in client.get("/locker", auth=STAFF).text
 
 
 def test_two_recovery_runs_at_once_record_one_outcome(booking_app):

@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Assistant · Campus Asset Concierge</title>
+  <title>MiMi · Campus Asset Concierge</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/locker.css">
   <link rel="stylesheet" href="/static/locker_borrower.css">
-  <link rel="stylesheet" href="/static/locker_assistant.css?v=20261110-clear-chat">
-  <script src="/static/locker_assistant.js" defer></script>
+  <link rel="stylesheet" href="/static/locker_assistant.css?v=20261111-mimi">
+  <script src="/static/locker_assistant.js?v=20261111-mimi" defer></script>
 </head>
 <body class="borrower-shell">
   {% from "locker_icons.html" import icon, equipment %}
@@ -20,20 +20,20 @@
   {% include "locker_borrower_bar.html" %}
 
   <main class="canvas assistant-canvas" id="main-content">
-    <noscript><p class="notice">The assistant needs JavaScript. Use the My Locker page to collect and return items.</p></noscript>
+    <noscript><p class="notice">MiMi needs JavaScript. Use the My Locker page to collect and return items.</p></noscript>
 
     <section class="assistant" aria-labelledby="assistant-title">
       <header class="assistant-heading">
-        <span class="assistant-heading-icon">{{ icon('sparkles', 32) }}</span>
-        <div><h2 id="assistant-title">AI Assistant</h2><p>Find and book equipment with a quick chat.</p></div>
+        <span class="assistant-heading-icon"><img src="/static/mimi.jpg" alt="" width="54" height="54"></span>
+        <div><h2 id="assistant-title">MiMi</h2><p>Your equipment booking assistant. Find and book equipment with a quick chat.</p></div>
         <div class="assistant-illustration" aria-hidden="true"><div class="assistant-checklist"><i></i><span>✓ ━━━━━</span><span>✓ ━━━</span><span>✓ ━━━━━</span></div><div class="assistant-robot"><span>⌒ ⌒</span><i></i></div></div>
       </header>
       <div class="assistant-log" id="assistant-log" data-username="{{ username }}" role="log" aria-live="polite" aria-label="Conversation">
         <div class="conversation-date"><span>New conversation</span></div>
         <div class="assistant-row assistant-row--bot" data-greeting>
-          <span class="assistant-avatar">{{ icon('sparkles', 23) }}</span>
+          <span class="assistant-avatar"><img src="/static/mimi.jpg" alt="" width="36" height="36"></span>
           <div class="assistant-bubble">
-            <p><strong>Hi! I'm your Campus Asset Concierge.</strong><br>I can help you book equipment and check your pickups or returns.</p>
+            <p><strong>Hi! I'm MiMi, your Campus Asset Concierge assistant.</strong><br>I can help you book equipment and check your pickups or returns.</p>
             <p>What would you like to do?</p>
           </div>
         </div>
@@ -44,7 +44,7 @@
       </div>
 
       <form class="assistant-form" id="assistant-form" autocomplete="off">
-        <label class="sr-only" for="assistant-input">Message the assistant</label>
+        <label class="sr-only" for="assistant-input">Message MiMi</label>
         <textarea id="assistant-input" name="message" rows="1" maxlength="2000"
           placeholder="Type a message, e.g. ‘Book a projector today’" required></textarea>
         <button class="button button--primary" type="submit" id="assistant-send" aria-label="Send message">{{ icon('send', 21) }}</button>
@@ -70,7 +70,7 @@
       </section>
     </aside>
   </main>
-  <template id="assistant-bot-icon">{{ icon('sparkles', 22) }}</template>
+  <template id="assistant-bot-icon"><img src="/static/mimi.jpg" alt="" width="36" height="36"></template>
   <template id="assistant-user-icon">{{ icon('user', 22) }}</template>
   <template id="assistant-projector-art">{{ equipment('projector') }}</template>
   <template id="assistant-kit-art">{{ equipment('raspberry-pi-kit') }}</template>

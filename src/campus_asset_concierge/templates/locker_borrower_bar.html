@@ -4,7 +4,7 @@
   <a class="borrower-brand" href="/locker">{{ icon('cube', 30) }}<span>Campus Asset Concierge</span></a>
   <nav class="borrower-nav" aria-label="Borrower sections">
     <a href="/locker" class="borrower-nav-link{% if bar_active == 'locker' %} is-current{% endif %}"{% if bar_active == 'locker' %} aria-current="page"{% endif %}>{{ icon('cube', 18) }} My Locker</a>
-    <a href="/assistant" class="borrower-nav-link{% if bar_active == 'assistant' %} is-current{% endif %}"{% if bar_active == 'assistant' %} aria-current="page"{% endif %}>{{ icon('chat', 18) }} Assistant</a>
+    <a href="/assistant" class="borrower-nav-link{% if bar_active == 'assistant' %} is-current{% endif %}"{% if bar_active == 'assistant' %} aria-current="page"{% endif %}>{{ icon('chat', 18) }} MiMi</a>
   </nav>
   <div class="borrower-session">
     <div class="borrower-clock">{{ icon('clock', 22) }}<div><span>Test clock (simulated) · MYT</span><time datetime="{{ current_time }}">{{ current_time[:10] }} · {{ hhmm(current_time) }}</time></div></div>

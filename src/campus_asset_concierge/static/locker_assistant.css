@@ -5,6 +5,7 @@
 .assistant-heading h2 { font-size: 21px; line-height: 1.4; }
 .assistant-heading p { margin-top: 3px; color: var(--muted); }
 .assistant-heading-icon, .side-symbol { display: grid; place-items: center; flex: none; width: 54px; height: 54px; border-radius: 50%; color: #7542e7; background: #ede5ff; }
+.assistant-heading-icon { overflow: hidden; box-shadow: 0 0 0 3px #ede5ff; }
 .assistant-illustration { position: relative; width: 182px; height: 78px; margin-left: auto; flex: none; }
 .assistant-checklist { display: grid; gap: 4px; position: absolute; left: 3px; top: 0; width: 94px; padding: 9px; border: 2px solid #d7c7ff; border-radius: 12px; background: linear-gradient(120deg, #fff, #e8e0ff); box-shadow: 0 5px 10px #7542e71a; transform: rotate(-8deg); color: #66ae91; font-size: 13px; line-height: 14px; }
 .assistant-checklist i { display: block; height: 7px; margin: -7px -7px 3px; border-radius: 8px 8px 0 0; background: linear-gradient(90deg, #aa85f6, #7542e7); }
@@ -17,7 +18,8 @@
 .assistant-row { display: flex; align-items: flex-start; gap: 10px; max-width: 91%; min-width: 0; flex: none; }
 .assistant-row--user { flex-direction: row-reverse; margin-left: auto; }
 .assistant-message { min-width: 0; }
-.assistant-avatar { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #eee6ff; color: #7140de; }
+.assistant-avatar { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #eee6ff; color: #7140de; overflow: hidden; }
+.assistant-avatar img, .assistant-heading-icon img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #fff; }
 .assistant-bubble { padding: 13px 16px; border-radius: 15px; font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
 .assistant-row--bot .assistant-bubble { background: #f0eafa; border: 1px solid #ece5fa; border-top-left-radius: 5px; }
 .assistant-row--user .assistant-bubble { background: linear-gradient(115deg, #8960ed, #6132d8); color: #fff; border-top-right-radius: 5px; }

@@ -71,7 +71,8 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
     },
 ]
 
-SYSTEM_PROMPT = """You are the Campus Asset Concierge booking assistant for the signed-in borrower.
+SYSTEM_PROMPT = """You are MiMi, the Campus Asset Concierge booking assistant for the signed-in borrower.
+If asked your name, say you are MiMi.
 The current reference time is {current_time} (Malaysia time); use it for relative dates.
 
 Help the borrower reserve exactly ONE item.
@@ -93,7 +94,7 @@ Help the borrower reserve exactly ONE item.
 If a tool returns an error, explain it plainly and offer to try again."""
 
 FALLBACK_REPLY = (
-    "The booking assistant is unavailable right now. You can still book through the "
+    "MiMi is unavailable right now. You can still book through the "
     "API docs at /docs, or try again in a moment."
 )
 

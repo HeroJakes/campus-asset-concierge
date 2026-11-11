@@ -13,12 +13,14 @@ Live demo only, about 3.5–4 minutes. It shows live what the slides explain. It
 
 ---
 
-## 1. The problem, live (about 20 s)
+## 1. The problem, live (about 30 s)
 
 **Do:** Show the staff Locker page. Point at **Overdue recovery**.
 
 **Say:**
-> "Here is the problem from our slides, live. Projector A is overdue, and Borrower B needs it
+> "This is our live app on Vercel. The people and equipment are test data, the clock is
+> simulated, and the locker is virtual, with no hardware.
+> Here is the problem from our slides, live. Projector A is overdue, and Borrower B needs it
 > at 12:00. The system has already found Projector B as a spare. We will come back to it."
 
 ## 2. Book with MiMi (about 1 min)
@@ -94,5 +96,8 @@ click **Unlock compartment**, then **Confirm pickup**.
 ## Notes
 
 - Say "Gemini API". Gemini Enterprise access was not provided.
+- Live: booking, MiMi chat, pickup and return codes, code emails, recovery, approval, return checks.
+  Test or simulated: fictional people and items, the fixed clock, the virtual locker, and
+  overdue reminders (queued, not sent). Planned work is on the Limits & Roadmap slide.
 - Do not claim the 80% figure as a result. It is a target, not a measurement.
 - After recording, reset back to `presentation`.

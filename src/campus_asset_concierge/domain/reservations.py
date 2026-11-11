@@ -100,6 +100,14 @@ def reassignment_applicable(
     )
 
 
+def uncollected_pickups(state: dict, asset_id: str) -> list[dict]:
+    """Pickup access for a unit that is loaded in a compartment and not yet collected."""
+    return [
+        access for access in state.get("pickup_access", {}).values()
+        if access["asset_id"] == asset_id and access["collected_at"] is None
+    ]
+
+
 def eligible_unit(
     state: dict, asset_id: str, category: str, pickup: datetime, due: datetime, now: datetime,
     require_hdmi: bool = False, require_built_in_speakers: bool = False,
@@ -122,13 +130,8 @@ def eligible_unit(
             return False
 
     # A loaded unit cannot serve any window that starts before its booking ends.
-    for access in state.get("pickup_access", {}).values():
-        if (
-            access["asset_id"] == asset_id
-            and access["collected_at"] is None
-            and pickup < access["due_at"]
-        ):
-            return False
+    if any(pickup < access["due_at"] for access in uncollected_pickups(state, asset_id)):
+        return False
 
     # A return in progress (code issued, not yet verified) holds the unit entirely.
     access = state.get("return_access", {}).get(asset_id)

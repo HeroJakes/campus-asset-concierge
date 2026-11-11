@@ -115,6 +115,7 @@ class Returns:
 
             access["dropped_at"] = now
             loan["status"] = "awaiting_check"
+            loan["dropped_at"] = now
             state["locker"]["compartments"][access["compartment"]] = "returned"
             _audit(state, now, borrower_id, "returned_dropped", asset_id)
             return _view(asset_id, loan, access, now)

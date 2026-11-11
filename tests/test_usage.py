@@ -29,7 +29,7 @@ def test_usage_reports_each_unit_from_the_seeded_state():
 def test_usage_marks_overdue_loans_and_held_units():
     state = scenarios.starting_state(scenarios.TestScenario.SPARE_AVAILABLE)
     state["elapsed_minutes"] = 90
-    state["loans"]["active-projector"]["status"] = "overdue"
+    # Recovery has not run, but the loan is already past due.
     state["assets"]["projector-b"]["condition"] = "hold"
 
     by_id = units(equipment_usage(state))
@@ -38,6 +38,14 @@ def test_usage_marks_overdue_loans_and_held_units():
     assert by_id["projector-a"]["loan_minutes"] == 150
     assert by_id["projector-b"]["status"] == "On hold after failed check"
     assert by_id["projector-b"]["busy"] is False
+
+
+def test_upcoming_counts_only_bookings_that_can_still_be_collected():
+    state = scenarios.starting_state(scenarios.TestScenario.SPARE_AVAILABLE)
+    state["elapsed_minutes"] = 150  # next-projector pickup 12:00, code window closes 12:30
+    assert units(equipment_usage(state))["projector-a"]["upcoming"] == 1
+    state["elapsed_minutes"] = 151
+    assert units(equipment_usage(state))["projector-a"]["upcoming"] == 0
 
 
 def test_returned_loan_without_its_return_record_counts_until_due_time():
@@ -82,13 +90,13 @@ def test_recovery_records_its_last_run_for_staff(booking_app):
 
     store.advance(61)
     first = client.post("/recovery/run", auth=STAFF).json()["last_run"]
-    assert first["changes"] == 4
+    assert first["new_events"] == 4
     assert first["clock_at"].startswith("2026-11-07T11:01")
 
     second = client.post("/recovery/run", auth=STAFF).json()["last_run"]
-    assert second["changes"] == 0
+    assert second["new_events"] == 0
     assert second["ran_at"] >= first["ran_at"]
-    assert "0 changes" in client.get("/locker", auth=STAFF).text
+    assert "0 new activity events" in client.get("/locker", auth=STAFF).text
 
 
 def test_two_recovery_runs_at_once_record_one_outcome(booking_app):
@@ -103,7 +111,7 @@ def test_two_recovery_runs_at_once_record_one_outcome(booking_app):
 
     with ThreadPoolExecutor(max_workers=2) as pool:
         outcomes = [pool.submit(run) for _ in range(2)]
-        changes = sorted(outcome.result(timeout=20).json()["last_run"]["changes"] for outcome in outcomes)
+        changes = sorted(outcome.result(timeout=20).json()["last_run"]["new_events"] for outcome in outcomes)
 
     assert changes == [0, 4]
     saved = store.load()

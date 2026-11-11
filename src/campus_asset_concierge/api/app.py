@@ -287,9 +287,10 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
             context |= pickups.staff_page()
             context["returns"] = returns.staff_returns()
             context["recovery"] = recovery.staff_page()
-            context["usage"] = equipment_usage(load_state())
             if bookings_page:
                 context |= booking_overview(context["reservations"], q, status)
+            else:
+                context["usage"] = equipment_usage(load_state())
         else:
             context["pickups"] = pickups.borrower_page(actor.username)
             context["returns"] = returns.borrower_page(actor.username)

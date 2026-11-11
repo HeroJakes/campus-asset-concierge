@@ -65,7 +65,7 @@ class Recovery:
             state["last_recovery_run"] = {
                 "ran_at": datetime.now(UTC),
                 "clock_at": now,
-                "changes": len(state.get("audit_events", [])) - events_before,
+                "new_events": len(state.get("audit_events", [])) - events_before,
             }
             return _result(state, now)
 

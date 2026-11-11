@@ -7,6 +7,7 @@ from campus_asset_concierge.domain.reservations import (
     ReservationError,
     local_clock,
     malaysia_times,
+    uncollected_pickups,
 )
 from campus_asset_concierge.storage.local_state import LocalStateStore
 
@@ -204,10 +205,7 @@ def _check_can_load(state: dict, reservation_id: str, reservation: dict, now: da
         for loan in state["loans"].values()
     ):
         raise ReservationError(409, "This unit is still on loan.")
-    if any(
-        access["asset_id"] == asset_id and access["collected_at"] is None
-        for access in state.get("pickup_access", {}).values()
-    ):
+    if uncollected_pickups(state, asset_id):
         raise ReservationError(409, "This unit is already in a compartment.")
     if any(
         other_id != reservation_id
@@ -292,7 +290,7 @@ def _loan_view(loan_id: str, loan: dict) -> dict:
         **loan,
         "picked_up_at": _malaysia_iso(loan["picked_up_at"]),
         "due_at": _malaysia_iso(loan["due_at"]),
-    }
+    } | ({"dropped_at": _malaysia_iso(loan["dropped_at"])} if loan.get("dropped_at") else {})
 
 
 def _audit(

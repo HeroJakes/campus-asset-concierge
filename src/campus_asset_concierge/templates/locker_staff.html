@@ -80,7 +80,7 @@
   </section>
 
   <section class="panel recovery-panel" id="recovery" aria-labelledby="recovery-title">
-    <div class="panel-heading"><h2 id="recovery-title"><span class="panel-heading-icon panel-heading-icon--recovery">{{ icon('alert') }}</span>Overdue recovery</h2><span class="panel-meta">{% if recovery.last_run %}Last check {{ recovery.last_run.ran_at[:10] }} {{ hhmm(recovery.last_run.ran_at) }} MYT · {{ recovery.last_run.changes }} change{{ 's' if recovery.last_run.changes != 1 }}{% else %}Recovery check has not run yet{% endif %}</span></div>
+    <div class="panel-heading"><h2 id="recovery-title"><span class="panel-heading-icon panel-heading-icon--recovery">{{ icon('alert') }}</span>Overdue recovery</h2><span class="panel-meta">{% if recovery.last_run %}Last check {{ recovery.last_run.ran_at[:10] }} {{ hhmm(recovery.last_run.ran_at) }} MYT · {{ recovery.last_run.new_events }} new activity event{{ 's' if recovery.last_run.new_events != 1 }}{% else %}Recovery check has not run yet{% endif %}</span></div>
     {% for proposal in pending %}
       {% set affected = reservations | selectattr('id', 'equalto', proposal.reservation_id) | first %}
       <article class="recovery-summary">

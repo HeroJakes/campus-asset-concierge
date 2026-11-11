@@ -199,6 +199,18 @@ The later Gemini/Gmail workflow needs its own integration and delivery checks.
 
 ## Release evidence
 
+### November 11 release
+
+- Deployed reviewed `main` commit `56b9254` (PRs #37 and #38) with the Vercel CLI.
+- Deployment: `dpl_J7FPw9MrNv4Eo3nMaj4RdHcpYaXP`, production, Singapore `sin1`.
+- Includes Stage 2.4 staff visibility, six compartments, MiMi, the full-review fixes,
+  and the `presentation` seed. No environment variables or scheduler settings changed.
+- `demo/hackathon-20261111` was reset to `presentation` (61 elapsed minutes, recovery
+  run): six units, A1 loaded, A2 awaiting a return check, Projector B proposal pending.
+- Live HTTPS checks: health, login, MiMi image, staff locker and bookings, Borrower A
+  locker, and the MiMi page returned 200. The staff page showed six compartments,
+  "2 in use · 4 free", the return to check, the proposal, and the 11:01 clock.
+
 ### November 10 release
 
 - Deployed reviewed `main` commit `703ea98ede876bb3431e3b4b7ede710f14b6b966`.

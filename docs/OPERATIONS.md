@@ -162,10 +162,11 @@ Between demonstrations, authorize as `local-operator` in `/docs`, then POST
 `/local-test/reset` with:
 
 ```json
-{"scenario":"spare_available"}
+{"scenario":"presentation"}
 ```
 
-Use `spare_unavailable` only to show the no-spare outcome. Reset checks the exact
+`presentation` is the main showcase (the `spare_available` story plus fictional
+history). Use `spare_unavailable` only to show the no-spare outcome. Reset checks the exact
 document at the destructive boundary, replaces previous demo activity, sets
 61 elapsed minutes, and runs recovery. It restores the chosen proposal/escalation.
 Never expose the operator password as a public judge credential.

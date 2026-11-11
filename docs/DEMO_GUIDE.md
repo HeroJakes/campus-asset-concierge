@@ -20,6 +20,16 @@ instructions on Vercel.
 | Raspberry Pi kit | Free for a new Borrower A booking |
 | Six compartments (A1 to A6) | All empty after reset; temporary handover spaces |
 
+`presentation` is the main showcase. It keeps the `spare_available` story above and adds
+a morning of fictional history so every staff panel has content:
+
+| Extra item | Starting story |
+| --- | --- |
+| Projector B | Lent to Borrower A 07:30–08:45, returned and checked; still the free spare |
+| Raspberry Pi Kit B | Lent to Borrower B 08:00–09:30, returned and checked; Borrower A has it booked 14:00–16:00 (waiting to be loaded) |
+| Projector C | Borrower B dropped it off in A2 at 10:20; **waiting for a return check** |
+| Raspberry Pi Kit C | Loaded in A1 at 10:45 for Borrower B's 11:30 pickup |
+
 `spare_available` prepares a Projector B proposal awaiting staff approval.
 `spare_unavailable` also books Projector B for noon, so recovery prepares an
 escalation owned by `equipment-staff`. Proposals do not change a booking until
@@ -39,7 +49,7 @@ Keep the operator in a separate session with Basic authorization at `/docs`;
 the login form does not grant operator access.
 
 Before recording, operator POST `/local-test/reset` with
-`{"scenario":"spare_available"}`. Refresh the staff and borrower pages.
+`{"scenario":"presentation"}`. Refresh the staff and borrower pages.
 Reset clears previous activity. Do not reseed cloud data or change the clock.
 
 1. **Show the problem on staff's screen.** Projector A is overdue; Borrower B needs it at noon. Say: "We detect the conflict before the next student arrives." Leave the proposal pending.
@@ -48,7 +58,11 @@ Reset clears previous activity. Do not reseed cloud data or change the clock.
 4. **Recover the projector booking.** On staff's overview select **Review substitute proposal**, explain the eligible Projector B, then **Approve and apply**. Show `next-projector` on staff's Bookings page now assigned to Projector B. The original Projector A loan remains overdue.
 5. **Return the kit.** On Borrower A's page select the **Raspberry Pi kit**, then **Return this item**. Get its code from the **return status** link (borrower-owned GET `/returns`), enter it, unlock, and **Confirm drop-off**. Staff refresh, select **Check return**, then **Pass**. Explain that an item is not available until its condition check passes; **Fail** would put it on hold.
 6. **Show the other outcome as a separate scenario.** Operator reset with `{"scenario":"spare_unavailable"}`. Refresh staff's screen and show **Staff-owned escalation**. Say: "When no suitable spare exists, the case has a clear staff owner." This clears the earlier demo actions.
-7. **Close.** "Booking, controlled collection, checked returns, and recovery protect the next student's booking." Restore `spare_available` backstage for the next judge.
+7. **Close.** "Booking, controlled collection, checked returns, and recovery protect the next student's booking." Restore `presentation` backstage for the next judge.
+
+Optional extra on the `presentation` seed: on staff's **Returns to check**, select
+**Check return** for Projector C and **Pass** to show a checked return without
+waiting for a new drop-off. The Equipment use panel shows each unit's loans and time on loan.
 
 Show recovery before returning the original overdue projector. Returning the kit
 instead keeps that story intact. Use an 11:01 pickup for immediate collection:

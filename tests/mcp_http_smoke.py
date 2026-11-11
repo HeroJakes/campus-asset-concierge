@@ -35,7 +35,7 @@ async def check(url: str, scenario: str, *, http_client: httpx.AsyncClient | Non
     async with connected_session(url, http_client=http_client) as session:
         recovery = await call(session, "run_overdue_recovery", {})
         assert recovery["overdue_loans"][0]["id"] == "active-projector"
-        if scenario == "spare_available":
+        if scenario != "spare_unavailable":  # presentation keeps the spare_available story
             assert recovery["substitution_proposals"][0]["substitute_asset_id"] == "projector-b"
             assert recovery["escalations"] == []
         else:
@@ -63,6 +63,6 @@ async def check(url: str, scenario: str, *, http_client: httpx.AsyncClient | Non
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("url")
-    parser.add_argument("scenario", choices=["spare_available", "spare_unavailable"])
+    parser.add_argument("scenario", choices=["spare_available", "spare_unavailable", "presentation"])
     args = parser.parse_args()
     asyncio.run(check(args.url, args.scenario))

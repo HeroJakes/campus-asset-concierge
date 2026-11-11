@@ -65,12 +65,13 @@ p { text-wrap: pretty; }
 .icon-button:hover { background: #eeebfa; }
 .refresh-button svg { transition: transform 220ms ease; }
 .refresh-button:hover svg { transform: rotate(40deg); }
-.locker-dashboard { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); grid-template-areas: 'loading returns' 'compartments recovery' 'bookings bookings' 'activity activity'; align-items: stretch; gap: 24px; }
+.locker-dashboard { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); grid-template-areas: 'loading returns' 'compartments recovery' 'bookings bookings' 'usage usage' 'activity activity'; align-items: stretch; gap: 24px; }
 .loading-hero { grid-area: loading; }
 .returns-panel { grid-area: returns; }
 .compartment-panel { grid-area: compartments; }
 .recovery-panel { grid-area: recovery; }
 .booking-summary { grid-area: bookings; }
+.usage-panel { grid-area: usage; min-width: 0; }
 .activity-panel { grid-area: activity; }
 .locker-dashboard section { scroll-margin-top: 24px; animation: panel-enter 420ms both; }
 .locker-dashboard .compartment-panel { animation-delay: 50ms; }
@@ -180,13 +181,14 @@ details[open] > .disclosure-summary .disclosure-icon { transform: rotate(270deg)
 .recovery-details .panel-meta { margin-top: 10px; }
 .applied-summary { display: flex; gap: 8px; align-items: flex-start; color: #4c725f; font-size: 12px; }
 .applied-summary svg { flex: none; }
-.booking-summary table { min-width: 800px; font-size: 13px; }
-.booking-summary th { height: 38px; padding: 8px 12px; background: #f7f5fb; font-size: 11px; color: #6a5d7d; font-weight: 500; }
-.booking-summary th:first-child { border-radius: 9px 0 0 9px; }
-.booking-summary th:last-child { border-radius: 0 9px 9px 0; }
-.booking-summary td { padding: 14px 12px; }
+:is(.booking-summary, .usage-panel) table { min-width: 800px; font-size: 13px; }
+.usage-panel table { min-width: 560px; }
+:is(.booking-summary, .usage-panel) th { height: 38px; padding: 8px 12px; background: #f7f5fb; font-size: 11px; color: #6a5d7d; font-weight: 500; }
+:is(.booking-summary, .usage-panel) th:first-child { border-radius: 9px 0 0 9px; }
+:is(.booking-summary, .usage-panel) th:last-child { border-radius: 0 9px 9px 0; }
+:is(.booking-summary, .usage-panel) td { padding: 14px 12px; }
 .booking-summary th:last-child, .booking-summary td.action { width: 190px; min-width: 190px; text-align: left; }
-.booking-summary tr:first-child td { border-top: 0; }
+:is(.booking-summary, .usage-panel) tr:first-child td { border-top: 0; }
 .booking-summary .button { font-size: 12px; min-height: 40px; padding: 8px 12px; }
 .booking-summary .meta { display: inline-block; max-width: 180px; white-space: normal; font-size: 11px; margin-top: 4px; }
 .booking-summary .blocker { display: block; min-width: 160px; white-space: normal; font-size: 12px; text-align: left; line-height: 1.5; }

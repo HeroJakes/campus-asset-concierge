@@ -41,7 +41,10 @@ async def check(url: str, scenario: str, *, http_client: httpx.AsyncClient | Non
         else:
             assert recovery["substitution_proposals"] == []
             assert recovery["escalations"][0]["owner"] == "equipment-staff"
-        assert await call(session, "run_overdue_recovery", {}) == recovery
+        rerun = await call(session, "run_overdue_recovery", {})
+        # Only the run record changes on a rerun; the lending outcome must not.
+        assert rerun.pop("last_run")["changes"] == 0
+        assert rerun == {key: value for key, value in recovery.items() if key != "last_run"}
         offer = await call(session, "find_equipment", {
             "borrower_id": "borrower-a", "category": "projector",
             "pickup_at": "2026-11-07T14:00", "duration_minutes": 60, "require_hdmi": True,

@@ -32,6 +32,7 @@ from campus_asset_concierge.recovery import Recovery
 from campus_asset_concierge.reservations import Reservations
 from campus_asset_concierge.returns import Returns
 from campus_asset_concierge.storage.local_state import LocalStateStore
+from campus_asset_concierge.usage import equipment_usage
 
 PACKAGE_DIR = Path(__file__).resolve().parent.parent
 logger = logging.getLogger(__name__)
@@ -286,6 +287,7 @@ def create_app(store: LocalStateStore | None = None, *, public_demo_accounts: bo
             context |= pickups.staff_page()
             context["returns"] = returns.staff_returns()
             context["recovery"] = recovery.staff_page()
+            context["usage"] = equipment_usage(load_state())
             if bookings_page:
                 context |= booking_overview(context["reservations"], q, status)
         else:

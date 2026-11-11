@@ -1,0 +1,20 @@
+  <section class="panel usage-panel" id="usage" aria-labelledby="usage-title">
+    <div class="panel-heading"><h2 id="usage-title">Equipment use</h2><span class="panel-meta">{{ usage.in_use }} of {{ usage.units | length }} units in use · {{ usage.total_loans }} loan{{ 's' if usage.total_loans != 1 }} · {{ (usage.loan_minutes / 60) | round(1) }} h lent</span></div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Unit</th><th>Right now</th><th>Loans</th><th>Time on loan</th><th>Upcoming bookings</th></tr></thead>
+        <tbody>
+          {% for unit in usage.units %}
+          <tr>
+            <td class="identity">{{ name(unit.asset_id) }}</td>
+            <td>{{ unit.status }}</td>
+            <td class="figure">{{ unit.loans }}</td>
+            <td class="figure">{{ unit.loan_minutes // 60 }} h {{ unit.loan_minutes % 60 }} min</td>
+            <td class="figure">{{ unit.upcoming }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="section-footnote">Loan time runs from pickup to drop-off on the test clock.</p>
+  </section>

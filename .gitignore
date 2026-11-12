@@ -21,3 +21,5 @@ serviceAccount*.json
 .vercel/
 firebase-debug.log*
 firestore-debug.log*
+# Hackathon submission material (deck, demo script, checklist) — kept local
+submission/

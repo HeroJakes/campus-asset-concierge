@@ -129,7 +129,7 @@ Known limits, not fixed (need a team decision):
 1. Deploy this release, run the protected operator reset so the hosted locker gets six compartments, and rehearse the hosted Borrower A and staff sequence in the [demo guide](DEMO_GUIDE.md#presentation-sequence).
 2. Rehearse automatic pickup/return email on the hosted demo. Gmail is configured; the borrower-owned API lookup remains the demo fallback.
 3. Record both recovery outcomes, the return check, the equipment use panel, the video, and judge access instructions.
-4. Fill the [submission checklist](../submission/README.md). Report measured results rather than presenting the earlier 80% target as evidence.
+4. Fill the submission checklist (kept outside the repo). Report measured results rather than presenting the earlier 80% target as evidence.
 
 Gemini Enterprise was not provided. The demo uses the Gemini API chat and the
 Gmail API. Explain this in the submission.

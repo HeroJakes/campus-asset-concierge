@@ -198,7 +198,7 @@ is designed and tested, use only the borrower-owned API stand-in described above
 
 ## Before submission
 
-Check the [submission checklist](../submission/README.md): app access, private demo
+Check the submission checklist (kept outside the repo): app access, private demo
 credentials, fixed-clock instructions, reset arrangements, deck, video, and write-up.
 Label the virtual locker, fictional data, planned Gemini integration, and simulated
 email honestly. Do not claim the earlier 80% recovery target is a measured result.

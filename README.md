@@ -48,6 +48,9 @@ The full walkthrough is in the [demo guide](docs/DEMO_GUIDE.md).
 
 We use the Gemini API because Gemini Enterprise access was not provided.
 
+Next step: Gemini Enterprise. Our lending tools are already exposed as an MCP server, and the
+setup plan is in the [demo guide](docs/DEMO_GUIDE.md#gemini-assembly). This is not tested yet.
+
 ## Built with
 
 Python 3.12, FastAPI, Cloud Firestore, Gemini API, Gmail API, MCP, hosted on Vercel.

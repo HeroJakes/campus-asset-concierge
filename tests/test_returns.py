@@ -398,3 +398,20 @@ def test_loading_reclaims_a_compartment_from_an_abandoned_return(booking_app):
     _, compartment = _load_booking(client, "raspberry_pi_kit", "2026-11-07T10:45")
 
     assert compartment == abandoned
+
+
+def test_new_loan_of_a_returned_unit_ignores_the_old_return_record(booking_app):
+    # The return record is kept per unit, so the next loan of the same unit must not reuse it.
+    client, store = booking_app
+    dropped(client)
+    assert verify(client).status_code == 200
+
+    def lend_again(data):
+        data["loans"]["second-loan"] = data["loans"]["active-projector"] | {"status": "active", "dropped_at": None}
+
+    store.change(lend_again)
+
+    assert my_return(client)["step"] == "can_return"
+    assert "code" not in my_return(client)
+    assert return_request(client).status_code == 200
+    assert my_return(client)["step"] == "enter_code"

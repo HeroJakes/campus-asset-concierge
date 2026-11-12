@@ -40,7 +40,7 @@ class Returns:
             if loan["borrower_id"] != borrower_id:
                 raise ReservationError(404, "You have no item to return for that unit.")
 
-            access = state.get("return_access", {}).get(asset_id)
+            access = _access_for(state, loan_id, asset_id)
             if access is not None and return_live(access, now):
                 # Idempotent before the drop: keep the existing code and compartment.
                 return _view(asset_id, loan, access, now)
@@ -194,6 +194,12 @@ def _open_loan(state: dict, asset_id: str) -> tuple[str | None, dict | None]:
     return None, None
 
 
+def _access_for(state: dict, loan_id: str, asset_id: str) -> dict | None:
+    # Return records are kept per unit, so one left by an earlier loan of the unit is not this loan's.
+    access = state.get("return_access", {}).get(asset_id)
+    return access if access is not None and access["loan_id"] == loan_id else None
+
+
 def _code_closes_at(access: dict) -> datetime:
     return access["issued_at"] + RETURN_CODE_WINDOW
 
@@ -238,10 +244,9 @@ def _result_view(asset_id: str, loan: dict, access: dict) -> dict:
 
 def _borrower_views(state: dict, borrower_id: str) -> list[dict]:
     now = local_clock(state)
-    returns = state.get("return_access", {})
     return [
-        _view(loan["asset_id"], loan, returns.get(loan["asset_id"]), now)
-        for _, loan in sorted(state["loans"].items())
+        _view(loan["asset_id"], loan, _access_for(state, loan_id, loan["asset_id"]), now)
+        for loan_id, loan in sorted(state["loans"].items())
         if loan["borrower_id"] == borrower_id and loan["status"] in OPEN_LOAN
     ]
 

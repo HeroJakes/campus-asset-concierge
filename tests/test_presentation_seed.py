@@ -54,3 +54,23 @@ def test_presentation_sequence_runs_on_the_seed(booking_app):
     assert return_drop(client, "raspberry-pi-kit").status_code == 200
     assert verify(client, "raspberry-pi-kit").status_code == 200
     assert verify(client, "projector-c").status_code == 200  # the seeded return can be checked too
+
+
+def test_rehearsing_twice_without_a_reset_still_offers_return(booking_app):
+    # A second run gets Kit B, which Borrower B returned this morning; its old return must not leak in.
+    client, _ = booking_app
+    start_presentation(client)
+    for pickup_at, expected_kit in (("2026-11-07T11:01", "raspberry-pi-kit"), ("2026-11-07T11:01", "raspberry-pi-kit-b")):
+        offer = client.post("/reservation-offers", auth=BORROWER_A, json={
+            "category": "raspberry_pi_kit", "pickup_at": pickup_at, "duration_minutes": 60,
+        }).json()
+        assert offer["asset_id"] == expected_kit
+        kit = client.post(f"/reservation-offers/{offer['id']}/confirm", auth=BORROWER_A).json()["id"]
+        assert load(client, kit).status_code == 200
+        assert unlock(client, kit, code_for(client, kit)).status_code == 200
+        assert pick_up(client, kit).status_code == 200
+
+        page = client.get("/locker", auth=BORROWER_A).text
+        row = page.split(f'data-post="/assets/{expected_kit}/return-request"')
+        assert len(row) == 2, f"no Return button for {expected_kit}"
+        assert "Waiting for staff check" not in page
